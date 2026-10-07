@@ -18,7 +18,7 @@ import {
   Phone,
   Mail,
   MapPin,
-  Send,   
+  Send,
   Trash2,
   Check,
   Tag,
