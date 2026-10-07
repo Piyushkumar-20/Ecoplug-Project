@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
-import healthRoutes from "./routes/health.router.js"
+import healthRoutes from "./routes/health.router.js";
+import companyRoutes from "./routes/company.routes.js";
+import userRoutes from "./routes/user.routes.js";
+
 const app = express();
 
 app.use(cors());
@@ -13,6 +16,9 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-app.use("/api/health", healthRoutes)
+app.use("/api/health", healthRoutes);
+
+app.use("/api/companies", companyRoutes);
+app.use("/api/users", userRoutes);
 
 export default app;
