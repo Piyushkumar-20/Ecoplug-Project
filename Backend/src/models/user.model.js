@@ -2,7 +2,7 @@ import db from "../config/db.js";
 
 const createUser = async (companyId, name, email, passwordHash, role = "EMPLOYEE") => {
   const [result] = await db.query(
-    `INSERT INTO company_user
+    `INSERT INTO s
       (company_id, name, email, password_hash, role)
      VALUES (?, ?, ?, ?, ?)`,
     [companyId, name, email, passwordHash, role]
@@ -14,7 +14,7 @@ const createUser = async (companyId, name, email, passwordHash, role = "EMPLOYEE
 const findUserByEmail = async (email) => {
   const [rows] = await db.query(
     `SELECT id, company_id, name, email, password_hash, role, created_at, updated_at
-     FROM company_user
+     FROM company_users
      WHERE email = ?
      LIMIT 1`,
     [email]
@@ -26,7 +26,7 @@ const findUserByEmail = async (email) => {
 const findUserById = async (id) => {
   const [rows] = await db.query(
     `SELECT id, company_id, name, email, role, created_at, updated_at
-     FROM company_user
+     FROM company_users
      WHERE id = ?
      LIMIT 1`,
     [id]
@@ -38,7 +38,7 @@ const findUserById = async (id) => {
 const getUsersByCompanyId = async (companyId) => {
   const [rows] = await db.query(
     `SELECT id, company_id, name, email, role, created_at, updated_at
-     FROM company_user
+     FROM company_users
      WHERE company_id = ?
      ORDER BY id DESC`,
     [companyId]
