@@ -1,12 +1,17 @@
 import bcrypt from "bcryptjs";
-import { createUser } from "../models/user.model.js";
+import {
+  createUser,
+  getUsersByCompanyId,
+} from "../models/user.model.js";
 
 const registerUser = async ({ companyId, name, email, password }) => {
   const passwordHash = await bcrypt.hash(password, 10);
 
-  const result = await createUser(companyId, name, email, passwordHash);
-
-  return result;
+  return createUser(companyId, name, email, passwordHash, "EMPLOYEE");
 };
 
-export {registerUser}
+const listUsers = async (companyId) => {
+  return getUsersByCompanyId(companyId);
+};
+
+export { registerUser, listUsers };
