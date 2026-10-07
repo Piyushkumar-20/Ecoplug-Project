@@ -107,53 +107,53 @@ const DashboardView = ({ selectedCpo }) => {
     <div className="space-y-6 pb-12">
  
       {/* Metric Cards Grid */}
-<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-  {stats.map((stat, i) => {
-    const Icon = stat.icon;
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 items-start">
+        {stats.map((stat, i) => {
+          const Icon = stat.icon;
 
-    return (
-      <div
-        key={i}
-        className={`${
-          i === 0
-            ? 'lg:col-span-2 bg-[#211F26] text-white p-5 rounded-2xl border border-slate-800 shadow-md hover:-translate-y-1 hover:shadow-xl'
-            : 'lg:col-span-1 bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs hover:-translate-y-1 hover:shadow-md'
-        } transition-all duration-300`}
-      >
+          return (
+            <divcd 
+              key={i}
+              className={`${
+                i === 0
+                  ? 'lg:col-span-2 bg-[#211F26] text-white p-5 rounded-2xl border border-slate-800 shadow-md hover:-translate-y-1 hover:shadow-xl'
+                  : 'lg:col-span-1 bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs hover:-translate-y-1 hover:shadow-md'
+              } transition-all duration-300`}
+            >
 
-        {/* Icon */}
-        <div className="flex items-center justify-between">
-          <div
-            className={`w-9 h-9 rounded-xl ${
-              i === 0
-                ? 'bg-white/10 text-purple-300'
-                : `${stat.bg} ${stat.textColor}`
-            } flex items-center justify-center shadow-2xs`}
-          >
-            <Icon className="w-4.5 h-4.5" />
-          </div>
-        </div>
+              {/* Icon */}
+              <div className="flex items-center justify-between">
+                <div
+                  className={`w-9 h-9 rounded-xl ${
+                    i === 0
+                      ? 'bg-white/10 text-purple-300'
+                      : `${stat.bg} ${stat.textColor}`
+                  } flex items-center justify-center shadow-2xs`}
+                >
+                  <Icon className="w-4.5 h-4.5" />
+                </div>
+              </div>
 
-        {/* Value + Title */}
-        <div className="mt-3">
-          <span
-            className={`${
-              i === 0
-                ? 'text-3xl text-white'
-                : 'text-xl sm:text-2xl text-slate-900'
-            } font-black tracking-tight block`}
-          >
-            {stat.value}
-          </span>
+              {/* Value + Title */}
+              <div className="mt-3 flex-1 flex flex-col justify-center">
+                <span
+                  className={`${
+                    i === 0
+                      ? 'text-3xl text-white'
+                      : 'text-xl sm:text-2xl text-slate-900'
+                  } font-black tracking-tight block`}
+                >
+                  {stat.value}
+                </span>
 
-          <span
-            className={`text-[11px] font-semibold ${
-              i === 0 ? 'text-slate-300' : 'text-slate-500'
-            } block truncate mt-0.5`}
-          >
-            {stat.title}
-          </span>
-        </div>
+                <span
+                  className={`text-[11px] font-semibold ${
+                    i === 0 ? 'text-slate-300' : 'text-slate-500'
+                  } block truncate mt-0.5`}
+                >
+                  {stat.title}
+                </span>
+              </div>
 
         {/* Revenue Mini Chart - Only First Card */}
         {i === 0 && (
@@ -204,7 +204,7 @@ const DashboardView = ({ selectedCpo }) => {
           </span>
         </div>
 
-      </div>
+      </divcd>
     );
   })}
 </div>
