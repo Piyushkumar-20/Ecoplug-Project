@@ -1,10 +1,10 @@
-import { registerCompany } from "../services/company.service.js";
+import  * as companyService from "../services/company.service.js";
 
 const register = async (req, res) => {
   try {
     const { name, adminName, adminEmail, adminPassword } = req.body;
 
-    const result = await registerCompany({
+    const result = await companyService({
       name: name.trim(),
       adminName: adminName.trim(),
       adminEmail: adminEmail.trim().toLowerCase(),
@@ -37,4 +37,19 @@ const register = async (req, res) => {
   }
 };
 
-export { register };
+const getProfile = async (req, res, next) => {
+  try {
+    const { userId, companyId } = req.user;
+
+    const profile = await companyService.getProfile(userId, companyId);
+
+    return res.status(200).json({
+      success: true,
+      data: profile,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { register, getProfile};

@@ -1,6 +1,10 @@
 import bcrypt from "bcryptjs";
 import db from "../config/db.js";
-import { createCompany } from "../models/companies.model.js";
+import {
+  createCompany,
+  findCompanyById,
+  getProfileByUserId,
+} from "../models/companies.model.js";
 import { createUser } from "../models/user.model.js";
 
 const registerCompany = async ({
@@ -16,7 +20,7 @@ const registerCompany = async ({
 
     const companyResult = await createCompany(
       { name, adminName, adminEmail },
-      connection
+      connection,
     );
 
     const companyId = companyResult.insertId;
@@ -28,7 +32,7 @@ const registerCompany = async ({
       adminEmail,
       passwordHash,
       "ADMIN",
-      connection
+      connection,
     );
 
     await connection.commit();
@@ -45,4 +49,43 @@ const registerCompany = async ({
   }
 };
 
-export { registerCompany };
+const getProfile = async (userId, companyId) => {
+  const profile = await getProfileByUserId(userId, companyId);
+
+  if (!profile) {
+    const error = new Error("Profile not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  return {
+    user: {
+      id: profile.user_id,
+      name: profile.user_name,
+      email: profile.user_email,
+      role: profile.user_role,
+    },
+
+    company: {
+      id: profile.company_id,
+      name: profile.company_name,
+      partyId: profile.party_id,
+      role: profile.company_role,
+      address: profile.address,
+      city: profile.city,
+      state: profile.state,
+      pin: profile.pin,
+      gstin: profile.gstin,
+      cin: profile.cin,
+      pan: profile.pan,
+    },
+
+    admin: {
+      name: profile.admin_name,
+      mobile: profile.admin_mobile,
+      email: profile.admin_email,
+    },
+  };
+};
+
+export { registerCompany, getProfile };
