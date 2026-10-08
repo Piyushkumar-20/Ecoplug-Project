@@ -9,6 +9,8 @@ import ChargersView from './components/ChargersView';
 import TariffsView from './components/TariffsView';
 import SessionsView from './components/SessionsView';
 import ComplaintsView from './components/ComplaintsView';
+import Login from './pages/Login';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -35,17 +37,73 @@ function App() {
         {/* Dashboard Main Content Area (Independent Scroll Container) */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
           <Routes>
-            <Route path="/" element={<DashboardView selectedCpo={selectedCpo} />} />
-            <Route path="/dashboard" element={<Navigate to="/" replace />} />
-            <Route path="/profile" element={<ProfileView />} />
-            <Route path="/locations" element={<LocationsView />} />
-            <Route path="/chargers" element={<ChargersView />} />
-            <Route path="/tariffs" element={<TariffsView />} />
-            <Route path="/session" element={<SessionsView />} />
-            <Route path="/sessions" element={<Navigate to="/session" replace />} />
-            <Route path="/complaints" element={<ComplaintsView />} />
-            <Route path="/complanis" element={<Navigate to="/complaints" replace />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <DashboardView selectedCpo={selectedCpo} />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/dashboard" 
+              element={
+                <Navigate to="/" replace />
+                } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                <ProfileView />
+                } 
+            />
+            <Route 
+              path="/locations" 
+              element={
+                <LocationsView />
+              } 
+            />
+            <Route 
+              path="/chargers" 
+              element={<ChargersView />
+              } 
+            />
+            <Route 
+              path="/tariffs" 
+              element={<TariffsView />             
+              } 
+            />
+            <Route 
+              path="/session" 
+              element={
+                <SessionsView />
+              } 
+            />
+            <Route 
+              path="/sessions" 
+              element={
+                <Navigate to="/session" replace />
+              } 
+            />
+            <Route 
+              path="/complaints" 
+              element={
+                <ComplaintsView />
+              } 
+            />
+            <Route 
+              path="/complanis" 
+              element={
+                <Navigate to="/complaints" replace />
+              } 
+            />
+            <Route 
+              path="*" 
+              element={
+                <Navigate to="/" replace />
+              } 
+            />
           </Routes>
         </main>
       </div>
