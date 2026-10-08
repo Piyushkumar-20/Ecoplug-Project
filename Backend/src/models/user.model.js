@@ -1,8 +1,15 @@
 import db from "../config/db.js";
 
-const createUser = async (companyId, name, email, passwordHash, role = "EMPLOYEE") => {
-  const [result] = await db.query(
-    `INSERT INTO s
+const createUser = async (
+  companyId,
+  name,
+  email,
+  passwordHash,
+  role = "EMPLOYEE",
+  connection = db
+) => {
+  const [result] = await connection.query(
+    `INSERT INTO company_users
       (company_id, name, email, password_hash, role)
      VALUES (?, ?, ?, ?, ?)`,
     [companyId, name, email, passwordHash, role]

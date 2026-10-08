@@ -1,20 +1,34 @@
 import { registerCompany } from "../services/company.service.js";
 
-const createCompany = async (req, res) => {
+const register = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, adminName, adminEmail, adminPassword } = req.body;
 
-    const result = await registerCompany({ name });
+    const result = await registerCompany({
+      name: name.trim(),
+      adminName: adminName.trim(),
+      adminEmail: adminEmail.trim().toLowerCase(),
+      adminPassword,
+    });
 
     res.status(201).json({
       success: true,
-      message: "Company registered successfully",
+      message: "Company registered successfully. You can now login.",
       data: {
-        companyId: result.insertId,
+        companyId: result.companyId,
+        adminUserId: result.adminUserId,
+        adminEmail: adminEmail.trim().toLowerCase(),
       },
     });
   } catch (error) {
-    console.error("Create company error:", error.message);
+    console.error("Company registration error:", error.message);
+
+    if (error.code === "ER_DUP_ENTRY") {
+      return res.status(409).json({
+        success: false,
+        message: "An account with this admin email already exists",
+      });
+    }
 
     res.status(500).json({
       success: false,
@@ -23,4 +37,4 @@ const createCompany = async (req, res) => {
   }
 };
 
-export { createCompany };
+export { register };
