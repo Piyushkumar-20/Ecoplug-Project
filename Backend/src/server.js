@@ -9,8 +9,8 @@ async function startServer() {
     await db.query("SELECT 1");
     console.log("MySql Connected Successfully");
 
-    app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server is running on port ${PORT}`);
     });
   } catch (error) {
     console.error("MySql Connection Failed");
