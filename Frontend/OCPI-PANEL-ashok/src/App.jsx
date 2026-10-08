@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate,useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import DashboardView from './components/DashboardView';
@@ -16,26 +16,39 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [selectedCpo, setSelectedCpo] = useState('All CPOs');
 
+  const location = useLocation();
+  const isLoginPage = location.pathname === '/login';
+
   return (
     <div className="h-screen w-screen bg-[#F8FAFC] text-slate-900 font-sans flex overflow-hidden antialiased selection:bg-amber-200">
       {/* Fixed/Collapsible Sidebar */}
-      <Sidebar
-        isOpen={isSidebarOpen}
-        setIsOpen={setIsSidebarOpen}
-      />
+      {!isLoginPage && (
+        <Sidebar
+          isOpen={isSidebarOpen}
+          setIsOpen={setIsSidebarOpen}
+        />
+      )}
 
       {/* Right Column: Header + Independently Scrollable Dashboard Container */}
       <div className="flex-1 flex flex-col h-screen min-w-0 overflow-hidden transition-all duration-300">
-        <Header
-          isSidebarOpen={isSidebarOpen}
-          onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
-          onOpenSidebar={() => setIsSidebarOpen(true)}
-          selectedCpo={selectedCpo}
-          setSelectedCpo={setSelectedCpo}
-        />
+        {!isLoginPage && (
+          <Header
+            isSidebarOpen={isSidebarOpen}
+            onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
+            onOpenSidebar={() => setIsSidebarOpen(true)}
+            selectedCpo={selectedCpo}
+            setSelectedCpo={setSelectedCpo}
+          />
+        )}
 
         {/* Dashboard Main Content Area (Independent Scroll Container) */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+        <main
+          className={
+            isLoginPage
+              ? "flex-1 overflow-y-auto"
+              : "flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto"
+          }
+        >
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route
