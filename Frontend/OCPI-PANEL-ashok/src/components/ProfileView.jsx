@@ -49,6 +49,7 @@ const ProfileView = () => {
         <p className="text-xs sm:text-sm text-slate-500 font-medium">Manage your eMSP network administrator profile & settings.</p>
       </div>
 
+      
       {/* Main Profile Header Card */}
       <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-center md:items-start gap-6">
         <div className="relative">
@@ -65,60 +66,44 @@ const ProfileView = () => {
         </div>
 
         <div className="flex-1 text-center md:text-left space-y-2">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-            <div>
-              <h2 className="text-xl font-extrabold text-slate-900">{profile.user.name}</h2>
-              <p className="text-xs font-semibold text-slate-500">
-                {profile.company.name}
-              </p>
-            </div>
-            
+          <div>
+            <h2 className="text-xl font-extrabold text-slate-900">
+              {profile.user.name}
+            </h2>
+            <p className="text-xs font-semibold text-slate-500">
+              {profile.company.name}
+            </p>
+            <p className="text-xs font-bold text-amber-600">
+              {profile.user.role}
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-3 border-t border-slate-100 text-xs">
-            <div className="flex items-center space-x-2 text-slate-600">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-100 text-xs">
+            <div className="flex items-center gap-2 text-slate-600">
               <Mail className="w-4 h-4 text-slate-400" />
               <span>{profile.user.email}</span>
             </div>
-            <div className="flex items-center space-x-2 text-slate-600">
+
+            <div className="flex items-center gap-2 text-slate-600">
               <Phone className="w-4 h-4 text-slate-400" />
               <span>{profile.admin.mobile || "Not provided"}</span>
             </div>
-            <div className="flex items-center space-x-2 text-slate-600">
+
+            <div className="flex items-center gap-2 text-slate-600">
               <MapPin className="w-4 h-4 text-slate-400" />
-              <span>{[
-                profile.company.city,
-                profile.company.state,
-                profile.company.pin,
-              ].filter(Boolean).join(", ") || "Not provided"}
+              <span>
+                {[
+                  profile.company.city,
+                  profile.company.state,
+                  profile.company.pin,
+                ].filter(Boolean).join(", ") || "Not provided"}
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Profile Details Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
-          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <Shield className="w-4 h-4 text-amber-500" />
-            <span>Role & Permissions</span>
-          </h3>
-          
-          <div className="space-y-2 text-xs">
-            <div className="flex justify-between py-2 border-b border-slate-100">
-              <span className="text-slate-500">Access Level</span>
-              <span className="font-bold text-slate-900">
-                {profile.user.role}
-              </span>
-            </div>
 
-            
-          </div>
-        </div>
-
-        
-      </div>
       
       
       {/* Company & Admin Details */}
