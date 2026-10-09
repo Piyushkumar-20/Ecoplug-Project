@@ -108,6 +108,7 @@ _
       
       {/* Company & Admin Details */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
           <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
             <Building2 className="w-4 h-4 text-amber-500" />
@@ -137,7 +138,8 @@ _
             ))}
           </div>
         </div>
-
+     
+        {profile.user.role === "ADMIN" && (
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
           <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
             <User className="w-4 h-4 text-amber-500" />
@@ -159,6 +161,7 @@ _
             ))}
           </div>
         </div>
+        )}
       </div>
 
     </div>
