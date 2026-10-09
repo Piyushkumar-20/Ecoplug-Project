@@ -12,6 +12,8 @@ const getChargers = async (companyId) => {
     maxOutputKW: Number(charger.maxOutputWatts) / 1000,
     lastActive: charger.lastActive,
     status: charger.status,
+    emsp: charger.emsp,
+    hardwareModel: charger.hardwareModel,
   }));
 };
 

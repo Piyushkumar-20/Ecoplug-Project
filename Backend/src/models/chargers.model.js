@@ -16,7 +16,9 @@ const getChargersByCompanyId = async (companyId) => {
         ORDER BY c.standard
         SEPARATOR ', '
       ) AS connectorType,
-      COALESCE(MAX(c.max_electric_power), 0) AS maxOutputWatts
+      COALESCE(MAX(c.max_electric_power), 0) AS maxOutputWatts,
+      e.emsp AS emsp,
+      e.hardware_model AS hardwareModel
     FROM ocpi_roaming_evses AS e
     INNER JOIN ocpi_roaming_locations AS l
       ON l.id = e.location_id
@@ -30,7 +32,9 @@ const getChargersByCompanyId = async (companyId) => {
       e.last_updated,
       l.id,
       l.name,
-      l.city
+      l.city,
+      e.emsp,
+      e.hardware_model
     ORDER BY e.last_updated DESC, e.uid ASC
     `,
     [companyId],
