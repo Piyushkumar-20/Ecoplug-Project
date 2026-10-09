@@ -4,7 +4,7 @@ const register = async (req, res) => {
   try {
     const { name, adminName, adminEmail, adminPassword } = req.body;
 
-    const result = await companyService({
+    const result = await companyService.registerCompany({
       name: name.trim(),
       adminName: adminName.trim(),
       adminEmail: adminEmail.trim().toLowerCase(),

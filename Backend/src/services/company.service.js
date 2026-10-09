@@ -2,7 +2,6 @@ import bcrypt from "bcryptjs";
 import db from "../config/db.js";
 import {
   createCompany,
-  findCompanyById,
   getProfileByUserId,
 } from "../models/companies.model.js";
 import { createUser } from "../models/user.model.js";
