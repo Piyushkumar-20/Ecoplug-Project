@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserCircle, LogOut } from 'lucide-react';
 import { apiRequest } from '../services/api';
@@ -21,6 +21,33 @@ const Header = ({ onOpenSidebar, onToggleSidebar, isSidebarOpen, selectedCpo, se
   
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef(null);
+  const notificationRef = useRef(null);
+
+
+useEffect(() => {
+  const handleOutsideClick = (event) => {
+    if (
+      profileRef.current &&
+      !profileRef.current.contains(event.target)
+    ) {
+      setIsProfileOpen(false);
+    }
+
+    if (
+      notificationRef.current &&
+      !notificationRef.current.contains(event.target)
+    ) {
+      setShowNotifications(false);
+    }
+  };
+
+  document.addEventListener("click", handleOutsideClick);
+
+  return () => {
+    document.removeEventListener("click", handleOutsideClick);
+  };
+}, []);
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
@@ -79,9 +106,12 @@ const Header = ({ onOpenSidebar, onToggleSidebar, isSidebarOpen, selectedCpo, se
       {/* Right Area: Tools, Notifications & Admin User Profile */}
       <div className="flex items-center space-x-2 sm:space-x-4">
         {/* Notification Bell */}
-        <div className="relative">
+        <div className="relative" ref={notificationRef} >
           <button
-            onClick={() => setShowNotifications(!showNotifications)}
+            onClick={() => {
+              setShowNotifications(!showNotifications);
+              setIsProfileOpen(false);
+            }}
             className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 relative transition-colors cursor-pointer"
           >
             <Bell className="w-4.5 h-4.5" />
@@ -122,7 +152,7 @@ const Header = ({ onOpenSidebar, onToggleSidebar, isSidebarOpen, selectedCpo, se
         {/* User Profile */}
         
         {/* User Profile Dropdown */}
-        <div className="relative">
+        <div className="relative" ref={profileRef} >
           <button
             type="button"
             onClick={() => {
