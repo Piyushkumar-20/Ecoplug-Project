@@ -53,7 +53,13 @@ const ProfileView = () => {
       <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-center md:items-start gap-6">
         <div className="relative">
           <div className="w-24 h-24 rounded-full bg-amber-100 border-4 border-amber-300 flex items-center justify-center text-amber-900 font-black text-2xl shadow-md">
-            AK
+            {profile.user.name
+              .split(" ")
+              .filter(Boolean)
+              .map((word) => word[0])
+              .join("")
+              .slice(0, 2)
+              .toUpperCase()}
           </div>
           <span className="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-emerald-500 ring-2 ring-white" />
         </div>
@@ -66,9 +72,7 @@ const ProfileView = () => {
                 {profile.company.name}
               </p>
             </div>
-            <span className="px-3 py-1 bg-amber-100 text-amber-900 font-bold text-xs rounded-full inline-block self-center md:self-start">
-              Verified Partner
-            </span>
+            
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-3 border-t border-slate-100 text-xs">
@@ -108,62 +112,70 @@ const ProfileView = () => {
                 {profile.user.role}
               </span>
             </div>
-            <div className="flex justify-between py-2 border-b border-slate-100">
-              <span className="text-slate-500">Roaming Protocol</span>
-              <span className="font-bold text-slate-900">OCPI v2.2.1</span>
-            </div>
-            <div className="flex justify-between py-2 border-b border-slate-100">
-              <span className="text-slate-500">Managed CPOs</span>
-              <span className="font-bold text-slate-900">52 Active Partners</span>
-            </div>
-            <div className="flex justify-between py-2">
-              <span className="text-slate-500">Two-Factor Authentication</span>
-              <span className="font-bold text-emerald-600 flex items-center gap-1">
-                <CheckCircle className="w-3.5 h-3.5" /> Enabled
-              </span>
-            </div>
+
+            
+          </div>
+        </div>
+
+        
+      </div>
+      
+      
+      {/* Company & Admin Details */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <Building2 className="w-4 h-4 text-amber-500" />
+            <span>Company Details</span>
+          </h3>
+
+          <div className="space-y-2 text-xs">
+            {[
+              ["Company Name", profile.company.name],
+              ["Company ID", profile.company.id],
+              ["Party ID", profile.company.partyId],
+              ["Company Role", profile.company.role],
+              ["Address", profile.company.address],
+              ["City", profile.company.city],
+              ["State", profile.company.state],
+              ["PIN Code", profile.company.pin],
+              ["GSTIN", profile.company.gstin],
+              ["CIN", profile.company.cin],
+              ["PAN", profile.company.pan],
+            ].map(([label, value]) => (
+              <div key={label} className="flex justify-between gap-4 py-2 border-b border-slate-100">
+                <span className="text-slate-500">{label}</span>
+                <span className="font-bold text-slate-900 text-right break-all">
+                  {value || "Not provided"}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
           <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <Key className="w-4 h-4 text-amber-500" />
-            <span>API & Credentials</span>
+            <User className="w-4 h-4 text-amber-500" />
+            <span>Admin Details</span>
           </h3>
-          
-          <div className="space-y-3 text-xs">
-            <div>
-              <label className="text-slate-500 text-[11px] font-semibold block mb-1">eMSP Roaming API Key</label>
-              <div className="flex items-center space-x-2">
-                <input 
-                  type="password" 
-                  value="emsp_live_99812489124891248912" 
-                  readOnly 
-                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-mono text-slate-700"
-                />
-                <button className="px-3 py-1.5 bg-[#FEF0A6] hover:bg-amber-300 font-bold rounded-xl text-slate-900 transition-colors">
-                  Copy
-                </button>
-              </div>
-            </div>
 
-            <div>
-              <label className="text-slate-500 text-[11px] font-semibold block mb-1">CPO Endpoint Token</label>
-              <div className="flex items-center space-x-2">
-                <input 
-                  type="password" 
-                  value="cpo_token_secret_x88921" 
-                  readOnly 
-                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-mono text-slate-700"
-                />
-                <button className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 font-bold rounded-xl text-slate-700 transition-colors">
-                  Show
-                </button>
+          <div className="space-y-2 text-xs">
+            {[
+              ["Admin Name", profile.admin.name],
+              ["Admin Email", profile.admin.email],
+              ["Admin Mobile", profile.admin.mobile],
+            ].map(([label, value]) => (
+              <div key={label} className="flex justify-between gap-4 py-2 border-b border-slate-100">
+                <span className="text-slate-500">{label}</span>
+                <span className="font-bold text-slate-900 text-right break-all">
+                  {value || "Not provided"}
+                </span>
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
+
     </div>
   );
 };
