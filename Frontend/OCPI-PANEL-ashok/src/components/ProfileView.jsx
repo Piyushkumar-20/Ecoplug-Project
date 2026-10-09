@@ -77,7 +77,7 @@ const ProfileView = () => {
               {profile.user.role}
             </p>
           </div>
-
+_
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-100 text-xs">
             <div className="flex items-center gap-2 text-slate-600">
               <Mail className="w-4 h-4 text-slate-400" />

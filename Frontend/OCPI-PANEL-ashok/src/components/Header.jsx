@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { UserCircle, LogOut } from 'lucide-react';
+import { apiRequest } from '../services/api';
 import {
   Search,
   Bell,
@@ -15,6 +18,37 @@ import {
 const Header = ({ onOpenSidebar, onToggleSidebar, isSidebarOpen, selectedCpo, setSelectedCpo }) => {
   const [isCpoOpen, setIsCpoOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  
+  const navigate = useNavigate();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  const userName = user.name || "User";
+  const userRole = user.role || "User";
+  const initials = userName
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  const handleLogout = async () => {
+    try {
+      await apiRequest("/api/auth/logout", {
+        method: "POST",
+      });
+    } catch (error) {
+      console.error("Logout API error:", error.message);
+    } finally {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setIsProfileOpen(false);
+      navigate("/login", { replace: true });
+    }
+  };
+
 
   const handleToggle = onToggleSidebar || onOpenSidebar;
 
@@ -86,15 +120,75 @@ const Header = ({ onOpenSidebar, onToggleSidebar, isSidebarOpen, selectedCpo, se
         <div className="h-6 w-px bg-slate-200 hidden sm:block" />
 
         {/* User Profile */}
-        <div className="flex items-center space-x-2.5">
-          <div className="w-8.5 h-8.5 rounded-full bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-900 font-bold text-xs shadow-xs">
-            AK
-          </div>
-          <div className="hidden sm:block text-left">
-            <h4 className="text-xs font-bold text-slate-900 leading-tight">Ashok Kumar</h4>
-            <p className="text-[10px] font-semibold text-slate-400">eMSP Admin</p>
-          </div>
+        
+        {/* User Profile Dropdown */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => {
+              setIsProfileOpen(!isProfileOpen);
+              setShowNotifications(false);
+            }}
+            className="flex items-center space-x-2.5 text-left rounded-xl hover:bg-slate-50 p-1.5 transition-colors"
+            aria-expanded={isProfileOpen}
+            aria-label="Open user profile menu"
+          >
+            <div className="w-8.5 h-8.5 rounded-full bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-900 font-bold text-xs shadow-xs">
+              {initials}
+            </div>
+
+            <div className="hidden sm:block text-left">
+              <h4 className="text-xs font-bold text-slate-900 leading-tight">
+                {userName}
+              </h4>
+              <p className="text-[10px] font-semibold text-slate-400">
+                {userRole}
+              </p>
+            </div>
+
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block" />
+          </button>
+
+          {isProfileOpen && (
+            <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-200 py-2 z-50">
+              <div className="px-4 py-3 border-b border-slate-100">
+                <p className="text-sm font-bold text-slate-900">
+                  {userName}
+                </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  {userRole}
+                </p>
+                {user.email && (
+                  <p className="text-xs text-slate-400 mt-1 break-all">
+                    {user.email}
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsProfileOpen(false);
+                  navigate("/profile");
+                }}
+                className="w-full px-4 py-2.5 flex items-center gap-3 text-sm text-slate-700 hover:bg-amber-50 transition-colors"
+              >
+                <UserCircle className="w-4 h-4" />
+                My Profile
+              </button>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="w-full px-4 py-2.5 flex items-center gap-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
+            </div>
+          )}
         </div>
+
       </div>
     </header>
   );
