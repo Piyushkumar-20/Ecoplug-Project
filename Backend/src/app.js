@@ -6,6 +6,8 @@ import userRoutes from "./routes/user.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import tariffsRoutes from "./routes/tariffs.routes.js";
 import locationRoutes from "./routes/location.routes.js";
+import chargersRoutes from "./routes/chargers.router.js";
+
 const app = express();
 
 app.use(cors());
@@ -24,5 +26,5 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/tariffs", tariffsRoutes);
 app.use("/api/locations", locationRoutes);
-
+app.use("/api/chargers", chargersRoutes);
 export default app;
