@@ -108,9 +108,9 @@ const Login = () => {
 
       {/* ================= LOGIN CARD ================= */}
 
-      <div className="relative z-10 w-full max-w-[500px]">
+      <div className="relative z-10 w-full max-w-[345px]">
 
-        <div className="relative rounded-[28px] border border-emerald-300/20 bg-white/[0.055] backdrop-blur-2xl shadow-[0_0_70px_rgba(16,185,129,0.10)] px-7 py-8 sm:px-9 sm:py-9">
+        <div className="relative rounded-[28px] border border-emerald-300/20 bg-white/[0.055] backdrop-blur-2xl shadow-[0_0_70px_rgba(16,185,129,0.10)] px-6 py-6 sm:px-8 sm:py-7">
           {/* Card inner glow */}
           <div className="absolute inset-0 rounded-[32px] bg-gradient-to-br from-emerald-400/[0.06] via-transparent to-cyan-400/[0.06] pointer-events-none" />
 
@@ -120,7 +120,7 @@ const Login = () => {
 
             <div className="text-center mb-9">
 
-              <h1 className="text-4xl sm:text-5xl font-black tracking-tight">
+              <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
 
                 <span className="bg-gradient-to-r from-emerald-400 via-lime-300 to-cyan-400 bg-clip-text text-transparent">
                   ECOPLUG
@@ -138,7 +138,7 @@ const Login = () => {
 
             <form
               onSubmit={handleLogin}
-              className="space-y-5"
+              className="space-y-4"
             >
 
               {/* EMAIL */}
@@ -157,7 +157,7 @@ const Login = () => {
                   placeholder="Enter Email"
                   required
                   autoComplete="email"
-                  className="w-full h-16 pl-16 pr-5 rounded-full bg-white/[0.06] backdrop-blur-md border border-white/20 text-white placeholder:text-white/45 outline-none focus:border-emerald-400/70 focus:bg-white/[0.09] focus:ring-2 focus:ring-emerald-400/20 transition-all"
+                  className="w-full h-14 pl-16 pr-5 rounded-full bg-white/[0.06] backdrop-blur-md border border-white/20 text-white placeholder:text-white/45 outline-none focus:border-emerald-400/70 focus:bg-white/[0.09] focus:ring-2 focus:ring-emerald-400/20 transition-all"
                 />
 
               </div>
@@ -178,7 +178,7 @@ const Login = () => {
                   placeholder="Enter Password"
                   required
                   autoComplete="current-password"
-                  className="w-full h-14 pl-16 pr-16 rounded-full bg-white/[0.06] backdrop-blur-md border border-white/20 text-white placeholder:text-white/45 outline-none focus:border-emerald-400/70 focus:bg-white/[0.09] focus:ring-2 focus:ring-emerald-400/20 transition-all"
+                  className="w-full h-12 pl-16 pr-16 rounded-full bg-white/[0.06] backdrop-blur-md border border-white/20 text-white placeholder:text-white/45 outline-none focus:border-emerald-400/70 focus:bg-white/[0.09] focus:ring-2 focus:ring-emerald-400/20 transition-all"
                 />
 
                 <button
