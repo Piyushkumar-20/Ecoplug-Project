@@ -1,7 +1,47 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { User, Mail, Phone, Shield, Building2, MapPin, Key, Award, CheckCircle } from 'lucide-react';
+import { apiRequest } from '../services/api';
 
 const ProfileView = () => {
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await apiRequest("/api/companies/profile");
+        setProfile(data.data);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <p className="text-sm text-slate-500">Loading profile...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl p-4">
+        {error}
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return null;
+  }
+
   return (
     <div className="space-y-6 max-w-5xl pb-12">
       <div>
@@ -21,8 +61,10 @@ const ProfileView = () => {
         <div className="flex-1 text-center md:text-left space-y-2">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
             <div>
-              <h2 className="text-xl font-extrabold text-slate-900">Ashok Kumar</h2>
-              <p className="text-xs font-semibold text-slate-500">eMSP Super Administrator & Network Operator</p>
+              <h2 className="text-xl font-extrabold text-slate-900">{profile.user.name}</h2>
+              <p className="text-xs font-semibold text-slate-500">
+                {profile.company.name}
+              </p>
             </div>
             <span className="px-3 py-1 bg-amber-100 text-amber-900 font-bold text-xs rounded-full inline-block self-center md:self-start">
               Verified Partner
@@ -32,15 +74,20 @@ const ProfileView = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-3 border-t border-slate-100 text-xs">
             <div className="flex items-center space-x-2 text-slate-600">
               <Mail className="w-4 h-4 text-slate-400" />
-              <span>ashok.kumar@emsp-mobility.com</span>
+              <span>{profile.user.email}</span>
             </div>
             <div className="flex items-center space-x-2 text-slate-600">
               <Phone className="w-4 h-4 text-slate-400" />
-              <span>+91 98765 43210</span>
+              <span>{profile.admin.mobile || "Not provided"}</span>
             </div>
             <div className="flex items-center space-x-2 text-slate-600">
               <MapPin className="w-4 h-4 text-slate-400" />
-              <span>New Delhi, India</span>
+              <span>{[
+                profile.company.city,
+                profile.company.state,
+                profile.company.pin,
+              ].filter(Boolean).join(", ") || "Not provided"}
+              </span>
             </div>
           </div>
         </div>
@@ -57,7 +104,9 @@ const ProfileView = () => {
           <div className="space-y-2 text-xs">
             <div className="flex justify-between py-2 border-b border-slate-100">
               <span className="text-slate-500">Access Level</span>
-              <span className="font-bold text-slate-900">Global Admin</span>
+              <span className="font-bold text-slate-900">
+                {profile.user.role}
+              </span>
             </div>
             <div className="flex justify-between py-2 border-b border-slate-100">
               <span className="text-slate-500">Roaming Protocol</span>
