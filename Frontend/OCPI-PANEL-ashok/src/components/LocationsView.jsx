@@ -59,7 +59,61 @@ const LocationsView = () => {
     startIndex,
     endIndex
   );
+  const handleExport = () => {
+  if (filteredLocations.length === 0) {
+    alert('No locations available to export.');
+    return;
+  }
 
+  const headers = [
+    'Location ID',
+    'Station Name',
+    'City / Region',
+    'Chargers',
+    'Power Output (kW)',
+    'Address',
+    'Added Date',
+    'Status',
+  ];
+
+  const escapeCsv = (value) => {
+    const text = String(value ?? '');
+    return `"${text.replace(/"/g, '""')}"`;
+  };
+
+  const rows = filteredLocations.map((loc) => [
+    loc.id,
+    loc.name,
+    loc.city,
+    loc.chargers,
+    loc.powerOutputKW,
+    loc.address,
+    loc.addedDate
+      ? new Date(loc.addedDate).toLocaleDateString('en-GB')
+      : '',
+    loc.status,
+  ]);
+
+  const csvContent = [headers, ...rows]
+    .map((row) => row.map(escapeCsv).join(','))
+    .join('\r\n');
+
+  // BOM helps Excel display UTF-8 text correctly
+  const blob = new Blob(['\uFEFF', csvContent], {
+    type: 'text/csv;charset=utf-8;',
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+
+  link.href = url;
+  link.download = 'locations.csv';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  URL.revokeObjectURL(url);
+};
   return (
     <div className="space-y-5 pb-12 select-none">
       {/* Filter & Action Toolbar */}
@@ -79,12 +133,12 @@ const LocationsView = () => {
         <div className="flex items-center space-x-2 shrink-0">
           <button
             type="button"
+            onClick={handleExport}
             className="flex items-center space-x-2 bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 transition-all cursor-pointer shadow-2xs"
           >
             <Upload className="w-3.5 h-3.5 text-slate-500 rotate-180" />
             <span>Export</span>
           </button>
-
           <button
             type="button"
             className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-all cursor-pointer shadow-2xs"
@@ -104,7 +158,7 @@ const LocationsView = () => {
                 <th className="py-3.5 px-4">Station Name</th>
                 <th className="py-3.5 px-4">City / Region</th>
                 <th className="py-3.5 px-4 text-center">Chargers</th>
-                <th className="py-3.5 px-4 text-center">Power Output</th>
+                <th className="py-3.5 px-4 text-center">Max Power Output</th>
                 <th className="py-3.5 px-4">Address</th>
                 <th className="py-3.5 px-4">Added Date</th>
                 <th className="py-3.5 px-4 text-center">Status</th>
