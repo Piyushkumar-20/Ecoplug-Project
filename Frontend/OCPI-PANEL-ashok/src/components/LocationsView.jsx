@@ -1,26 +1,63 @@
-import React, { useState } from 'react';
-import { Calendar, ChevronDown, Plus, SlidersHorizontal, Upload, LayoutGrid } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Upload, LayoutGrid } from 'lucide-react';
+import { apiRequest } from '../services/api';
 
 const LocationsView = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCpo, setSelectedCpo] = useState('');
 
-  const locations = [
-    { id: 'LOC-0101', emsp: 'Statiq Platform', name: 'Connaught Place Hub', city: 'New Delhi', chargers: 2, power: '240 kW DC', address: 'Block A, Inner Circle, CP', date: '09-09-2026', time: '14:05:14', status: 'Online' },
-    { id: 'LOC-0102', emsp: 'Tata Power', name: 'BKC Business Plaza', city: 'Mumbai', chargers: 6, power: '180 kW DC', address: 'G Block, BKC, Bandra East', date: '09-09-2026', time: '13:10:14', status: 'Online' },
-    { id: 'LOC-0103', emsp: 'Ather Grid', name: 'Indiranagar Metro Hub', city: 'Bengaluru', chargers: 3, power: '120 kW DC', address: '100 Feet Rd, Indiranagar', date: '09-09-2026', time: '13:05:14', status: 'Online' },
-    { id: 'LOC-0104', emsp: 'Zeon Charging', name: 'Cyber Hub Station', city: 'Gurugram', chargers: 1, power: '150 kW DC', address: 'DLF Cyber City, Phase 2', date: '09-09-2026', time: '11:40:14', status: 'Maintenance' },
-    { id: 'LOC-0105', emsp: 'Adani TotalEnergies', name: 'HITEC City Park', city: 'Hyderabad', chargers: 4, power: '200 kW DC', address: 'Madhapur, HITEC City', date: '09-09-2026', time: '11:20:14', status: 'Online' },
-    { id: 'LOC-0106', emsp: 'ChargeMOD', name: 'Anna Nagar Supercharger', city: 'Chennai', chargers: 6, power: '90 kW DC', address: '2nd Avenue, Anna Nagar', date: '09-09-2026', time: '10:55:14', status: 'Offline' }
-  ];
+  const [locations, setLocations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const filteredLocations = locations.filter(loc => {
-    const matchesSearch = loc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      loc.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      loc.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCpo = selectedCpo === '' || loc.emsp === selectedCpo;
-    return matchesSearch && matchesCpo;
-  });
+    useEffect(() => {
+      const fetchLocations = async () => {
+        try {
+          setLoading(true);
+          setError('');
+
+          const response = await apiRequest('/api/locations');
+
+          setLocations(response.data);
+        } catch (err) {
+          setError(err.message || 'Failed to load locations');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchLocations();
+    }, []);
+
+
+useEffect(() => {
+  const fetchLocations = async () => {
+    try {
+      setLoading(true);
+      setError('');
+
+      const response = await apiRequest('/api/locations');
+
+      setLocations(response.data);
+    } catch (err) {
+      setError(err.message || 'Failed to load locations');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchLocations();
+}, []);
+
+  const filteredLocations = locations.filter((loc) => {
+  const search = searchTerm.toLowerCase();
+
+  return (
+    String(loc.id ?? '').toLowerCase().includes(search) ||
+    String(loc.name ?? '').toLowerCase().includes(search) ||
+    String(loc.city ?? '').toLowerCase().includes(search)
+  );
+});
 
   return (
     <div className="space-y-5 pb-12 select-none">
@@ -73,7 +110,27 @@ const LocationsView = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
-              {filteredLocations.map((item) => (
+                {loading ? (
+                  <tr>
+                    <td colSpan={8} className="py-8 text-center text-slate-500">
+                      Loading locations...
+                    </td>
+                  </tr>
+                ) : error ? (
+                  <tr>
+                    <td colSpan={8} className="py-8 text-center text-rose-600">
+                      {error}
+                  </td>
+                </tr>
+              ) : filteredLocations.length === 0 ? (
+    <tr>
+      <td colSpan={8} className="py-8 text-center text-slate-500">
+        No locations found.
+      </td>
+    </tr>
+  ) : (
+    filteredLocations.map((item) => (
+
                 <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
                   <td className="py-3.5 px-4 font-mono font-bold text-[#C05621] underline hover:text-[#A0461A] cursor-pointer">
                     {item.id}
@@ -81,23 +138,35 @@ const LocationsView = () => {
                   <td className="py-3.5 px-4 font-semibold text-slate-800">{item.name}</td>
                   <td className="py-3.5 px-4 text-slate-700">{item.city}</td>
                   <td className="py-3.5 px-4 text-center font-bold text-slate-900">{item.chargers} Chargers</td>
-                  <td className="py-3.5 px-4 text-center font-bold text-slate-900">{item.power}</td>
+                  <td className="py-3.5 px-4 text-center font-bold text-slate-900">{item.powerOutputKW}kW</td>
                   <td className="py-3.5 px-4 text-slate-600 truncate max-w-[200px]">{item.address}</td>
                   <td className="py-3.5 px-4">
                     <div className="text-[11px]">
-                      <span className="font-bold text-slate-800 block">{item.date}</span>
+                      <span className="font-bold text-slate-800 block">
+                        {item.addedDate
+                          ? new Date(item.addedDate).toLocaleDateString('en-GB')
+                          : '-'}
+                      </span>
                       <span className="text-[10px] text-slate-400 block">{item.time}</span>
                     </div>
                   </td>
                   <td className="py-3.5 px-4 text-center">
-                    <span className={`px-3 py-0.5 rounded-full text-[11px] font-bold ${item.status === 'Online' ? 'bg-[#ECFDF5] text-[#059669]' :
-                      item.status === 'Maintenance' ? 'bg-[#FEF3C7] text-[#D97706]' : 'bg-rose-100 text-rose-700'
-                      }`}>
+                    <span className={`px-3 py-0.5 rounded-full text-[11px] font-bold 
+                      ${item.status === 'Online'
+                        ? 'bg-[#ECFDF5] text-[#059669]'
+                        : item.status === 'Maintenance'
+                          ? 'bg-[#FEF3C7] text-[#D97706]'
+                          : item.status === 'Partial'
+                            ? 'bg-orange-100 text-orange-700'
+                            : 'bg-rose-100 text-rose-700'
+                      }
+                      `}>
                       {item.status}
                     </span>
                   </td>
                 </tr>
-              ))}
+              ))
+            )}
             </tbody>
           </table>
         </div>
