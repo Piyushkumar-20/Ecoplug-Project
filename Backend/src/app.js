@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.routes.js";
 import tariffsRoutes from "./routes/tariffs.routes.js";
 import locationRoutes from "./routes/location.routes.js";
 import chargersRoutes from "./routes/chargers.router.js";
+import sessionRoutes from "./routes/session.routes.js";
 
 const app = express();
 
@@ -27,4 +28,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/tariffs", tariffsRoutes);
 app.use("/api/locations", locationRoutes);
 app.use("/api/chargers", chargersRoutes);
+app.use("/api/sessions", sessionRoutes);
+
 export default app;
