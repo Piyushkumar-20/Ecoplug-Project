@@ -1,39 +1,31 @@
-
 import { getLocationsByCompanyId } from "../models/location.model.js";
 
 const getLocationStatus = (evseStatuses) => {
   const statuses = String(evseStatuses ?? "")
     .split(",")
+    .map((status) => status.trim().toUpperCase())
     .filter(Boolean);
 
   if (statuses.length === 0) {
     return "Offline";
   }
 
-  const availableCount = statuses.filter(
-    (status) => status === "AVAILABLE"
-  ).length;
-
-  const inoperativeCount = statuses.filter(
-    (status) => status === "INOPERATIVE"
-  ).length;
-
-  // Every charger is available
-  if (availableCount === statuses.length) {
+  // All chargers are available
+  if (statuses.every((status) => status === "AVAILABLE")) {
     return "Online";
   }
 
-  // Every charger is inoperative
-  if (inoperativeCount === statuses.length) {
+  // All chargers are inoperative
+  if (statuses.every((status) => status === "INOPERATIVE")) {
     return "Maintenance";
   }
 
-  // Some chargers are available, but not all
-  if (availableCount > 0) {
+  // At least one charger is available, but not all
+  if (statuses.includes("AVAILABLE")) {
     return "Partial";
   }
 
-  // No available chargers; remaining statuses may be UNKNOWN
+  // No available chargers
   return "Offline";
 };
 
@@ -47,7 +39,11 @@ const getLocations = async (companyId) => {
     address: location.address,
     addedDate: location.last_updated,
     chargers: Number(location.chargers),
-    powerOutputKW: Number(location.total_power_watts) / 1000,
+    powerOutputKW:
+      location.max_power_watts == null
+        ? null
+        : Number(location.max_power_watts) / 1000,
+    powerType: location.power_type,
     status: getLocationStatus(location.evse_statuses),
   }));
 };
