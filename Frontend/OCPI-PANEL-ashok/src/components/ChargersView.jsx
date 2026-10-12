@@ -58,6 +58,54 @@ const paginatedChargers = filteredChargers.slice(
   startIndex,
   endIndex
 );
+const handleExport = () => {
+  if (filteredChargers.length === 0) {
+    alert('No chargers available to export');
+    return;
+  }
+
+  const headers = [
+    'Charger ID',
+    'eMSP',
+    'Hardware Model',
+    'Location',
+    'Connector Type',
+    'Max Output (kW)',
+    'Last Active',
+    'Status',
+  ];
+
+  const rows = filteredChargers.map((item) => [
+    item.chargerId,
+    item.emsp,
+    item.hardwareModel,
+    item.locationName,
+    item.connectorType,
+    item.maxOutputKW,
+    item.lastActive,
+    item.status,
+  ]);
+
+  const escapeCSV = (value) =>
+    `"${String(value ?? '').replace(/"/g, '""')}"`;
+
+  const csvContent = [headers, ...rows]
+    .map((row) => row.map(escapeCSV).join(','))
+    .join('\r\n');
+
+  const blob = new Blob(['\uFEFF' + csvContent], {
+    type: 'text/csv;charset=utf-8;',
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+
+  link.href = url;
+  link.download = 'chargers.csv';
+  link.click();
+
+  URL.revokeObjectURL(url);
+};
   return (
     <div className="space-y-5 pb-12 select-none">
       {/* Top Header & Actions */}
@@ -120,7 +168,10 @@ const paginatedChargers = filteredChargers.slice(
         </div>
 
         <div className="flex items-center space-x-2 shrink-0">
-          <button className="flex items-center space-x-2 bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 transition-all cursor-pointer shadow-2xs">
+          <button
+            onClick={handleExport}
+            className="flex items-center space-x-2 bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 transition-all cursor-pointer shadow-2xs"
+          >
             <Upload className="w-3.5 h-3.5 text-slate-500 rotate-180" />
             <span>Export</span>
           </button>
