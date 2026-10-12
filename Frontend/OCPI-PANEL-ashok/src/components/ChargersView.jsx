@@ -1,28 +1,52 @@
 import React, { useState } from 'react';
 import { Calendar, ChevronDown, Plus, SlidersHorizontal, Upload, LayoutGrid } from 'lucide-react';
+import { useEffect } from 'react';
+import { apiRequest } from '../services/api';
 
 const ChargersView = () => {
   const [searchId, setSearchId] = useState('');
   const [selectedCpo, setSelectedCpo] = useState('');
+  const [chargers, setChargers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const chargers = [
-    { id: 'CHG-9901', emsp: 'Statiq Platform', name: 'ABB Terra 180 Fast Charger', location: 'Ecoplug GANPATI DH...', connector: 'CCS2 / CHAdeMO', output: '180 kW', usage: '82%', date: '09-09-2026', time: '14:05:14', status: 'Charging' },
-    { id: 'CHG-9902', emsp: 'Tata Power', name: 'Delta City Charger 120', location: 'Ecoplug Shri Ji Resort', connector: 'CCS2 Dual', output: '120 kW', usage: '100%', date: '09-09-2026', time: '13:10:14', status: 'Charging' },
-    { id: 'CHG-9903', emsp: 'Ather Grid', name: 'Ather Grid FastPod', location: 'Ecoplug Hotel Mayan...', connector: 'Ather Proprietary', output: '60 kW', usage: '0%', date: '09-09-2026', time: '13:05:14', status: 'Available' },
-    { id: 'CHG-9904', emsp: 'Zeon Charging', name: 'Siemens Sicharge D', location: 'Laxmi Nagar (MCD P...', connector: 'CCS2 Ultra', output: '300 kW', usage: '0%', date: '09-09-2026', time: '11:40:14', status: 'Offline' },
-    { id: 'CHG-9905', emsp: 'Adani TotalEnergies', name: 'Tritium Veefil-PK 175', location: 'Ecoplug Lords SKD R...', connector: 'CCS2 / Type 2', output: '175 kW', usage: '45%', date: '09-09-2026', time: '11:20:14', status: 'Charging' },
-    { id: 'CHG-9906', emsp: 'Relux', name: 'Alpitronic Hypercharger HYC300', location: 'Ecoplug R K Family R...', connector: 'CCS2 High Power', output: '300 kW', usage: '0%', date: '09-09-2026', time: '10:55:14', status: 'Available' },
-    { id: 'CHG-9907', emsp: 'Fortum Charge', name: 'Kempower Satellite C-Series', location: 'Ecoplug Dhaba 90\'S', connector: 'CCS2 Modular', output: '200 kW', usage: '60%', date: '09-09-2026', time: '10:20:14', status: 'Charging' }
-  ];
+  useEffect(() => {
+    const fetchChargers = async () => {
+      try {
+        setLoading(true);
+        setError('');
 
-  const filteredChargers = chargers.filter(c => {
-    const matchesId = c.id.toLowerCase().includes(searchId.toLowerCase()) ||
-      c.name.toLowerCase().includes(searchId.toLowerCase()) ||
-      c.location.toLowerCase().includes(searchId.toLowerCase());
-    const matchesCpo = selectedCpo === '' || c.emsp === selectedCpo;
-    return matchesId && matchesCpo;
-  });
+        const response = await apiRequest('/api/chargers');
 
+        setChargers(
+          Array.isArray(response.data) ? response.data : []
+        );
+      } catch (err) {
+        setError(err.message || 'Failed to load chargers');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchChargers();
+  }, []);
+  
+
+  const filteredChargers = chargers.filter((c) => {
+  const chargerId = String(c.chargerId || '');
+  const hardwareModel = String(c.hardwareModel || '');
+  const locationName = String(c.locationName || '');
+  const emsp = String(c.emsp || '');
+
+  const matchesId =
+    chargerId.toLowerCase().includes(searchId.toLowerCase()) ||
+    hardwareModel.toLowerCase().includes(searchId.toLowerCase()) ||
+    locationName.toLowerCase().includes(searchId.toLowerCase());
+
+  const matchesCpo = selectedCpo === '' || emsp === selectedCpo;
+
+  return matchesId && matchesCpo;
+});
   return (
     <div className="space-y-5 pb-12 select-none">
       {/* Top Header & Actions */}
@@ -66,11 +90,11 @@ const ChargersView = () => {
               className="w-full px-3.5 py-2 bg-slate-50/80 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-amber-400/40 focus:bg-white appearance-none pr-8 cursor-pointer"
             >
               <option value="">All eMSPs</option>
-              <option value="Statiq Platform">Statiq Platform</option>
-              <option value="Tata Power">Tata Power</option>
-              <option value="Ather Grid">Ather Grid</option>
-              <option value="Zeon Charging">Zeon Charging</option>
-              <option value="Adani TotalEnergies">Adani TotalEnergies</option>
+                {[...new Set(chargers.map((c) => c.emsp).filter(Boolean))].map((emsp) => (
+                  <option key={emsp} value={emsp}>
+                    {emsp}
+                  </option>
+                ))}
             </select>
             <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
@@ -111,20 +135,28 @@ const ChargersView = () => {
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
               {filteredChargers.map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
+                <tr key={item.chargerId} className="hover:bg-slate-50/70 transition-colors">
                   <td className="py-3.5 px-4 font-mono font-bold text-[#C05621] underline hover:text-[#A0461A] cursor-pointer">
-                    {item.id}
+                    {item.chargerId}
                   </td>
                   <td className="py-3.5 px-4 font-medium text-slate-700">{item.emsp}</td>
-                  <td className="py-3.5 px-4 font-semibold text-slate-800">{item.name}</td>
-                  <td className="py-3.5 px-4 text-slate-600 truncate max-w-[180px]">{item.location}</td>
-                  <td className="py-3.5 px-4 font-mono text-[11px] text-slate-600">{item.connector}</td>
-                  <td className="py-3.5 px-4 text-center font-bold text-slate-900">{item.output}</td>
+                  <td className="py-3.5 px-4 font-semibold text-slate-800">{item.hardwareModel}</td>
+                  <td className="py-3.5 px-4 text-slate-600 truncate max-w-[180px]">{item.locationName}</td>
+                  <td className="py-3.5 px-4 font-mono text-[11px] text-slate-600">{item.connectorType}</td>
+                  <td className="py-3.5 px-4 text-center font-bold text-slate-900">{item.maxOutputKW}kW</td>
 
                   <td className="py-3.5 px-4">
                     <div className="text-[11px]">
-                      <span className="font-bold text-slate-800 block">{item.date}</span>
-                      <span className="text-[10px] text-slate-400 block">{item.time}</span>
+                      <span className="font-bold text-slate-800 block">
+                        {item.lastActive
+                          ? new Date(item.lastActive).toLocaleDateString('en-GB')
+                          : '—'}
+                      </span>
+                      <span className="text-[10px] text-slate-400 block">
+                        {item.lastActive
+                          ? new Date(item.lastActive).toLocaleTimeString('en-GB')
+                          : ''}
+                      </span>
                     </div>
                   </td>
                   <td className="py-3.5 px-4 text-center">
