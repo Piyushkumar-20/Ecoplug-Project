@@ -9,7 +9,8 @@ const ChargersView = () => {
   const [chargers, setChargers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
   useEffect(() => {
     const fetchChargers = async () => {
       try {
@@ -31,8 +32,7 @@ const ChargersView = () => {
     fetchChargers();
   }, []);
   
-
-  const filteredChargers = chargers.filter((c) => {
+const filteredChargers = chargers.filter((c) => {
   const chargerId = String(c.chargerId || '');
   const hardwareModel = String(c.hardwareModel || '');
   const locationName = String(c.locationName || '');
@@ -47,6 +47,17 @@ const ChargersView = () => {
 
   return matchesId && matchesCpo;
 });
+
+const totalItems = filteredChargers.length;
+const totalPages = Math.ceil(totalItems / rowsPerPage);
+
+const startIndex = (currentPage - 1) * rowsPerPage;
+const endIndex = Math.min(startIndex + rowsPerPage, totalItems);
+
+const paginatedChargers = filteredChargers.slice(
+  startIndex,
+  endIndex
+);
   return (
     <div className="space-y-5 pb-12 select-none">
       {/* Top Header & Actions */}
@@ -77,7 +88,10 @@ const ChargersView = () => {
             <input
               type="text"
               value={searchId}
-              onChange={(e) => setSearchId(e.target.value)}
+              onChange={(e) => {
+                setSearchId(e.target.value);
+                setCurrentPage(1);
+              }}
               placeholder="Charger ID / Name"
               className="w-full px-3.5 py-2 bg-slate-50/80 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-amber-400/40 focus:bg-white transition-all"
             />
@@ -134,7 +148,7 @@ const ChargersView = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
-              {filteredChargers.map((item) => (
+              {paginatedChargers.map((item) => (
                 <tr key={item.chargerId} className="hover:bg-slate-50/70 transition-colors">
                   <td className="py-3.5 px-4 font-mono font-bold text-[#C05621] underline hover:text-[#A0461A] cursor-pointer">
                     {item.chargerId}
@@ -176,23 +190,72 @@ const ChargersView = () => {
         <div className="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
           <div className="flex items-center space-x-2">
             <span>Rows per page</span>
-            <select className="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 font-semibold text-slate-700 cursor-pointer">
-              <option value="25">25</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-            </select>
+            <select
+              value={rowsPerPage}
+              onChange={(e) => {
+                setRowsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 font-semibold text-slate-700 cursor-pointer"
+            >
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value={200}>200</option>
+            <option value={250}>250</option>
+          </select>
           </div>
 
           <div>
-            Showing <strong className="text-slate-800">1 - 25</strong> of <strong className="text-slate-800">148 items</strong>
+            Showing{' '}
+              <strong className="text-slate-800">
+                {totalItems === 0 ? 0 : startIndex + 1} - {endIndex}
+              </strong>{' '}
+              of <strong className="text-slate-800">{totalItems} items</strong>
           </div>
 
           <div className="flex items-center space-x-2 font-semibold">
-            <button className="px-2 py-1 rounded-md text-slate-400 hover:text-slate-700">«</button>
-            <button className="px-2 py-1 rounded-md text-slate-400 hover:text-slate-700">‹</button>
-            <span>Page <span className="px-2 py-0.5 rounded-md bg-slate-100 font-bold text-slate-900 border border-slate-200">1</span> of 6</span>
-            <button className="px-2 py-1 rounded-md text-slate-400 hover:text-slate-700">›</button>
-            <button className="px-2 py-1 rounded-md text-slate-400 hover:text-slate-700">»</button>
+            <button
+              onClick={() => setCurrentPage(1)}
+              disabled={currentPage === 1}
+              className="px-2 py-1 rounded-md text-slate-400 hover:text-slate-700 disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              «
+            </button>
+
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="px-2 py-1 rounded-md text-slate-400 hover:text-slate-700 disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              ‹
+            </button>
+
+            <span>
+              Page{' '}
+              <span className="px-2 py-0.5 rounded-md bg-slate-100 font-bold text-slate-900 border border-slate-200">
+                {currentPage}
+              </span>{' '}
+              of {totalPages}
+            </span>
+
+            <button
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+              }
+              disabled={currentPage >= totalPages || totalPages === 0}
+              className="px-2 py-1 rounded-md text-slate-400 hover:text-slate-700 disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              ›
+            </button>
+
+            <button
+              onClick={() => setCurrentPage(totalPages)}
+              disabled={currentPage >= totalPages || totalPages === 0}
+              className="px-2 py-1 rounded-md text-slate-400 hover:text-slate-700 disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              »
+            </button>
           </div>
         </div>
       </div>
