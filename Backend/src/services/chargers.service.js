@@ -6,6 +6,12 @@ const CONNECTOR_LABELS = {
   CHADEMO: "CHAdeMO",
 };
 
+const CONNECTOR_FILTERS = {
+  CCS2: "IEC_62196_T2_COMBO",
+  "TYPE 2": "IEC_62196_T2",
+  CHADEMO: "CHADEMO",
+};
+
 const getDisplayConnectorType = (connectorType) => {
   if (!connectorType) return "—";
 
@@ -46,6 +52,7 @@ const getDisplayStatus = (status) => {
 
 const getDisplayChargerId = (charger) => {
   const locationMatch = /^LOC-(\d+)$/i.exec(String(charger.locationId ?? ""));
+
   const evseMatch = /(?:\*|[-])(\d+)$/.exec(String(charger.chargerId ?? ""));
 
   if (locationMatch && evseMatch) {
@@ -74,13 +81,40 @@ const getDisplayChargerId = (charger) => {
 
 const formatPowerOutput = (powerKW) => {
   if (!Number.isFinite(powerKW)) return "—";
+
   return `${Number(powerKW.toFixed(2))} kW`;
 };
 
-const getChargers = async (companyId) => {
-  const chargers = await getChargersByCompanyId(companyId);
+const getChargers = async (companyId, filters = {}) => {
+  const normalizedFilters = { ...filters };
 
-  return chargers.map((charger) => {
+  // Convert dashboard connector labels to database standards.
+  if (normalizedFilters.connectorType) {
+    const key = String(normalizedFilters.connectorType).trim().toUpperCase();
+
+    normalizedFilters.connectorType =
+      CONNECTOR_FILTERS[key] ?? normalizedFilters.connectorType;
+  }
+
+  // Support Last N Days filtering.
+  if (normalizedFilters.lastActiveDays !== undefined) {
+    const days = Number(normalizedFilters.lastActiveDays);
+
+    if (!Number.isInteger(days) || days < 1 || days > 3650) {
+      throw new Error("lastActiveDays must be between 1 and 3650");
+    }
+
+    const from = new Date();
+    from.setDate(from.getDate() - days);
+
+    normalizedFilters.lastActiveFrom = from.toISOString().slice(0, 10);
+  }
+
+  // Fetch chargers using SQL filters.
+  const chargers = await getChargersByCompanyId(companyId, normalizedFilters);
+
+  // Format database records for the dashboard.
+  let result = chargers.map((charger) => {
     const maxOutputKW = Number(charger.maxOutputWatts) / 1000;
 
     return {
@@ -101,6 +135,27 @@ const getChargers = async (companyId) => {
       hardwareModel: charger.hardwareModel,
     };
   });
+
+  // Search by generated charger ID, EVSE ID, model, location or eMSP.
+  if (filters.search?.trim()) {
+    const search = filters.search.trim().toLowerCase();
+
+    result = result.filter((charger) =>
+      [
+        charger.displayChargerId,
+        charger.chargerId,
+        charger.hardwareModel,
+        charger.locationName,
+        charger.emsp,
+      ].some((value) =>
+        String(value ?? "")
+          .toLowerCase()
+          .includes(search),
+      ),
+    );
+  }
+
+  return result;
 };
 
 export { getChargers };
