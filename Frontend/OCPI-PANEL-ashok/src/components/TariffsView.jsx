@@ -22,7 +22,7 @@ const TariffsView = () => {
         setError('');
 
         const response = await apiRequest('/api/tariffs');
-        console.log("Tariffs API Response:", response.data);
+       
         setTariffPlans(
           Array.isArray(response.data) ? response.data : []
         );
