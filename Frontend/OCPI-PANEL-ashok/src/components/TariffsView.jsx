@@ -192,17 +192,7 @@ if (error) {
       
       {showFilters && (
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-            placeholder="Search tariff ID..."
-            className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400/40"
-          />
-
+          
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <select
               value={filters.status}
