@@ -122,10 +122,7 @@ const handleExport = () => {
             <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
           </button>
 
-          <button className="inline-flex items-center space-x-2 bg-[#C05621] hover:bg-[#A0461A] text-white font-bold px-4 py-2 rounded-xl text-xs shadow-xs transition-all cursor-pointer">
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>Add Charger</span>
-          </button>
+          
         </div>
       </div>
 
