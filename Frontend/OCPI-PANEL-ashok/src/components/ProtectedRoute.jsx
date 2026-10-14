@@ -1,14 +1,20 @@
+
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = () => {
   const token = localStorage.getItem("token");
+  const tokenExpiry = Number(localStorage.getItem("tokenExpiry"));
 
-  if (!token) {
+  if (!token || !tokenExpiry || Date.now() >= tokenExpiry) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("tokenExpiry");
+    localStorage.removeItem("user");
+
     return <Navigate to="/login" replace />;
   }
 
-  return children;
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

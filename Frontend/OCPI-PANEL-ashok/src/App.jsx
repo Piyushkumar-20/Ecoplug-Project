@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate,useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -18,6 +18,40 @@ function App() {
 
   const location = useLocation();
   const isLoginPage = location.pathname === '/login';
+  
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const tokenExpiry = Number(localStorage.getItem("tokenExpiry"));
+
+    if (!token) return;
+
+    if (!tokenExpiry || Date.now() >= tokenExpiry) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("tokenExpiry");
+      localStorage.removeItem("user");
+      window.location.replace("/login");
+      return;
+    }
+
+    const logout = () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("tokenExpiry");
+      localStorage.removeItem("user");
+      window.location.replace("/login");
+    };
+
+    const remainingTime = tokenExpiry - Date.now();
+
+    if (remainingTime <= 0) {
+      logout();
+      return;
+    }
+
+    const timer = window.setTimeout(logout, remainingTime);
+
+    return () => window.clearTimeout(timer);
+  }, [location.pathname]);
+
 
   return (
     <div className="h-screen w-screen bg-[#F8FAFC] text-slate-900 font-sans flex overflow-hidden antialiased selection:bg-amber-200">
@@ -49,75 +83,31 @@ function App() {
               : "flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto"
           }
         >
-          <Routes>
-            <Route path="/login" element={<Login />} />
+          
+        <Routes>
+          <Route path="/login" element={<Login />} />
+
+          {/* All dashboard pages protected centrally */}
+          <Route element={<ProtectedRoute />}>
             <Route
               path="/"
-              element={
-                <ProtectedRoute>
-                  <DashboardView selectedCpo={selectedCpo} />
-                </ProtectedRoute>
-              }
+              element={<DashboardView selectedCpo={selectedCpo} />}
             />
-            <Route 
-              path="/dashboard" 
-              element={
-                <Navigate to="/" replace />
-                } 
-            />
-            <Route 
-              path="/profile" 
-              element={
-                <ProfileView />
-                } 
-            />
-            <Route 
-              path="/locations" 
-              element={
-                <LocationsView />
-              } 
-            />
-            <Route 
-              path="/chargers" 
-              element={<ChargersView />
-              } 
-            />
-            <Route 
-              path="/tariffs" 
-              element={<TariffsView />             
-              } 
-            />
-            <Route 
-              path="/session" 
-              element={
-                <SessionsView />
-              } 
-            />
-            <Route 
-              path="/sessions" 
-              element={
-                <Navigate to="/session" replace />
-              } 
-            />
-            <Route 
-              path="/complaints" 
-              element={
-                <ComplaintsView />
-              } 
-            />
-            <Route 
-              path="/complanis" 
-              element={
-                <Navigate to="/complaints" replace />
-              } 
-            />
-            <Route 
-              path="*" 
-              element={
-                <Navigate to="/" replace />
-              } 
-            />
-          </Routes>
+
+            <Route path="/dashboard" element={<Navigate to="/" replace />} />
+            <Route path="/profile" element={<ProfileView />} />
+            <Route path="/locations" element={<LocationsView />} />
+            <Route path="/chargers" element={<ChargersView />} />
+            <Route path="/tariffs" element={<TariffsView />} />
+            <Route path="/session" element={<SessionsView />} />
+            <Route path="/sessions" element={<Navigate to="/session" replace />} />
+            <Route path="/complaints" element={<ComplaintsView />} />
+            <Route path="/complanis" element={<Navigate to="/complaints" replace />} />
+
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
+
         </main>
       </div>
     </div>

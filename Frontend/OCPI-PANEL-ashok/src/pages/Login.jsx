@@ -28,6 +28,7 @@ const Login = () => {
       });
 
       localStorage.setItem("token", data.data.token);
+      localStorage.setItem("tokenExpiry",String(Date.now() + 24 * 60 * 60 * 1000));
       localStorage.setItem("user", JSON.stringify(data.data.user));
 
       navigate("/");
