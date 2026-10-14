@@ -37,56 +37,28 @@ const parseTariffElements = (elements) => {
   };
 };
 
-const getPriceComponent = (priceComponents, type) => {
-  return priceComponents.find((component) => component?.type === type) ?? null;
-};
-
 const getTariffs = async () => {
   const tariffs = await getAllTariffs();
 
   return tariffs.map((tariff) => {
     const { restrictions, priceComponents } = parseTariffElements(
-      tariff.elements,
+      tariff.elements
     );
 
-    const energy = getPriceComponent(priceComponents, "ENERGY");
-
-    const parking = getPriceComponent(priceComponents, "PARKING_TIME");
-
-    const flat = getPriceComponent(priceComponents, "FLAT");
+    const energy = priceComponents.find(
+      (component) => component?.type === "ENERGY"
+    );
 
     return {
-      tariffId: tariff.tariff_id,
-      partyId: tariff.party_id,
-      type: tariff.type,
-      currency: tariff.currency,
+      tariffId: `#TRF-${String(Number(tariff.id) + 100).padStart(4, "0")}`,
 
-      validity: {
-        startTime: restrictions.start_time ?? null,
-        endTime: restrictions.end_time ?? null,
-      },
 
-      energy: energy
-        ? {
-            price: energy.price ?? null,
-            stepSize: energy.step_size ?? null,
-          }
-        : null,
-
-      parking: parking
-        ? {
-            price: parking.price ?? null,
-            stepSize: parking.step_size ?? null,
-          }
-        : null,
-
-      flat: flat
-        ? {
-            price: flat.price ?? null,
-          }
-        : null,
-
+      validityWindow: `${restrictions.start_time ?? "00:00"} - ${
+        restrictions.end_time ?? "23:59"
+      }`,
+      baseRate: energy?.price ?? null,
       createdAt: tariff.created_at,
+      status: tariff.status,
     };
   });
 };

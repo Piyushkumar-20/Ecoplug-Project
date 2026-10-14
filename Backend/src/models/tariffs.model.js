@@ -11,7 +11,8 @@ const getAllTariffs = async () => {
        currency,
        type,
        elements,
-       created_at
+       created_at,
+       status
      FROM ocpi_tariffs
      ORDER BY id DESC`,
   );
