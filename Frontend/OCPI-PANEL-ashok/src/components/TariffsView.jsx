@@ -1,25 +1,58 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Calendar, ChevronDown, Plus, SlidersHorizontal, Upload, LayoutGrid } from 'lucide-react';
+import { apiRequest } from '../services/api';
+
 
 const TariffsView = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCpo, setSelectedCpo] = useState('');
 
-  const tariffPlans = [
-    { id: '#TRF-0101', emsp: 'Statiq Platform', name: 'Standard Peak Tariff', rate: '₹ 18.50 / kWh', window: 'Peak (08:00 - 22:00)', tax: '18% GST', margin: '₹ 1.50 / kWh', date: '09-09-2026', time: '14:05:14', status: 'Active' },
-    { id: '#TRF-0102', emsp: 'Tata Power', name: 'Off-Peak Eco Tariff', rate: '₹ 14.00 / kWh', window: 'Off-Peak (22:00 - 08:00)', tax: '18% GST', margin: '₹ 1.00 / kWh', date: '09-09-2026', time: '13:10:14', status: 'Active' },
-    { id: '#TRF-0103', emsp: 'Zeon Charging', name: 'Hyper Fast Charge Rate', rate: '₹ 22.00 / kWh', window: 'DC Ultra Fast (>150kW)', tax: '18% GST', margin: '₹ 2.00 / kWh', date: '09-09-2026', time: '13:05:14', status: 'Active' },
-    { id: '#TRF-0104', emsp: 'Adani TotalEnergies', name: 'Fleet Preferred Rate', rate: '₹ 12.50 / kWh', window: '24x7 Fleet Access', tax: '18% GST', margin: '₹ 0.50 / kWh', date: '09-09-2026', time: '11:40:14', status: 'Active' },
-    { id: '#TRF-0105', emsp: 'Ather Grid', name: 'Night Saver Discount', rate: '₹ 11.00 / kWh', window: 'Late Night (00:00 - 06:00)', tax: '18% GST', margin: '₹ 0.75 / kWh', date: '09-09-2026', time: '11:20:14', status: 'Active' },
-    { id: '#TRF-0106', emsp: 'ChargeMOD', name: 'Highway Express Supercharger', rate: '₹ 24.50 / kWh', window: '24x7 High Output', tax: '18% GST', margin: '₹ 2.50 / kWh', date: '09-09-2026', time: '10:55:14', status: 'Draft' }
-  ];
+  const [tariffPlans, setTariffPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const filteredTariffs = tariffPlans.filter(plan => {
-    const matchesSearch = plan.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          plan.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCpo = selectedCpo === '' || plan.emsp === selectedCpo;
-    return matchesSearch && matchesCpo;
-  });
+  useEffect(() => {
+    const fetchTariffs = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const response = await apiRequest('/api/tariffs');
+
+        setTariffPlans(
+          Array.isArray(response.data) ? response.data : []
+        );
+      } catch (err) {
+        setError(err.message || 'Failed to load tariffs');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTariffs();
+  }, []);
+
+
+    
+const filteredTariffs = tariffPlans.filter((plan) => {
+  const tariffId = String(plan.tariffId || '');
+  const validityWindow = String(plan.validityWindow || '');
+
+  const matchesSearch =
+    tariffId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    validityWindow.toLowerCase().includes(searchTerm.toLowerCase());
+
+  return matchesSearch;
+});
+
+if (loading) {
+  return <div className="p-6 text-sm text-slate-500">Loading tariffs...</div>;
+}
+
+if (error) {
+  return <div className="p-6 text-sm text-red-600">{error}</div>;
+}
 
   return (
     <div className="space-y-5 pb-12 select-none">
@@ -27,7 +60,9 @@ const TariffsView = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Tariffs</h1>
-          <p className="text-xs font-semibold text-slate-400 mt-0.5">38 tariff plans</p>
+          <p className="text-xs font-semibold text-slate-400 mt-0.5">
+            {filteredTariffs.length} tariff plans
+          </p>
         </div>
 
         <div className="flex items-center space-x-3">
@@ -37,10 +72,6 @@ const TariffsView = () => {
             <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
           </button>
 
-          <button className="inline-flex items-center space-x-2 bg-[#C05621] hover:bg-[#A0461A] text-white font-bold px-4 py-2 rounded-xl text-xs shadow-xs transition-all cursor-pointer">
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>Create Tariff Plan</span>
-          </button>
         </div>
       </div>
 
@@ -97,38 +128,48 @@ const TariffsView = () => {
               <tr>
                 <th className="py-3.5 px-4">Tariff ID</th>
                 <th className="py-3.5 px-4">Plan Name</th>
-                <th className="py-3.5 px-4">eMSP Partner</th>
+               
                 <th className="py-3.5 px-4">Validity Window</th>
                 <th className="py-3.5 px-4 text-center">Base Rate</th>
-                <th className="py-3.5 px-4 text-center">eMSP Margin</th>
-                <th className="py-3.5 px-4 text-center">Tax (GST)</th>
+                
+                
                 <th className="py-3.5 px-4">Created At</th>
                 <th className="py-3.5 px-4 text-center">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
               {filteredTariffs.map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
+                <tr key={item.tariffId} className="hover:bg-slate-50/70 transition-colors">
                   <td className="py-3.5 px-4 font-mono font-bold text-[#C05621] underline hover:text-[#A0461A] cursor-pointer">
-                    {item.id}
+                    {item.tariffId}
                   </td>
-                  <td className="py-3.5 px-4 font-bold text-slate-900">{item.name}</td>
-                  <td className="py-3.5 px-4 font-medium text-slate-700">{item.emsp}</td>
-                  <td className="py-3.5 px-4 text-slate-600">{item.window}</td>
-                  <td className="py-3.5 px-4 text-center font-extrabold text-slate-900">{item.rate}</td>
-                  <td className="py-3.5 px-4 text-center font-bold text-slate-700">{item.margin}</td>
-                  <td className="py-3.5 px-4 text-center text-slate-500 font-medium">{item.tax}</td>
+                  <td className="py-3.5 px-4 font-bold text-slate-900">{item.validityWindow || '—'}</td>
+                  
+                  <td className="py-3.5 px-4 text-slate-600">{item.validityWindow || '—'}</td>
+                  <td className="py-3.5 px-4 text-center font-extrabold text-slate-900">{item.baseRate != null? `₹ ${Number(item.baseRate).toFixed(2)} / kWh`: '—'}</td>
+                  
+                  
                   <td className="py-3.5 px-4">
                     <div className="text-[11px]">
-                      <span className="font-bold text-slate-800 block">{item.date}</span>
-                      <span className="text-[10px] text-slate-400 block">{item.time}</span>
+                      <span className="font-bold text-slate-800 block">
+                        {item.createdAt
+                          ? new Date(item.createdAt).toLocaleDateString('en-GB')
+                          : '—'}
+                      </span>
+                      <span className="text-[10px] text-slate-400 block">
+                        {item.createdAt
+                          ? new Date(item.createdAt).toLocaleTimeString('en-GB')
+                          : ''}
+                      </span>
                     </div>
                   </td>
                   <td className="py-3.5 px-4 text-center">
                     <span className={`px-3 py-0.5 rounded-full text-[11px] font-bold ${
                       item.status === 'Active' ? 'bg-[#ECFDF5] text-[#059669]' : 'bg-[#FEF3C7] text-[#D97706]'
                     }`}>
-                      {item.status}
+                      {item.status
+                        ? item.status.charAt(0) + item.status.slice(1).toLowerCase()
+                        : '—'}
                     </span>
                   </td>
                 </tr>
