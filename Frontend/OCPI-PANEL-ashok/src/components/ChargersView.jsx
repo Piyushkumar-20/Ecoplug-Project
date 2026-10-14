@@ -207,7 +207,7 @@ const handleExport = () => {
                   <td className="py-3.5 px-4 font-medium text-slate-700">{item.emsp}</td>
                   <td className="py-3.5 px-4 font-semibold text-slate-800">{item.hardwareModel}</td>
                   <td className="py-3.5 px-4 text-slate-600 truncate max-w-[180px]">{item.locationName}</td>
-                  <td className="py-3.5 px-4 font-mono text-[11px] text-slate-600">{item.connectorType}</td>
+                  <td className="py-3.5 px-4 font-mono text-[11px] text-slate-600">{item.displayConnectorType || item.connectorType}</td>
                   <td className="py-3.5 px-4 text-center font-bold text-slate-900">{item.maxOutputKW}kW</td>
 
                   <td className="py-3.5 px-4">
