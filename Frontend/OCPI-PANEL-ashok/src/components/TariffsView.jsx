@@ -3,26 +3,83 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, ChevronDown, Plus, SlidersHorizontal, Upload, LayoutGrid } from 'lucide-react';
 import { apiRequest } from '../services/api';
 
-
 const TariffsView = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
-
+  const [filters, setFilters] = useState({
+    status: '',
+    validityWindow: '',
+    dateRange: '30',
+    minRate: '',
+    maxRate: '',
+  });
+  const [appliedFilters, setAppliedFilters] = useState({
+    status: '',
+    validityWindow: '',
+    dateRange: '30',
+    minRate: '',
+    maxRate: '',
+  });
   const [tariffPlans, setTariffPlans] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(25);
-
   useEffect(() => {
     const fetchTariffs = async () => {
       try {
         setLoading(true);
         setError('');
 
-        const response = await apiRequest('/api/tariffs');
-       
+        const params = new URLSearchParams();
+
+        if (searchTerm.trim()) {
+          params.set('search', searchTerm.trim());
+        }
+
+        if (appliedFilters.status) {
+          params.set('status', appliedFilters.status);
+        }
+
+        if (appliedFilters.validityWindow) {
+          params.set('validityWindow', appliedFilters.validityWindow);
+        }
+
+        if (appliedFilters.minRate !== '') {
+          params.set('minRate', appliedFilters.minRate);
+        }
+
+        if (appliedFilters.maxRate !== '') {
+          params.set('maxRate', appliedFilters.maxRate);
+        }
+
+        if (appliedFilters.dateRange) {
+          const today = new Date();
+          const fromDate = new Date();
+
+          fromDate.setDate(
+            fromDate.getDate() - Number(appliedFilters.dateRange)
+          );
+
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  };
+
+  params.set('createdFrom', formatDate(fromDate));
+  params.set('createdTo', formatDate(today));
+}
+
+const query = params.toString();
+
+const response = await apiRequest(
+  `/api/tariffs${query ? `?${query}` : ''}`
+);
         setTariffPlans(
           Array.isArray(response.data) ? response.data : []
         );
@@ -34,7 +91,7 @@ const TariffsView = () => {
     };
 
     fetchTariffs();
-  }, []);
+  }, [appliedFilters, searchTerm]);
 
 
     
@@ -111,9 +168,11 @@ if (error) {
             />
           </div>
 
-          
-
-          <button className="flex items-center space-x-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 transition-all cursor-pointer">
+          <button
+            type="button"
+            onClick={() => setShowFilters((prev) => !prev)}
+            className="flex items-center space-x-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 transition-all cursor-pointer"
+          >
             <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500" />
             <span>More Filters</span>
           </button>
@@ -130,23 +189,148 @@ if (error) {
           </button>
         </div>
       </div>
+      
+      {showFilters && (
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            placeholder="Search tariff ID..."
+            className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400/40"
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <select
+              value={filters.status}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, status: e.target.value }))
+              }
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm bg-white text-slate-700"
+            >
+              <option value="">All Status</option>
+              <option value="Active">Active</option>
+              <option value="Draft">Draft</option>
+            </select>
+
+            <select
+              value={filters.validityWindow}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  validityWindow: e.target.value,
+                }))
+              }
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm bg-white text-slate-700"
+            >
+              <option value="">All Windows</option>
+              <option value="Peak">Peak</option>
+              <option value="Off-Peak">Off-Peak</option>
+              <option value="Late Night">Late Night</option>
+              <option value="24x7 Fleet Access">24x7 Fleet Access</option>
+              <option value="24x7 High Output">24x7 High Output</option>
+              <option value="DC Ultra Fast">DC Ultra Fast</option>
+            </select>
+
+            <select
+              value={filters.dateRange}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, dateRange: e.target.value }))
+              }
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm bg-white text-slate-700"
+            >
+              <option value="">All Dates</option>
+              <option value="7">Last 7 Days</option>
+              <option value="30">Last 30 Days</option>
+              <option value="90">Last 90 Days</option>
+            </select>
+
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                type="number"
+                min="0"
+                value={filters.minRate}
+                onChange={(e) =>
+                  setFilters((prev) => ({ ...prev, minRate: e.target.value }))
+                }
+                placeholder="Min Rate (₹)"
+                className="min-w-0 w-full px-3 py-3 border border-slate-200 rounded-xl text-sm"
+              />
+              <input
+                type="number"
+                min="0"
+                value={filters.maxRate}
+                onChange={(e) =>
+                  setFilters((prev) => ({ ...prev, maxRate: e.target.value }))
+                }
+                placeholder="Max Rate (₹)"
+                className="min-w-0 w-full px-3 py-3 border border-slate-200 rounded-xl text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                setFilters({
+                  status: "",
+                  validityWindow: "",
+                  dateRange: "",
+                  minRate: "",
+                  maxRate: "",
+                });
+                setAppliedFilters({
+                  status: "",
+                  validityWindow: "",
+                  dateRange: "",
+                  minRate: "",
+                  maxRate: "",
+                });
+                setSearchTerm("");
+                setCurrentPage(1);
+              }}
+              
+              className="px-5 py-2.5 border border-slate-200 rounded-full text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              Reset
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setAppliedFilters({ ...filters });
+                setCurrentPage(1);
+                setShowFilters(false);
+              }}
+              className="px-5 py-2.5 bg-slate-900 text-white rounded-full text-sm font-semibold hover:bg-slate-800"
+            >
+              Apply Filters
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Table Card */}
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full table-fixed text-left text-xs">
+            <colgroup>
+              {Array.from({ length: 5 }).map((_, index) => (
+                <col key={index} style={{ width: "20%" }} />
+              ))}
+            </colgroup>
             <thead className="bg-[#FAFAFA] border-b border-slate-200/80 text-slate-700 font-bold text-[11px]">
               <tr>
-                <th className="py-3.5 px-4">Tariff ID</th>
-                
-               
-                <th className="py-3.5 px-4">Validity Window</th>
-                <th className="py-3.5 px-4 text-center">Base Rate</th>
-                
-                
-                <th className="py-3.5 px-4">Created At</th>
-                <th className="py-3.5 px-4 text-center">Status</th>
-              </tr>
+                <th className=" py-3 px-4">Tariff ID</th>
+                <th className=" py-3 px-4">Validity Window</th>
+                <th className=" py-3 px-4 text-center">Base Rate</th>
+                <th className=" py-3 px-4">Created At</th>
+                <th className=" py-3 px-4 text-center">Status</th>
+              </tr>s
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
               {paginatedTariffs.map((item) => (
@@ -156,11 +340,11 @@ if (error) {
                   </td>
                  
                   
-                  <td className="py-3.5 px-4 text-slate-600">{item.validityWindow || '—'}</td>
-                  <td className="py-3.5 px-4 text-center font-extrabold text-slate-900">{item.baseRate != null? `₹ ${Number(item.baseRate).toFixed(2)} / kWh`: '—'}</td>
+                  <td className="py-3 px-4 text-slate-600">{item.validityWindow || '—'}</td>
+                  <td className="py-3 px-4 text-center font-extrabold text-slate-900">{item.baseRate != null? `₹ ${Number(item.baseRate).toFixed(2)} / kWh`: '—'}</td>
                   
                   
-                  <td className="py-3.5 px-4">
+                  <td className="py-3 px-4">
                     <div className="text-[11px]">
                       <span className="font-bold text-slate-800 block">
                         {item.createdAt
