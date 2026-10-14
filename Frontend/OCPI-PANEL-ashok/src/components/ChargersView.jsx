@@ -200,9 +200,9 @@ const handleExport = () => {
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
               {paginatedChargers.map((item) => (
-                <tr key={item.chargerId} className="hover:bg-slate-50/70 transition-colors">
+                <tr key={item.displayChargerId || item.chargerId} className="hover:bg-slate-50/70 transition-colors">
                   <td className="py-3.5 px-4 font-mono font-bold text-[#C05621] underline hover:text-[#A0461A] cursor-pointer">
-                    {item.chargerId}
+                    {item.displayChargerId || item.chargerId}
                   </td>
                   <td className="py-3.5 px-4 font-medium text-slate-700">{item.emsp}</td>
                   <td className="py-3.5 px-4 font-semibold text-slate-800">{item.hardwareModel}</td>
