@@ -163,7 +163,7 @@ const SessionsView = () => {
                 </td>
 
                 <td className="py-3.5 px-4 text-slate-600">
-                  {item.vehicleRegistration || item.vehicle_registration || item.vehicle?.registrationNumber || item.vehicleMac || item.vehicle_mac || 'Not linked'}
+                  {item.evVehicle || item.ev_vehicle || item.vehicleRegistration || item.vehicle_registration || item.vehicle?.registrationNumber || item.vehicleMac || item.vehicle_mac || 'Not linked'}
                 </td>
 
                 <td className="py-3.5 px-4 font-medium text-slate-700 truncate max-w-[180px]">

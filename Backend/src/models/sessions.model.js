@@ -45,6 +45,8 @@ const getSessionsByCompanyId = async (
       s.session_id AS sessionId,
       s.cdr_id AS cdrId,
       s.company_id AS companyId,
+      s.driver_name AS driverName,
+      s.ev_vehicle AS evVehicle,
 
       l.id AS locationId,
       l.name AS stationName,
@@ -135,6 +137,8 @@ const getSessionById = async (sessionId, companyId) => {
       s.session_id AS sessionId,
       s.cdr_id AS cdrId,
       s.company_id AS companyId,
+      s.driver_name AS driverName,
+      s.ev_vehicle AS evVehicle,
 
       l.id AS locationId,
       l.name AS stationName,
