@@ -110,10 +110,8 @@ const getChargers = async (companyId, filters = {}) => {
     normalizedFilters.lastActiveFrom = from.toISOString().slice(0, 10);
   }
 
-  // Fetch chargers using SQL filters.
   const chargers = await getChargersByCompanyId(companyId, normalizedFilters);
 
-  // Format database records for the dashboard.
   let result = chargers.map((charger) => {
     const maxOutputKW = Number(charger.maxOutputWatts) / 1000;
 

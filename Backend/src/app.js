@@ -8,7 +8,7 @@ import tariffsRoutes from "./routes/tariffs.routes.js";
 import locationRoutes from "./routes/location.routes.js";
 import chargersRoutes from "./routes/chargers.router.js";
 import sessionRoutes from "./routes/session.routes.js";
-
+import dashboardRoutes from "./routes/dashboard.routes.js"
 const app = express();
 
 app.use(cors());
@@ -29,5 +29,6 @@ app.use("/api/tariffs", tariffsRoutes);
 app.use("/api/locations", locationRoutes);
 app.use("/api/chargers", chargersRoutes);
 app.use("/api/sessions", sessionRoutes);
+app.use("/api/dashboard", dashboardRoutes)
 
 export default app;
