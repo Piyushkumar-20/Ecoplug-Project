@@ -1,27 +1,69 @@
-import React, { useState } from 'react';
-import { Calendar, ChevronDown, Plus, SlidersHorizontal, Upload, LayoutGrid } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Calendar, ChevronDown, SlidersHorizontal, Upload, LayoutGrid } from 'lucide-react';
+import { apiRequest } from '../services/api';
 
 const SessionsView = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCpo, setSelectedCpo] = useState('');
 
-  const sessions = [
-    { id: 'SES-88210', emsp: 'Statiq Platform', user: 'Rohan Sharma', car: 'Tata Nexon EV', station: 'Ecoplug GANPATI DH...', energy: '34.5 kWh', duration: '42 mins', cost: '₹ 480', date: '09-09-2026', time: '14:05:14', status: 'Completed' },
-    { id: 'SES-88211', emsp: 'Tata Power', user: 'Priya Singh', car: 'MG ZS EV', station: 'Ecoplug Shri Ji Resort', energy: '48.2 kWh', duration: '58 mins', cost: '₹ 620', date: '09-09-2026', time: '13:10:14', status: 'Charging' },
-    { id: 'SES-88212', emsp: 'Zeon Charging', user: 'Vikram Mehta', car: 'Hyundai Ioniq 5', station: 'Ecoplug Hotel Mayan...', energy: '52.0 kWh', duration: '35 mins', cost: '₹ 890', date: '09-09-2026', time: '13:05:14', status: 'Completed' },
-    { id: 'SES-88213', emsp: 'Adani TotalEnergies', user: 'Amit Patel', car: 'Mahindra XUV400', station: 'Laxmi Nagar (MCD P...', energy: '12.1 kWh', duration: '18 mins', cost: '₹ 190', date: '09-09-2026', time: '11:40:14', status: 'Failed' },
-    { id: 'SES-88214', emsp: 'Ather Grid', user: 'Ananya Verma', car: 'Ather 450X', station: 'Ecoplug Lords SKD R...', energy: '3.8 kWh', duration: '25 mins', cost: '₹ 65', date: '09-09-2026', time: '11:20:14', status: 'Completed' },
-    { id: 'SES-88215', emsp: 'Relux', user: 'Karthik Raja', car: 'Kia EV6', station: 'Ecoplug R K Family R...', energy: '41.0 kWh', duration: '50 mins', cost: '₹ 750', date: '09-09-2026', time: '10:55:14', status: 'Completed' }
-  ];
-
-  const filteredSessions = sessions.filter(ses => {
-    const matchesSearch = ses.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ses.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ses.station.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCpo = selectedCpo === '' || ses.emsp === selectedCpo;
-    return matchesSearch && matchesCpo;
+  const [sessions, setSessions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 25,
+    total: 0,
+    totalPages: 0,
   });
+  useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        setLoading(true);
+        setError('');
 
+        const response = await apiRequest(
+          `/api/sessions?page=${currentPage}&limit=${rowsPerPage}`
+        );
+
+        setSessions(Array.isArray(response.data) ? response.data : []);
+        setPagination(
+          response.pagination || {
+            page: currentPage,
+            limit: rowsPerPage,
+            total: 0,
+            totalPages: 0,
+          }
+        );
+        
+      } catch (err) {
+        setError(err.message || 'Failed to load sessions');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSessions();
+ }, [currentPage, rowsPerPage]);
+
+  const filteredSessions = sessions.filter((ses) => {
+  const matchesSearch =
+    String(ses.sessionId || '')
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase()) ||
+    String(ses.stationName || '')
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase()) ||
+    String(ses.emspPartner || '')
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+  const matchesCpo =
+    selectedCpo === '' || ses.emspPartner === selectedCpo;
+
+  return matchesSearch && matchesCpo;
+});
   return (
     <div className="space-y-5 pb-12 select-none">
       {/* Top Header & Actions */}
@@ -38,10 +80,6 @@ const SessionsView = () => {
             <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
           </button>
 
-          <button className="inline-flex items-center space-x-2 bg-[#C05621] hover:bg-[#A0461A] text-white font-bold px-4 py-2 rounded-xl text-xs shadow-xs transition-all cursor-pointer">
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>Add Session</span>
-          </button>
         </div>
       </div>
 
@@ -110,33 +148,74 @@ const SessionsView = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
-              {filteredSessions.map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
-                  <td className="py-3.5 px-4 font-mono font-bold text-[#C05621] underline hover:text-[#A0461A] cursor-pointer">
-                    {item.id}
-                  </td>
-                  <td className="py-3.5 px-4 font-bold text-slate-900">{item.user}</td>
-                  <td className="py-3.5 px-4 text-slate-600">{item.car}</td>
-                  <td className="py-3.5 px-4 font-medium text-slate-700 truncate max-w-[180px]">{item.station}</td>
-                  <td className="py-3.5 px-4 font-medium text-slate-700">{item.emsp}</td>
-                  <td className="py-3.5 px-4 text-center font-extrabold text-slate-900">{item.energy}</td>
-                  <td className="py-3.5 px-4 text-center text-slate-600 font-medium">{item.duration}</td>
-                  <td className="py-3.5 px-4 text-right font-black text-slate-900">{item.cost}</td>
-                  <td className="py-3.5 px-4">
-                    <div className="text-[11px]">
-                      <span className="font-bold text-slate-800 block">{item.date}</span>
-                      <span className="text-[10px] text-slate-400 block">{item.time}</span>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-4 text-center">
-                    <span className={`px-3 py-0.5 rounded-full text-[11px] font-bold ${item.status === 'Charging' ? 'bg-cyan-100 text-cyan-800' :
-                      item.status === 'Completed' ? 'bg-[#ECFDF5] text-[#059669]' : 'bg-rose-100 text-rose-700'
-                      }`}>
-                      {item.status}
+              
+            {filteredSessions.map((item) => (
+              <tr
+                key={item.sessionId}
+                className="hover:bg-slate-50/70 transition-colors"
+              >
+                <td className="py-3.5 px-4 font-mono font-bold text-[#C05621]">
+                  {item.sessionId || '—'}
+                </td>
+
+                <td className="py-3.5 px-4 font-bold text-slate-900">—</td>
+
+                <td className="py-3.5 px-4 text-slate-600">—</td>
+
+                <td className="py-3.5 px-4 font-medium text-slate-700 truncate max-w-[180px]">
+                  {item.stationName || '—'}
+                </td>
+
+                <td className="py-3.5 px-4 font-medium text-slate-700">
+                  {item.emspPartner || '—'}
+                </td>
+
+                <td className="py-3.5 px-4 text-center font-extrabold text-slate-900">
+                  {item.energyKwh != null ? `${Number(item.energyKwh).toFixed(2)} kWh` : '—'}
+                </td>
+
+                <td className="py-3.5 px-4 text-center text-slate-600 font-medium">
+                  {item.durationMinutes != null ? `${item.durationMinutes} mins` : '—'}
+                </td>
+
+                <td className="py-3.5 px-4 text-right font-black text-slate-900">
+                  {item.billingAmount != null
+                    ? `${item.currency === 'INR' ? '₹' : item.currency || ''} ${Number(item.billingAmount).toFixed(2)}`
+                    : '—'}
+                </td>
+
+                <td className="py-3.5 px-4">
+                  <div className="text-[11px]">
+                    <span className="font-bold text-slate-800 block">
+                      {item.startedAt
+                        ? new Date(item.startedAt).toLocaleDateString('en-GB')
+                        : '—'}
                     </span>
-                  </td>
-                </tr>
-              ))}
+                    <span className="text-[10px] text-slate-400 block">
+                      {item.startedAt
+                        ? new Date(item.startedAt).toLocaleTimeString('en-GB')
+                        : ''}
+                    </span>
+                  </div>
+                </td>
+
+                <td className="py-3.5 px-4 text-center">
+                  <span
+                    className={`px-3 py-0.5 rounded-full text-[11px] font-bold ${
+                      item.status?.toUpperCase() === 'CHARGING'
+                        ? 'bg-cyan-100 text-cyan-800'
+                        : item.status?.toUpperCase() === 'COMPLETED'
+                          ? 'bg-[#ECFDF5] text-[#059669]'
+                          : 'bg-rose-100 text-rose-700'
+                    }`}
+                  >
+                    {item.status
+                      ? item.status.charAt(0) + item.status.slice(1).toLowerCase()
+                      : '—'}
+                  </span>
+                </td>
+              </tr>
+            ))}
             </tbody>
           </table>
         </div>
@@ -145,21 +224,95 @@ const SessionsView = () => {
         <div className="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
           <div className="flex items-center space-x-2">
             <span>Rows per page</span>
-            <select className="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 font-semibold text-slate-700 cursor-pointer">
-              <option value="25">25</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
+            <select
+              value={rowsPerPage}
+              onChange={(e) => {
+                setRowsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 font-semibold text-slate-700 cursor-pointer"
+            >
+              {[25, 50, 100]
+                .filter((size) => size === 25 || size <= pagination.total + 1)
+                .map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
             </select>
           </div>
 
           <div>
-            Showing <strong className="text-slate-800">1 - 25</strong> of <strong className="text-slate-800">1,420 items</strong>
+            Showing{' '}
+            <strong className="text-slate-800">
+              {pagination.total === 0
+                ? 0
+                : (currentPage - 1) * rowsPerPage + 1}
+              {' - '}
+              {Math.min(currentPage * rowsPerPage, pagination.total)}
+            </strong>
+            {' '}of{' '}
+            <strong className="text-slate-800">
+              {pagination.total} items
+            </strong>
           </div>
 
           <div className="flex items-center space-x-2 font-semibold">
-            <button className="px-2 py-1 rounded-md text-slate-400 hover:text-slate-700">«</button>
-            <span>Page <span className="px-2 py-0.5 rounded-md bg-slate-100 font-bold text-slate-900 border border-slate-200">1</span> of 57</span>
-            <button className="px-2 py-1 rounded-md text-slate-400 hover:text-slate-700">»</button>
+            {/* First Page */}
+            <button
+              onClick={() => setCurrentPage(1)}
+              disabled={currentPage === 1 || pagination.totalPages === 0}
+              className="px-2 py-1 rounded-md text-slate-400 hover:text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              «
+            </button>
+
+            {/* Previous Page */}
+            <button
+              onClick={() =>
+                setCurrentPage((prev) => Math.max(1, prev - 1))
+              }
+              disabled={currentPage === 1 || pagination.totalPages === 0}
+              className="px-2 py-1 rounded-md text-slate-400 hover:text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              ‹
+            </button>
+
+            <span>
+              Page{' '}
+              <span className="px-2 py-0.5 rounded-md bg-slate-100 font-bold text-slate-900 border border-slate-200">
+                {pagination.totalPages === 0 ? 0 : currentPage}
+              </span>
+              {' '}of {pagination.totalPages}
+            </span>
+
+            {/* Next Page */}
+            <button
+              onClick={() =>
+                setCurrentPage((prev) =>
+                  Math.min(pagination.totalPages, prev + 1)
+                )
+              }
+              disabled={
+                currentPage >= pagination.totalPages ||
+                pagination.totalPages === 0
+              }
+              className="px-2 py-1 rounded-md text-slate-400 hover:text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              ›
+            </button>
+
+            {/* Last Page */}
+            <button
+              onClick={() => setCurrentPage(pagination.totalPages)}
+              disabled={
+                currentPage >= pagination.totalPages ||
+                pagination.totalPages === 0
+              }
+              className="px-2 py-1 rounded-md text-slate-400 hover:text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              »
+            </button>
           </div>
         </div>
       </div>
