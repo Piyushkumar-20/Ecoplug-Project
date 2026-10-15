@@ -56,19 +56,19 @@ const SessionsView = () => {
     fetchSessions();
  }, [currentPage, rowsPerPage,searchTerm]);
 
-  const filteredSessions = sessions.filter((ses) => {
-  const matchesCpo =
-    selectedCpo === '' || ses.emspPartner === selectedCpo;
+  const emspOptions = [...new Set(sessions.map((session) => session.emspPartner).filter(Boolean))].sort();
 
-      return matchesCpo;
-    });
+  const filteredSessions = sessions.filter((ses) => {
+    const matchesCpo = selectedCpo === '' || ses.emspPartner === selectedCpo;
+    return matchesCpo;
+  });
   return (
     <div className="space-y-5 pb-12 select-none">
       {/* Top Header & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Charging Sessions</h1>
-          <p className="text-xs font-semibold text-slate-400 mt-0.5">1,420 sessions</p>
+          <p className="text-xs font-semibold text-slate-400 mt-0.5">{pagination.total.toLocaleString()} sessions</p>
         </div>
 
         <div className="flex items-center space-x-3">
@@ -92,7 +92,7 @@ const SessionsView = () => {
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              placeholder="Session ID / Driver"
+              placeholder="Session ID / station / charger"
               className="w-full px-3.5 py-2 bg-slate-50/80 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-amber-400/40 focus:bg-white transition-all"
             />
           </div>
@@ -104,10 +104,9 @@ const SessionsView = () => {
               className="w-full px-3.5 py-2 bg-slate-50/80 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-amber-400/40 focus:bg-white appearance-none pr-8 cursor-pointer"
             >
               <option value="">All eMSPs</option>
-              <option value="Statiq Platform">Statiq Platform</option>
-              <option value="Tata Power">Tata Power</option>
-              <option value="Ather Grid">Ather Grid</option>
-              <option value="Zeon Charging">Zeon Charging</option>
+              {emspOptions.map((partner) => (
+                <option key={partner} value={partner}>{partner}</option>
+              ))}
             </select>
             <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
@@ -152,16 +151,20 @@ const SessionsView = () => {
               
             {filteredSessions.map((item) => (
               <tr
-                key={item.sessionId}
+                key={item.id ?? item.sessionId}
                 className="hover:bg-slate-50/70 transition-colors"
               >
                 <td className="py-3.5 px-4 font-mono font-bold text-[#C05621]">
-                  {item.sessionId || '—'}
+                  {item.id != null ? `SES-${item.id}` : (item.sessionId || '—')}
                 </td>
 
-                <td className="py-3.5 px-4 font-bold text-slate-900">—</td>
+                <td className="py-3.5 px-4 font-bold text-slate-900">
+                  {item.driverName || item.driver_name || item.driver?.name || 'Not linked'}
+                </td>
 
-                <td className="py-3.5 px-4 text-slate-600">—</td>
+                <td className="py-3.5 px-4 text-slate-600">
+                  {item.vehicleRegistration || item.vehicle_registration || item.vehicle?.registrationNumber || item.vehicleMac || item.vehicle_mac || 'Not linked'}
+                </td>
 
                 <td className="py-3.5 px-4 font-medium text-slate-700 truncate max-w-[180px]">
                   {item.stationName || '—'}

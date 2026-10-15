@@ -15,7 +15,8 @@ const getSessionsByCompanyId = async (
   if (search) {
     conditions.push(`
       (
-        s.session_id LIKE ?
+        CAST(s.id AS CHAR) LIKE ?
+        OR s.session_id LIKE ?
         OR l.name LIKE ?
         OR l.city LIKE ?
         OR e.evse_id LIKE ?
@@ -24,7 +25,7 @@ const getSessionsByCompanyId = async (
 
     const searchTerm = `%${search}%`;
 
-    params.push(searchTerm, searchTerm, searchTerm, searchTerm);
+    params.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
   }
 
   const whereClause = conditions.join(" AND ");
