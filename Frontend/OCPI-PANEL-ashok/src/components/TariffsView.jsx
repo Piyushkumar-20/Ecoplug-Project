@@ -116,6 +116,48 @@ const paginatedTariffs = filteredTariffs.slice(
   startIndex,
   endIndex
 );
+
+const handleExport = () => {
+  const headers = [
+    "Tariff ID",
+    "Validity Window",
+    "Base Rate",
+    "Created At",
+    "Status",
+  ];
+
+  const escapeCSV = (value) =>
+    `"${String(value ?? "").replace(/"/g, '""')}"`;
+
+  const rows = filteredTariffs.map((item) => [
+    item.tariffId,
+    item.validityWindow,
+    item.baseRate,
+    item.createdAt
+      ? new Date(item.createdAt).toLocaleString("en-GB")
+      : "",
+    item.status,
+  ]);
+
+  const csvContent = [
+    headers.map(escapeCSV).join(","),
+    ...rows.map((row) => row.map(escapeCSV).join(",")),
+  ].join("\r\n");
+
+  const blob = new Blob(["\uFEFF" + csvContent], {
+    type: "text/csv;charset=utf-8;",
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = "tariffs.csv";
+  link.click();
+
+  URL.revokeObjectURL(url);
+};
+
 const pageSizeOptions = [25, 50, 100].filter(
   (size) => size < totalItems
 );
@@ -140,15 +182,6 @@ if (error) {
           <p className="text-xs font-semibold text-slate-400 mt-0.5">
             {filteredTariffs.length} tariff plans
           </p>
-        </div>
-
-        <div className="flex items-center space-x-3">
-          <button className="flex items-center space-x-2 bg-white border border-slate-200 hover:border-slate-300 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 shadow-2xs transition-all cursor-pointer">
-            <Calendar className="w-4 h-4 text-slate-400" />
-            <span>Last 30 Days</span>
-           
-          </button>
-
         </div>
       </div>
 
@@ -179,7 +212,9 @@ if (error) {
         </div>
 
         <div className="flex items-center space-x-2 shrink-0">
-          <button className="flex items-center space-x-2 bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 transition-all cursor-pointer shadow-2xs">
+          <button 
+            onClick={handleExport}
+            className="flex items-center space-x-2 bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 transition-all cursor-pointer shadow-2xs">
             <Upload className="w-3.5 h-3.5 text-slate-500 rotate-180" />
             <span>Export</span>
           </button>
