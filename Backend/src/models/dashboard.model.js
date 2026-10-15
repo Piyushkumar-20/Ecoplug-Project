@@ -121,10 +121,9 @@ const getDashboardByCompanyId = async (companyId) => {
       [companyId],
     ),
 
-    // 8. Daily activity for the last 30 calendar days
     db.query(
       `SELECT
-         DATE(s.start_date_time) AS day,
+         DATE_FORMAT(s.start_date_time, '%Y-%m-%d') AS day,
          COUNT(*) AS sessions,
          COALESCE(SUM(COALESCE(s.kwh, 0)), 0) AS energyKwh,
          COALESCE(
@@ -147,7 +146,7 @@ const getDashboardByCompanyId = async (companyId) => {
            CURDATE(),
            INTERVAL 1 DAY
          )
-       GROUP BY DATE(s.start_date_time)
+       GROUP BY DATE_FORMAT(s.start_date_time, '%Y-%m-%d')
        ORDER BY day ASC`,
       [companyId],
     ),
@@ -186,10 +185,7 @@ const getDashboardByCompanyId = async (companyId) => {
     })),
 
     dailyActivity: dailyActivityRows.map((row) => ({
-      day:
-        row.day instanceof Date
-          ? row.day.toISOString().slice(0, 10)
-          : String(row.day).slice(0, 10),
+      day: String(row.day).slice(0, 10),
       sessions: number(row.sessions),
       energyKwh: number(row.energyKwh),
       revenue: number(row.revenue),
