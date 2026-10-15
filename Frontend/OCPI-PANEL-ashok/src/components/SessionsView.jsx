@@ -23,9 +23,18 @@ const SessionsView = () => {
         setLoading(true);
         setError('');
 
-        const response = await apiRequest(
-          `/api/sessions?page=${currentPage}&limit=${rowsPerPage}`
-        );
+        const params = new URLSearchParams({
+            page: String(currentPage),
+            limit: String(rowsPerPage),
+          });
+
+          if (searchTerm.trim()) {
+            params.set('search', searchTerm.trim());
+          }
+
+          const response = await apiRequest(
+            `/api/sessions?${params.toString()}`
+          );
 
         setSessions(Array.isArray(response.data) ? response.data : []);
         setPagination(
@@ -45,25 +54,14 @@ const SessionsView = () => {
     };
 
     fetchSessions();
- }, [currentPage, rowsPerPage]);
+ }, [currentPage, rowsPerPage,searchTerm]);
 
   const filteredSessions = sessions.filter((ses) => {
-  const matchesSearch =
-    String(ses.sessionId || '')
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase()) ||
-    String(ses.stationName || '')
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase()) ||
-    String(ses.emspPartner || '')
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-
   const matchesCpo =
     selectedCpo === '' || ses.emspPartner === selectedCpo;
 
-  return matchesSearch && matchesCpo;
-});
+      return matchesCpo;
+    });
   return (
     <div className="space-y-5 pb-12 select-none">
       {/* Top Header & Actions */}
@@ -90,7 +88,10 @@ const SessionsView = () => {
             <input
               type="text"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
               placeholder="Session ID / Driver"
               className="w-full px-3.5 py-2 bg-slate-50/80 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-amber-400/40 focus:bg-white transition-all"
             />
