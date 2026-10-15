@@ -355,7 +355,7 @@ if (error) {
                 <th className=" py-3 px-4 text-center">Base Rate</th>
                 <th className=" py-3 px-4">Created At</th>
                 <th className=" py-3 px-4 text-center">Status</th>
-              </tr>s
+              </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
               {paginatedTariffs.map((item) => (
