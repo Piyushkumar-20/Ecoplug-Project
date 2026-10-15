@@ -6,6 +6,18 @@ import { apiRequest } from '../services/api';
 const ChargersView = () => {
   const [searchId, setSearchId] = useState('');
   const [selectedCpo, setSelectedCpo] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const initialFilters = {
+  status: '',
+  connectorType: '',
+  locationId: '',
+  minOutput: '',
+  maxOutput: '',
+  lastActiveDays: '',
+};
+
+const [filters, setFilters] = useState({ ...initialFilters });
+const [appliedFilters, setAppliedFilters] = useState({ ...initialFilters });
   const [chargers, setChargers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -16,12 +28,44 @@ const ChargersView = () => {
       try {
         setLoading(true);
         setError('');
+        const params = new URLSearchParams();
 
-        const response = await apiRequest('/api/chargers');
+        if (searchId.trim()) {
+          params.set('search', searchId.trim());
+        }
+        
+        if (appliedFilters.status) {
+          params.set('status', appliedFilters.status);
+        }
 
-        setChargers(
-          Array.isArray(response.data) ? response.data : []
+        if (appliedFilters.connectorType) {
+          params.set('connectorType', appliedFilters.connectorType);
+        }
+
+        if (appliedFilters.locationId.trim()) {
+          params.set('locationId', appliedFilters.locationId.trim());
+        }
+
+        if (appliedFilters.minOutput !== '') {
+          params.set('minOutput', appliedFilters.minOutput);
+        }
+
+        if (appliedFilters.maxOutput !== '') {
+          params.set('maxOutput', appliedFilters.maxOutput);
+        }
+
+        if (appliedFilters.lastActiveDays) {
+          params.set('lastActiveDays', appliedFilters.lastActiveDays);
+        }
+
+        const query = params.toString();
+
+        const response = await apiRequest(
+          `/api/chargers${query ? `?${query}` : ''}`
         );
+
+        setChargers(Array.isArray(response.data) ? response.data : []);
+
       } catch (err) {
         setError(err.message || 'Failed to load chargers');
       } finally {
@@ -30,23 +74,18 @@ const ChargersView = () => {
     };
 
     fetchChargers();
-  }, []);
+  }, [searchId, appliedFilters]);
   
+
 const filteredChargers = chargers.filter((c) => {
-  const chargerId = String(c.chargerId || '');
-  const hardwareModel = String(c.hardwareModel || '');
-  const locationName = String(c.locationName || '');
   const emsp = String(c.emsp || '');
 
-  const matchesId =
-    chargerId.toLowerCase().includes(searchId.toLowerCase()) ||
-    hardwareModel.toLowerCase().includes(searchId.toLowerCase()) ||
-    locationName.toLowerCase().includes(searchId.toLowerCase());
+  const matchesCpo =
+    selectedCpo === '' || emsp === selectedCpo;
 
-  const matchesCpo = selectedCpo === '' || emsp === selectedCpo;
-
-  return matchesId && matchesCpo;
+  return matchesCpo;
 });
+
 
 const totalItems = filteredChargers.length;
 const totalPages = Math.ceil(totalItems / rowsPerPage);
@@ -158,10 +197,16 @@ const handleExport = () => {
             <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
 
-          <button className="flex items-center space-x-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 transition-all cursor-pointer">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500" />
-            <span>More Filters</span>
-          </button>
+          
+        <button
+          type="button"
+          onClick={() => setShowFilters((prev) => !prev)}
+          className="flex items-center space-x-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 transition-all cursor-pointer"
+        >
+          <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500" />
+          <span>More Filters</span>
+        </button>
+
         </div>
 
         <div className="flex items-center space-x-2 shrink-0">
@@ -178,6 +223,141 @@ const handleExport = () => {
           </button>
         </div>
       </div>
+      
+{/* More Filters Panel */}
+{showFilters && (
+  <div className="bg-white border border-slate-200 rounded-xl p-5 mb-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div>
+        <label className="block text-xs font-semibold text-slate-600 mb-2">
+          Status
+        </label>
+        <select
+          value={filters.status}
+          onChange={(e) =>
+            setFilters({ ...filters, status: e.target.value })
+          }
+          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+        >
+          <option value="">All Statuses</option>
+          <option value="AVAILABLE">Available</option>
+          <option value="CHARGING">Charging</option>
+          <option value="FAULTED">Faulted</option>
+          <option value="OFFLINE">Offline</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-slate-600 mb-2">
+          Connector Type
+        </label>
+        <select
+          value={filters.connectorType}
+          onChange={(e) =>
+            setFilters({ ...filters, connectorType: e.target.value })
+          }
+          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+        >
+          <option value="">All Connector Types</option>
+          <option value="CCS2">CCS2</option>
+          <option value="Type 2">Type 2</option>
+          <option value="CHAdeMO">CHAdeMO</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-slate-600 mb-2">
+          Location ID
+        </label>
+        <input
+          type="text"
+          value={filters.locationId}
+          onChange={(e) =>
+            setFilters({ ...filters, locationId: e.target.value })
+          }
+          placeholder="Enter location ID"
+          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-slate-600 mb-2">
+          Minimum Output (kW)
+        </label>
+        <input
+          type="number"
+          min="0"
+          value={filters.minOutput}
+          onChange={(e) =>
+            setFilters({ ...filters, minOutput: e.target.value })
+          }
+          placeholder="Min kW"
+          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-slate-600 mb-2">
+          Maximum Output (kW)
+        </label>
+        <input
+          type="number"
+          min="0"
+          value={filters.maxOutput}
+          onChange={(e) =>
+            setFilters({ ...filters, maxOutput: e.target.value })
+          }
+          placeholder="Max kW"
+          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-slate-600 mb-2">
+          Last Active Within
+        </label>
+        <select
+          value={filters.lastActiveDays}
+          onChange={(e) =>
+            setFilters({ ...filters, lastActiveDays: e.target.value })
+          }
+          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+        >
+          <option value="">Any Time</option>
+          <option value="1">Last 24 Hours</option>
+          <option value="7">Last 7 Days</option>
+          <option value="30">Last 30 Days</option>
+          <option value="90">Last 90 Days</option>
+        </select>
+      </div>
+    </div>
+
+    <div className="flex justify-end gap-3 mt-5">
+      <button
+        type="button"
+        onClick={() => {
+          setFilters({ ...initialFilters });
+          setAppliedFilters({ ...initialFilters });
+          setCurrentPage(1);
+        }}
+        className="px-4 py-2 text-sm font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50"
+      >
+        Reset
+      </button>
+
+      <button
+        type="button"
+        onClick={() => {
+          setAppliedFilters({ ...filters });
+          setCurrentPage(1);
+        }}
+        className="relative z-50 px-4 py-2 text-sm font-semibold text-white bg-slate-900 rounded-lg hover:bg-slate-800 cursor-pointer"
+      >
+        Apply Filters
+      </button>
+    </div>
+  </div>
+)}
 
       {/* Table Card */}
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
