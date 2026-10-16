@@ -126,7 +126,7 @@ const ProfileView = () => {
 
           {/* Avatar */}
           <div className="relative shrink-0">
-            <div className="w-28 h-28 rounded-[30px] bg-gradient-to-br from-blue-100 to-blue-200 border-4 border-white ring-1 ring-blue-100 flex items-center justify-center text-blue-800 font-black text-3xl shadow-lg">
+            <div className="w-28 h-28 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 border-4 border-white ring-1 ring-blue-100 flex items-center justify-center text-blue-800 font-black text-3xl shadow-lg">
               {initials}
             </div>
 
