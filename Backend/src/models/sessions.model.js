@@ -2,31 +2,40 @@ import db from "../config/db.js";
 
 const getSessionsByCompanyId = async (
   companyId,
-  { page = 1, limit = 25, status, search } = {},
+  { page = 1, limit = 25, status, search, emsp, startDate, endDate } = {},
 ) => {
+  if (!companyId) {
+    throw new Error("Company ID is required");
+  }
+
   const conditions = ["s.company_id = ?"];
   const params = [companyId];
 
+  // Status filter
   if (status) {
-    conditions.push("s.status = ?");
-    params.push(status);
+    conditions.push("UPPER(s.status) = UPPER(?)");
+    params.push(status.trim());
   }
 
+  // eMSP partner filter
   if (emsp) {
     conditions.push("e.emsp = ?");
-    params.push(emsp);
+    params.push(emsp.trim());
   }
 
+  // Start date: include the entire start date
   if (startDate) {
     conditions.push("s.start_date_time >= ?");
-    params.push(startDate);
+    params.push(`${startDate} 00:00:00`);
   }
 
+  // End date: include the entire end date
   if (endDate) {
     conditions.push("s.start_date_time < DATE_ADD(?, INTERVAL 1 DAY)");
-    params.push(endDate);
+    params.push(`${endDate} 00:00:00`);
   }
 
+  // Search filter
   if (search) {
     conditions.push(`
       (
@@ -35,17 +44,28 @@ const getSessionsByCompanyId = async (
         OR l.name LIKE ?
         OR l.city LIKE ?
         OR e.evse_id LIKE ?
+        OR s.driver_name LIKE ?
+        OR s.ev_vehicle LIKE ?
       )
     `);
 
-    const searchTerm = `%${search}%`;
+    const searchTerm = `%${search.trim()}%`;
 
-    params.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
+    params.push(
+      searchTerm,
+      searchTerm,
+      searchTerm,
+      searchTerm,
+      searchTerm,
+      searchTerm,
+      searchTerm,
+    );
   }
 
   const whereClause = conditions.join(" AND ");
 
   const parsedPage = Math.max(1, Number.parseInt(page, 10) || 1);
+
   const parsedLimit = Math.min(
     100,
     Math.max(1, Number.parseInt(limit, 10) || 25),
@@ -113,9 +133,11 @@ const getSessionsByCompanyId = async (
     [...params, parsedLimit, offset],
   );
 
+  // Count all matching sessions using exactly the same filters.
   const [countRows] = await db.query(
     `
     SELECT COUNT(*) AS total
+
     FROM ocpi_sessions AS s
 
     LEFT JOIN ocpi_roaming_locations AS l
@@ -131,10 +153,35 @@ const getSessionsByCompanyId = async (
     params,
   );
 
-  const total = Number(countRows[0].total);
+  const total = Number(countRows[0]?.total ?? 0);
+
+  // All eMSP options belonging to this company.
+  // This is intentionally independent of the current page,
+  // status filter, search and selected date range.
+  const [emspRows] = await db.query(
+    `
+    SELECT DISTINCT
+      e.emsp AS emspPartner
+
+    FROM ocpi_roaming_evses AS e
+
+    INNER JOIN ocpi_roaming_locations AS l
+      ON l.id = e.location_id
+
+    WHERE l.company_id = ?
+      AND e.emsp IS NOT NULL
+      AND TRIM(e.emsp) <> ''
+
+    ORDER BY e.emsp ASC
+    `,
+    [companyId],
+  );
 
   return {
     sessions: rows,
+
+    emspOptions: emspRows.map((row) => row.emspPartner),
+
     pagination: {
       page: parsedPage,
       limit: parsedLimit,
@@ -145,6 +192,10 @@ const getSessionsByCompanyId = async (
 };
 
 const getSessionById = async (sessionId, companyId) => {
+  if (!sessionId || !companyId) {
+    throw new Error("Session ID and Company ID are required");
+  }
+
   const [rows] = await db.query(
     `
     SELECT
