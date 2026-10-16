@@ -103,44 +103,31 @@ const ProfileView = () => {
         <div className="absolute -top-20 right-24 w-72 h-72 rounded-full border border-white/10 pointer-events-none" />
 
         <div className="relative z-10">
-          <div className="flex items-center gap-3 text-xs font-semibold text-blue-200 mb-8">
-            <span>Settings</span>
-            <span>›</span>
-            <span className="text-white">User Profile</span>
-          </div>
-
+          
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
             User Profile
           </h1>
 
-          <p className="text-sm sm:text-base text-blue-100/90 mt-3 max-w-2xl">
-            Manage your company administrator profile and settings.
-          </p>
         </div>
       </header>
 
       {/* Main Profile Card */}
-      <section className="relative z-10 -mt-16 mx-4 sm:mx-8 lg:mx-12 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/70 shadow-lg">
+      <section className="relative z-10 -mt-16 mx-4 sm:mx-8 lg:mx-12 bg-white p-6 sm:p-5 rounded-3xl border border-slate-200/70 shadow-lg">
 
-        <div className="flex flex-col md:flex-row items-center md:items-start gap-6 sm:gap-7">
+        <div className="flex flex-col items-center gap-5 md:flex-row md:items-start md:gap-7">
 
           {/* Avatar */}
           <div className="relative shrink-0">
             <div className="w-28 h-28 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 border-4 border-white ring-1 ring-blue-100 flex items-center justify-center text-blue-800 font-black text-3xl shadow-lg">
               {initials}
             </div>
-
-            <span
-              className="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-emerald-500 ring-4 ring-white"
-              aria-label="Online"
-            />
           </div>
 
           {/* Profile Information */}
-          <div className="flex-1 min-w-0 w-full">
+          <div className="flex-1 min-w-0 w-full text-center md:text-left">
 
-            <div className="flex flex-wrap items-center gap-3 mb-2">
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-2">
+             <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
                 {profile.user.name}
               </h2>
 
@@ -216,9 +203,26 @@ const ProfileView = () => {
             <span>Company Details</span>
           </h3>
 
-          <div>
-            {renderDetails(companyDetails)}
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {companyDetails.map(([label, value]) => (
+              <div
+                key={label}
+                className={`rounded-xl border border-slate-100 bg-slate-50/70 p-4 min-w-0 ${
+                  label === "Address" ? "sm:col-span-2" : ""
+                }`}
+              >
+                <p className="text-xs font-medium text-slate-500 mb-2">
+                  {label}
+                </p>
+
+                <p className="text-sm font-semibold text-slate-800 break-words [overflow-wrap:anywhere]">
+                  {value || "Not provided"}
+                </p>
+              </div>
+            ))}
           </div>
+
         </div>
 
       </section>
