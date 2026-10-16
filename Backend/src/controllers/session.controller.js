@@ -12,6 +12,9 @@ const getSessionsController = async (req, res, next) => {
       limit: req.query.limit,
       status: req.query.status,
       search: req.query.search,
+      emsp: req.query.emsp,
+      startDate: req.query.startDate,
+      endDate: req.query.endDate,
     };
 
     const result = await getSessions(companyId, filters);

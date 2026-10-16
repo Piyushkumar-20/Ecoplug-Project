@@ -12,6 +12,21 @@ const getSessionsByCompanyId = async (
     params.push(status);
   }
 
+  if (emsp) {
+    conditions.push("e.emsp = ?");
+    params.push(emsp);
+  }
+
+  if (startDate) {
+    conditions.push("s.start_date_time >= ?");
+    params.push(startDate);
+  }
+
+  if (endDate) {
+    conditions.push("s.start_date_time < DATE_ADD(?, INTERVAL 1 DAY)");
+    params.push(endDate);
+  }
+
   if (search) {
     conditions.push(`
       (
