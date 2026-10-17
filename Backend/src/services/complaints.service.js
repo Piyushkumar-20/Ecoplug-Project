@@ -1,6 +1,7 @@
 import {
   getComplaintsByCompanyId,
   getComplaintByIdAndCompanyId,
+  getComplaintNotesById,
 } from "../models/complaints.model.js";
 
 const formatTat = (totalMinutes) => {
@@ -26,6 +27,10 @@ const getComplaints = async (companyId, filters = {}) => {
   }));
 };
 
+const getComplaintNotes = async (complaintId) => {
+  return getComplaintNotesById(complaintId);
+};
+
 const getComplaintDetails = async (complaintId, companyId) => {
   const complaint = await getComplaintByIdAndCompanyId(complaintId, companyId);
 
@@ -33,9 +38,12 @@ const getComplaintDetails = async (complaintId, companyId) => {
     return null;
   }
 
+  const notes = await getComplaintNotes(complaintId);
+
   return {
     ...complaint,
     tat: formatTat(complaint.tatMinutes),
+    notes,
   };
 };
-export { getComplaints, getComplaintDetails};
+export { getComplaints, getComplaintDetails, getComplaintNotes };

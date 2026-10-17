@@ -92,8 +92,8 @@ const getComplaintsByCompanyId = async (companyId, filters = {}) => {
 };
 
 const getComplaintByIdAndCompanyId = async (complaintId, companyId) => {
-    const [rows] = await db.query(
-      `
+  const [rows] = await db.query(
+    `
       SELECT
         c.id,
         c.external_complaint_id AS complaintId,
@@ -121,10 +121,28 @@ const getComplaintByIdAndCompanyId = async (complaintId, companyId) => {
       WHERE c.id = ? AND c.company_id = ?
       LIMIT 1
       `,
-      [complaintId, companyId]
-    );
-  
-    return rows[0] || null;
-  };
+    [complaintId, companyId],
+  );
 
-export { getComplaintsByCompanyId, getComplaintByIdAndCompanyId};
+  return rows[0] || null;
+};
+
+const getComplaintNotesById = async (complaintId) => {
+  const [rows] = await db.query(
+    `
+    SELECT
+      id,
+      complaint_id AS complaintId,
+      sender,
+      note_text AS noteText,
+      created_at AS createdAt
+    FROM complaint_notes
+    WHERE complaint_id = ?
+    ORDER BY created_at ASC, id ASC
+        `,
+    [complaintId],
+  );
+  return rows;
+};
+
+export { getComplaintsByCompanyId, getComplaintByIdAndCompanyId, getComplaintNotesById};
