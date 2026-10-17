@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -16,7 +15,25 @@ import {
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const location = useLocation();
-  const isDark = document.documentElement.classList.contains('dark');
+  const [isDark, setIsDark] = useState(() =>
+  localStorage.getItem('theme') === 'dark'
+);
+
+useEffect(() => {
+  const syncTheme = (event) => {
+    const selectedTheme = event.detail;
+
+    if (selectedTheme === 'light' || selectedTheme === 'dark') {
+      setIsDark(selectedTheme === 'dark');
+    }
+  };
+
+  window.addEventListener('theme-change', syncTheme);
+
+  return () => {
+    window.removeEventListener('theme-change', syncTheme);
+  };
+}, []);
 
   const menuItems = [
     { id: 'dashboard', path: '/', label: 'Dashboard', icon: LayoutDashboard },
