@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
@@ -15,6 +16,7 @@ import {
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const location = useLocation();
+  const isDark = document.documentElement.classList.contains('dark');
 
   const menuItems = [
     { id: 'dashboard', path: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -28,7 +30,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
   return (
     <>
-      {/* Mobile Backdrop Overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 lg:hidden"
@@ -36,30 +37,38 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         />
       )}
 
-      {/* Sidebar Container - Expandable (w-64) & Collapsible Icon-Only (w-20) */}
-      <aside className={`
-        fixed top-0 left-0 bottom-0 z-50 h-screen bg-white border-r border-slate-200/80 
-        flex flex-col justify-between transition-all duration-300 ease-in-out shrink-0 select-none overflow-y-auto overflow-x-hidden
-        ${isOpen
-          ? 'w-64 translate-x-0 opacity-100'
-          : '-translate-x-full lg:translate-x-0 lg:w-20 opacity-100'}
-        lg:sticky lg:top-0 lg:h-screen
-      `}>
+      <aside
+        className={`
+          fixed top-0 left-0 bottom-0 z-50 h-screen
+          ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200/80'}
+          border-r flex flex-col justify-between transition-all duration-300
+          ease-in-out shrink-0 select-none overflow-y-auto overflow-x-hidden
+          ${isOpen
+            ? 'w-64 translate-x-0 opacity-100'
+            : '-translate-x-full lg:translate-x-0 lg:w-20 opacity-100'}
+          lg:sticky lg:top-0 lg:h-screen
+        `}
+      >
         <div className={`flex flex-col justify-between h-full transition-all duration-300 ${isOpen ? 'w-64' : 'w-20'}`}>
-          {/* Top Header & Brand Logo */}
           <div>
-            <div className={`h-16 flex items-center border-b border-slate-100 sticky top-0 bg-white z-10 transition-all duration-300 ${isOpen ? 'px-6 justify-between' : 'px-0 justify-center'
-              }`}>
+            <div
+              className={`h-16 flex items-center border-b sticky top-0 z-10 transition-all duration-300
+                ${isDark ? 'border-slate-700 bg-slate-900' : 'border-slate-100 bg-white'}
+                ${isOpen ? 'px-6 justify-between' : 'px-0 justify-center'}
+              `}
+            >
               <Link to="/" className="flex items-center space-x-3 cursor-pointer" title="Ecoplug CPO's">
                 <img
                   src="/logo.png"
                   alt="Ecoplug Logo"
-                  className="w-9 h-9 rounded-full object-cover shadow-xs border border-slate-100 shrink-0"
+                  className={`w-9 h-9 rounded-full object-cover shadow-xs border shrink-0 ${isDark ? 'border-slate-700' : 'border-slate-100'}`}
                 />
+
                 {isOpen && (
                   <div className="animate-in fade-in duration-200 whitespace-nowrap overflow-hidden">
-                    <span className="text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-1">
-                      ECOPLUG CPO's <span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block"></span>
+                    <span className={`text-xl font-extrabold tracking-tight flex items-center gap-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                      ECOPLUG CPO's
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block" />
                     </span>
                     <p className="text-[8px] font-medium text-slate-400 tracking-wider uppercase -mt-0.5">
                       Connect. Chargers. Grow.
@@ -68,18 +77,16 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                 )}
               </Link>
 
-              {/* Mobile close button */}
               {isOpen && (
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 lg:hidden"
+                  className={`p-1.5 rounded-lg lg:hidden ${isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'}`}
                 >
                   <X className="w-5 h-5" />
                 </button>
               )}
             </div>
 
-            {/* Navigation Links */}
             <nav className={`space-y-1.5 transition-all duration-300 ${isOpen ? 'p-4' : 'p-2'}`}>
               {menuItems.map((item) => {
                 const Icon = item.icon;
@@ -97,18 +104,30 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                     }}
                     className={`
                       flex items-center rounded-xl font-medium text-sm transition-all duration-150 group cursor-pointer
-                      ${isOpen
-                        ? 'w-full justify-between px-3.5 py-2.5'
-                        : 'w-full justify-center p-3'}
+                      ${isOpen ? 'w-full justify-between px-3.5 py-2.5' : 'w-full justify-center p-3'}
                       ${isActive
                         ? 'bg-[#FEF0A6] text-slate-900 font-semibold shadow-xs shadow-amber-200/50'
-                        : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'}
+                        : isDark
+                          ? 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                          : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
+                      }
                     `}
                   >
                     <div className="flex items-center space-x-3">
-                      <Icon className={`w-5 h-5 shrink-0 transition-colors ${isActive ? 'text-slate-900 stroke-[2.3]' : 'text-slate-400 group-hover:text-slate-600'
-                        }`} />
-                      {isOpen && <span className="animate-in fade-in duration-200 whitespace-nowrap">{item.label}</span>}
+                      <Icon
+                        className={`w-5 h-5 shrink-0 transition-colors ${
+                          isActive
+                            ? 'text-slate-900 stroke-[2.3]'
+                            : isDark
+                              ? 'text-slate-400 group-hover:text-white'
+                              : 'text-slate-400 group-hover:text-slate-600'
+                        }`}
+                      />
+                      {isOpen && (
+                        <span className="animate-in fade-in duration-200 whitespace-nowrap">
+                          {item.label}
+                        </span>
+                      )}
                     </div>
 
                     {isOpen && isActive && (
@@ -120,14 +139,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             </nav>
           </div>
 
-          {/* Bottom Banner Card */}
           <div className={`transition-all duration-300 ${isOpen ? 'p-4' : 'p-2 flex justify-center'}`}>
             {isOpen ? (
               <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-emerald-900 via-slate-900 to-teal-950 p-4 text-white shadow-md group">
-                {/* Background EV image with overlay */}
                 <div
                   className="absolute inset-0 bg-cover bg-center opacity-35 mix-blend-overlay group-hover:scale-105 transition-transform duration-500"
-                  style={{ backgroundImage: `url('/assets/ev_sidebar_banner.png')` }}
+                  style={{ backgroundImage: "url('/assets/ev_sidebar_banner.png')" }}
                 />
                 <div className="relative z-10 space-y-2">
                   <div className="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-semibold border border-emerald-500/30">
@@ -173,4 +190,3 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 };
 
 export default Sidebar;
-
