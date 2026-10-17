@@ -14,12 +14,12 @@ const formatTat = (totalMinutes) => {
   return `${hours}h ${remainingMinutes}m`;
 };
 
-const getComplaints = async (companyId) => {
-  const complaints = await getComplaintsByCompanyId(companyId);
-
-  return complaints.map((complaint) => ({
-    ...complaint,
-    tat: formatTat(complaint.tatMinutes),
-  }));
-};
+const getComplaints = async (companyId, filters = {}) => {
+    const complaints = await getComplaintsByCompanyId(companyId, filters);
+  
+    return complaints.map((complaint) => ({
+      ...complaint,
+      tat: formatTat(complaint.tatMinutes),
+    }));
+  };
 export { getComplaints };

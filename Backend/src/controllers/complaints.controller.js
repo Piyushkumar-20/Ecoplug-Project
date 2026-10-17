@@ -11,7 +11,17 @@ const getComplaintsController = async (req, res) => {
       });
     }
 
-    const complaints = await getComplaints(companyId);
+    const filters = {
+        status: req.query.status,
+        priority: req.query.priority,
+        emsp: req.query.emsp,
+        complaintType: req.query.complaintType,
+        fromDate: req.query.fromDate,
+        toDate: req.query.toDate,
+        search: req.query.search,
+      };
+      
+      const complaints = await getComplaints(companyId, filters);
 
     return res.status(200).json({
       success: true,
