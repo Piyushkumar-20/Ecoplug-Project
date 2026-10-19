@@ -10,8 +10,10 @@ import chargersRoutes from "./routes/chargers.router.js";
 import sessionRoutes from "./routes/session.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js"
 import complaintRoutes from "./routes/complaints.routes.js"
-const app = express();
+import cookieParser from "cookie-parser";
 
+const app = express();
+app.use(cookieParser());
 app.use(cors());
 app.use(express.json());
 
