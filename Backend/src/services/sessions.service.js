@@ -2,30 +2,26 @@ import {
   getSessionsByCompanyId,
   getSessionById,
 } from "../models/sessions.model.js";
+import ApiError from "../utils/api-error.js";
 
 const getSessions = async (companyId, filters = {}) => {
   if (!companyId) {
-    throw new Error("Company ID is required");
+    throw ApiError.notFound("Company Id not found");
   }
-
   return await getSessionsByCompanyId(companyId, filters);
 };
 
 const getSessionDetails = async (sessionId, companyId) => {
   if (!sessionId) {
-    throw new Error("Session ID is required");
+    throw ApiError.notFound("Session Id not Found");
   }
-
   if (!companyId) {
-    throw new Error("Company ID is required");
+    throw ApiError.badGateway("Company Id is required");
   }
 
   const session = await getSessionById(sessionId, companyId);
-
   if (!session) {
-    const error = new Error("Session not found");
-    error.statusCode = 404;
-    throw error;
+    throw ApiError.notFound("Session Id not Found");
   }
 
   return session;

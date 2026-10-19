@@ -2,16 +2,14 @@ import {
   getComplaints,
   getComplaintDetails,
 } from "../services/complaints.service.js";
+import ApiError from "../utils/api-error.js";
 
 const getComplaintsController = async (req, res) => {
   try {
     const companyId = req.user?.companyId;
 
     if (!companyId) {
-      return res.status(401).json({
-        success: false,
-        message: "Authenticated company not found",
-      });
+      throw ApiError.unauthorized("Authenticated company not found");
     }
 
     const filters = {
@@ -34,10 +32,7 @@ const getComplaintsController = async (req, res) => {
   } catch (error) {
     console.error("Error fetching complaints:", error);
 
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch complaints",
-    });
+    throw new ApiError.internal("Failed to fetch complaints");
   }
 };
 
@@ -47,10 +42,7 @@ const getComplaintDetailsController = async (req, res) => {
     const { id } = req.params;
 
     if (!companyId) {
-      return res.status(401).json({
-        success: false,
-        message: "Authenticated company not found",
-      });
+      throw ApiError.unauthorized("Authenticated company not found");
     }
 
     if (!/^\d+$/.test(id) || Number(id) < 1) {
@@ -63,10 +55,7 @@ const getComplaintDetailsController = async (req, res) => {
     const complaint = await getComplaintDetails(Number(id), companyId);
 
     if (!complaint) {
-      return res.status(404).json({
-        success: false,
-        message: "Complaint not found",
-      });
+      throw ApiError.notFound("Complaint not found!");
     }
 
     return res.status(200).json({
@@ -75,11 +64,7 @@ const getComplaintDetailsController = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching complaint details:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch complaint details",
-    });
+    throw ApiError.unauthorized("Failed to fetch complaint details");
   }
 };
 

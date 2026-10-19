@@ -2,6 +2,7 @@ import {
   getSessions,
   getSessionDetails,
 } from "../services/sessions.service.js";
+import ApiError from "../utils/api-error.js";
 
 const isValidDate = (value) => {
   if (typeof value !== "string") {
@@ -21,19 +22,16 @@ const isValidDate = (value) => {
 
 const getSessionsController = async (req, res, next) => {
   try {
-    // Company ID must come from authenticated user context.
     const companyId = req.user.companyId;
 
     if (!companyId) {
-      return res.status(401).json({
-        success: false,
-        message: "Authenticated company information is missing",
-      });
+      throw ApiError.unauthorized(
+        "Authenticated company information is missing",
+      );
     }
 
     const { page, limit, status, search, emsp, startDate, endDate } = req.query;
 
-    // Validate date filters.
     if (startDate && !isValidDate(startDate)) {
       return res.status(400).json({
         success: false,
@@ -72,8 +70,6 @@ const getSessionsController = async (req, res, next) => {
       message: "Sessions fetched successfully",
       data: result.sessions,
       pagination: result.pagination,
-
-      // Used by the frontend eMSP dropdown.
       filters: {
         emspOptions: result.emspOptions ?? [],
       },
@@ -89,10 +85,9 @@ const getSessionDetailsController = async (req, res, next) => {
     const { sessionId } = req.params;
 
     if (!companyId) {
-      return res.status(401).json({
-        success: false,
-        message: "Authenticated company information is missing",
-      });
+      throw ApiError.unauthorized(
+        "Authenticated company information is missing",
+      );
     }
 
     const session = await getSessionDetails(sessionId, companyId);

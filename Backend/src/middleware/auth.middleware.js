@@ -1,32 +1,26 @@
 import jwt from "jsonwebtoken";
+import ApiError from "../utils/api-error.js";
 
 const authMiddleware = (req, res, next) => {
   const authorization = req.headers.authorization;
 
   if (!authorization || !authorization.startsWith("Bearer ")) {
-    return res.status(401).json({
-      success: false,
-      message: "Authentication required",
-    });
+    throw ApiError.unauthorized("Authentication required");
   }
 
   const token = authorization.slice(7).trim();
 
   if (!token) {
-    return res.status(401).json({
-      success: false,
-      message: "Authentication required",
-    });
+    throw ApiError.unauthorized("Authentication required");
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     if (!decoded.userId || !decoded.companyId || !decoded.role) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid authentication token",
-      });
+      throw ApiError.unauthorized(
+        "Authentication required. Invalid Authentication Token!",
+      );
     }
 
     req.user = {
@@ -38,18 +32,8 @@ const authMiddleware = (req, res, next) => {
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {
-      return res.status(401).json({
-        success: false,
-        code: "TOKEN_EXPIRED",
-        message: "Session expired. Please log in again.",
-      });
+      throw ApiError.unauthorized("Session expired. Please log in again.");
     }
-
-    return res.status(401).json({
-      success: false,
-      code: "TOKEN_INVALID",
-      message: "Invalid authentication token",
-    });
   }
 };
 

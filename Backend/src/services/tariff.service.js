@@ -96,7 +96,7 @@ const validateFilters = (filters) => {
     filters.createdTo &&
     filters.createdFrom > filters.createdTo
   ) {
-    throw new Error("createdFrom cannot be later than createdTo.");
+    throw new Error("createdFrom cannot be later than createdTo");
   }
 };
 

@@ -88,7 +88,6 @@ const formatPowerOutput = (powerKW) => {
 const getChargers = async (companyId, filters = {}) => {
   const normalizedFilters = { ...filters };
 
-  // Convert dashboard connector labels to database standards.
   if (normalizedFilters.connectorType) {
     const key = String(normalizedFilters.connectorType).trim().toUpperCase();
 
@@ -96,7 +95,6 @@ const getChargers = async (companyId, filters = {}) => {
       CONNECTOR_FILTERS[key] ?? normalizedFilters.connectorType;
   }
 
-  // Support Last N Days filtering.
   if (normalizedFilters.lastActiveDays !== undefined) {
     const days = Number(normalizedFilters.lastActiveDays);
 
@@ -134,7 +132,6 @@ const getChargers = async (companyId, filters = {}) => {
     };
   });
 
-  // Search by generated charger ID, EVSE ID, model, location or eMSP.
   if (filters.search?.trim()) {
     const search = filters.search.trim().toLowerCase();
 

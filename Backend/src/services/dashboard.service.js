@@ -1,10 +1,9 @@
 import { getDashboardByCompanyId } from "../models/dashboard.model.js";
+import ApiError from "../utils/api-error.js";
 
 const getDashboard = async (companyId) => {
   if (companyId === undefined || companyId === null || companyId === "") {
-    const error = new Error("Company ID is required");
-    error.statusCode = 400;
-    throw error;
+    throw ApiError.badGateway("Company Id is required");
   }
 
   return getDashboardByCompanyId(companyId);

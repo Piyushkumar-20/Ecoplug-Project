@@ -1,4 +1,5 @@
 import { getDashboard } from "../services/dashboard.service.js";
+import ApiResponse from "../utils/api-response.js"
 
 const getDashboardController = async (req, res, next) => {
   try {

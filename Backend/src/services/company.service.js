@@ -5,6 +5,7 @@ import {
   getProfileByUserId,
 } from "../models/companies.model.js";
 import { createUser } from "../models/user.model.js";
+import ApiError from "../utils/api-error.js"
 
 const registerCompany = async ({
   name,
@@ -52,9 +53,7 @@ const getProfile = async (userId, companyId) => {
   const profile = await getProfileByUserId(userId, companyId);
 
   if (!profile) {
-    const error = new Error("Profile not found");
-    error.statusCode = 404;
-    throw error;
+    throw ApiError.notFound("Profile not found!")
   }
 
   return {

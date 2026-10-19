@@ -1,4 +1,5 @@
-import  * as companyService from "../services/company.service.js";
+import * as companyService from "../services/company.service.js";
+import ApiError from "../utils/api-error.js";
 
 const register = async (req, res) => {
   try {
@@ -24,20 +25,15 @@ const register = async (req, res) => {
     console.error("Company registration error:", error.message);
 
     if (error.code === "ER_DUP_ENTRY") {
-      return res.status(409).json({
-        success: false,
-        message: "An account with this admin email already exists",
-      });
+      throw ApiError.conflict(
+        "An account with this admin email already exists",
+      );
     }
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to register company",
-    });
+    throw ApiError.badRequest("Failed to register company");
   }
 };
 
-const getProfile = async (req, res, next) => {
+const getProfile = async (req, res, next) => { 
   try {
     const { userId, companyId } = req.user;
 
@@ -52,4 +48,4 @@ const getProfile = async (req, res, next) => {
   }
 };
 
-export { register, getProfile};
+export { register, getProfile };
