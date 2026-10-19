@@ -51,39 +51,18 @@ function App() {
     };
   }, []);
 
-  // Existing session expiry handling
+  // If an API request cannot restore the session, send the user back to login.
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const tokenExpiry = Number(localStorage.getItem('tokenExpiry'));
-
-    if (!token) return;
-
-    if (!tokenExpiry || Date.now() >= tokenExpiry) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('tokenExpiry');
+    const handleSessionExpired = () => {
       localStorage.removeItem('user');
-      window.location.replace('/login');
-      return;
-    }
-
-    const logout = () => {
-      localStorage.removeItem('token');
-      localStorage.removeItem('tokenExpiry');
-      localStorage.removeItem('user');
-      window.location.replace('/login');
+      if (window.location.pathname !== '/login') {
+        window.location.replace('/login');
+      }
     };
 
-    const remainingTime = tokenExpiry - Date.now();
-
-    if (remainingTime <= 0) {
-      logout();
-      return;
-    }
-
-    const timer = window.setTimeout(logout, remainingTime);
-
-    return () => window.clearTimeout(timer);
-  }, [location.pathname]);
+    window.addEventListener('auth:session-expired', handleSessionExpired);
+    return () => window.removeEventListener('auth:session-expired', handleSessionExpired);
+  }, []);
 
   return (
     <div className="h-screen w-screen bg-[#F8FAFC] text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans flex overflow-hidden antialiased selection:bg-amber-200">

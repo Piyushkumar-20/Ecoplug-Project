@@ -2,7 +2,7 @@ import ecoplugLogo from "../assets/ecopluglogo.svg";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
-import { apiRequest } from "../services/api";
+import { apiRequest, setAccessToken, clearAccessToken } from "../services/api";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -28,15 +28,12 @@ const Login = () => {
         }),
       });
 
-      localStorage.setItem("token", data.data.token);
-      localStorage.setItem(
-        "tokenExpiry",
-        String(Date.now() + 24 * 60 * 60 * 1000)
-      );
+      setAccessToken(data.data.token);
       localStorage.setItem("user", JSON.stringify(data.data.user));
 
       navigate("/");
     } catch (error) {
+      clearAccessToken();
       setError(error.message);
     } finally {
       setLoading(false);

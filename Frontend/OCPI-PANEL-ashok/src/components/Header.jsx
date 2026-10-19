@@ -12,7 +12,7 @@ import {
   ChevronDown,
   PanelLeft,
 } from 'lucide-react';
-import { apiRequest } from '../services/api';
+import { apiRequest, clearAccessToken } from '../services/api';
 
 const Header = ({
   onOpenSidebar,
@@ -108,8 +108,7 @@ const Header = ({
     } catch (error) {
       console.error('Logout API error:', error.message);
     } finally {
-      localStorage.removeItem('token');
-      localStorage.removeItem('tokenExpiry');
+      clearAccessToken();
       localStorage.removeItem('user');
       setIsProfileOpen(false);
       navigate('/login', { replace: true });
