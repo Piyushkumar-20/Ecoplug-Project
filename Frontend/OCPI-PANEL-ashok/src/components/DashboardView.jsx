@@ -755,7 +755,7 @@ const DashboardView = ({ selectedCpo }) => {
                       fill="none"
                       d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                       role="button"
-                      tabIndex={0}
+                      
                       aria-label={`${segment.label}: ${segment.count} chargers`}
                       onClick={() =>
                         setSelectedChargerStatus(
@@ -764,16 +764,7 @@ const DashboardView = ({ selectedCpo }) => {
                       }
                       onMouseEnter={() => setHoveredChargerStatus(segment.key)}
                       onMouseLeave={() => setHoveredChargerStatus(null)}
-                      onFocus={() => setHoveredChargerStatus(segment.key)}
-                      onBlur={() => setHoveredChargerStatus(null)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" || event.key === " ") {
-                          event.preventDefault();
-                          setSelectedChargerStatus(
-                            selectedChargerStatus === segment.key ? null : segment.key,
-                          );
-                        }
-                      }}
+                     
                     >
                       <title>{`${segment.label}: ${formatCount(segment.count)} chargers`}</title>
                     </path>

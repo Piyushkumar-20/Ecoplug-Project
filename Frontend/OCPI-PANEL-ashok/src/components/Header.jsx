@@ -13,6 +13,7 @@ import {
   PanelLeft,
 } from 'lucide-react';
 import { apiRequest, clearAccessToken } from '../services/api';
+import { socket } from '../services/socket';
 
 const Header = ({
   onOpenSidebar,
@@ -23,6 +24,9 @@ const Header = ({
 }) => {
   const [isCpoOpen, setIsCpoOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
+  const [notificationsError, setNotificationsError] = useState("");
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const [theme, setTheme] = useState(() =>
@@ -100,6 +104,87 @@ const Header = ({
     .slice(0, 2)
     .toUpperCase();
 
+  const loadNotifications = async () => {
+    setNotificationsLoading(true);
+    setNotificationsError("");
+
+    try {
+      const response = await apiRequest("/api/notifications?limit=20&offset=0");
+      setNotifications(Array.isArray(response?.data) ? response.data : []);
+    } catch (error) {
+      setNotificationsError(error.message || "Unable to load notifications");
+    } finally {
+      setNotificationsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleNewNotification = (notification) => {
+      setNotifications((current) => {
+        if (current.some((item) => String(item.id) === String(notification.id))) {
+          return current;
+        }
+        return [notification, ...current].slice(0, 20);
+      });
+    };
+
+    const handleSocketConnect = () => {
+      void loadNotifications();
+    };
+
+    socket.on("notification:new", handleNewNotification);
+    socket.on("connect", handleSocketConnect);
+
+    if (socket.connected) {
+      void loadNotifications();
+    }
+
+    return () => {
+      socket.off("notification:new", handleNewNotification);
+      socket.off("connect", handleSocketConnect);
+    };
+  }, []);
+
+  const unreadCount = notifications.filter((notification) => !notification.is_read).length;
+
+  const handleMarkNotificationRead = async (notificationId) => {
+    try {
+      await apiRequest(`/api/notifications/${notificationId}/read`, {
+        method: "PATCH",
+      });
+      setNotifications((current) =>
+        current.map((notification) =>
+          String(notification.id) === String(notificationId)
+            ? { ...notification, is_read: true }
+            : notification
+        )
+      );
+    } catch (error) {
+      setNotificationsError(error.message || "Unable to update notification");
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await apiRequest("/api/notifications/read-all", { method: "PATCH" });
+      setNotifications((current) =>
+        current.map((notification) => ({ ...notification, is_read: true }))
+      );
+    } catch (error) {
+      setNotificationsError(error.message || "Unable to update notifications");
+    }
+  };
+
+  const formatNotificationTime = (value) => {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return new Intl.DateTimeFormat(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(date);
+  };
+
   const handleLogout = async () => {
     try {
       await apiRequest('/api/auth/logout', {
@@ -108,6 +193,7 @@ const Header = ({
     } catch (error) {
       console.error('Logout API error:', error.message);
     } finally {
+      socket.disconnect();
       clearAccessToken();
       localStorage.removeItem('user');
       setIsProfileOpen(false);
@@ -171,89 +257,119 @@ const Header = ({
         {/* Notifications */}
         <div className="relative" ref={notificationRef}>
           <button
+            type="button"
             onClick={() => {
-              setShowNotifications(!showNotifications);
+              const willOpen = !showNotifications;
+              setShowNotifications(willOpen);
               setIsProfileOpen(false);
+              if (willOpen) void loadNotifications();
             }}
             className={`p-2 rounded-xl relative transition-colors cursor-pointer ${
               isDark
                 ? 'text-slate-300 hover:bg-slate-800'
                 : 'text-slate-500 hover:bg-slate-100'
             }`}
-            aria-label="Notifications"
+            aria-label={`Notifications${unreadCount ? `, ${unreadCount} unread` : ''}`}
+            aria-expanded={showNotifications}
           >
             <Bell className="w-4.5 h-4.5" />
-            <span
-              className={`absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 animate-pulse ${
-                isDark ? 'ring-2 ring-slate-900' : 'ring-2 ring-white'
-              }`}
-            />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] leading-4 font-bold text-center">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
           </button>
 
           {showNotifications && (
             <div
-              className={`absolute right-0 mt-2 w-80 rounded-2xl shadow-xl border p-4 z-50 ${
+              className={`absolute right-0 mt-2 w-[min(24rem,calc(100vw-2rem))] rounded-2xl shadow-xl border p-4 z-50 ${
                 isDark
                   ? 'bg-slate-900 border-slate-700'
                   : 'bg-white border-slate-100'
               }`}
             >
               <div
-                className={`flex items-center justify-between pb-3 border-b ${
+                className={`flex items-center justify-between gap-3 pb-3 border-b ${
                   isDark ? 'border-slate-700' : 'border-slate-100'
                 }`}
               >
-                <h4
-                  className={`text-xs font-bold ${
+                <div>
+                  <h4 className={`text-sm font-bold ${
                     isDark ? 'text-slate-100' : 'text-slate-800'
-                  }`}
-                >
-                  System Alerts
-                </h4>
-                <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-600 text-[10px] font-bold">
-                  4 New
-                </span>
+                  }`}>
+                    Notifications
+                  </h4>
+                  <p className="text-[11px] text-slate-400 mt-0.5">
+                    {unreadCount} unread
+                  </p>
+                </div>
+                {unreadCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => void handleMarkAllRead()}
+                    className="text-[11px] font-semibold text-amber-600 hover:text-amber-700"
+                  >
+                    Mark all read
+                  </button>
+                )}
               </div>
 
-              <div
-                className={`divide-y max-h-64 overflow-y-auto my-1 ${
-                  isDark ? 'divide-slate-700' : 'divide-slate-100'
-                }`}
-              >
-                <div className="py-2.5 text-xs">
-                  <p
-                    className={`font-medium ${
-                      isDark ? 'text-slate-200' : 'text-slate-800'
-                    }`}
-                  >
-                    Statiq added 5 new stations
-                  </p>
-                  <span className="text-[10px] text-slate-400">
-                    10 minutes ago
-                  </span>
-                </div>
+              {notificationsError && (
+                <p role="alert" className="text-xs text-rose-500 py-3">
+                  {notificationsError}
+                </p>
+              )}
 
-                <div className="py-2.5 text-xs">
-                  <p className="font-medium text-rose-500">
-                    Tata Power charger offline
+              <div className={`max-h-80 overflow-y-auto divide-y ${
+                isDark ? 'divide-slate-700' : 'divide-slate-100'
+              }`}>
+                {notificationsLoading && notifications.length === 0 ? (
+                  <p className="py-6 text-center text-xs text-slate-400">
+                    Loading notifications…
                   </p>
-                  <span className="text-[10px] text-slate-400">
-                    25 minutes ago
-                  </span>
-                </div>
-
-                <div className="py-2.5 text-xs">
-                  <p
-                    className={`font-medium ${
-                      isDark ? 'text-slate-200' : 'text-slate-800'
-                    }`}
-                  >
-                    New roaming request
+                ) : notifications.length === 0 ? (
+                  <p className="py-6 text-center text-xs text-slate-400">
+                    You’re all caught up.
                   </p>
-                  <span className="text-[10px] text-slate-400">
-                    1 hour ago
-                  </span>
-                </div>
+                ) : (
+                  notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`py-3 flex items-start gap-2 ${
+                        !notification.is_read
+                          ? isDark ? 'bg-slate-800/50' : 'bg-amber-50/60'
+                          : ''
+                      }`}
+                    >
+                      <span className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${
+                        !notification.is_read ? 'bg-amber-500' : 'bg-transparent'
+                      }`} />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!notification.is_read) {
+                            void handleMarkNotificationRead(notification.id);
+                          }
+                        }}
+                        className="text-left flex-1 min-w-0"
+                      >
+                        <p className={`text-xs font-semibold ${
+                          isDark ? 'text-slate-100' : 'text-slate-800'
+                        }`}>
+                          {notification.title}
+                        </p>
+                        <p className={`text-xs mt-1 break-words ${
+                          isDark ? 'text-slate-300' : 'text-slate-600'
+                        }`}>
+                          {notification.message}
+                        </p>
+                        <span className="block text-[10px] text-slate-400 mt-1.5">
+                          {formatNotificationTime(notification.created_at)}
+                        </span>
+                      </button>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           )}
