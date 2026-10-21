@@ -1,68 +1,44 @@
-import {
-  createAndEmitNotification,
-  fetchNotifications,
-} from "../services/notification.service.js";
+import { fetchNotifications } from "../services/notification.service.js";
+import ApiError from "../utils/api-error.js";
 
-export const getNotifications = async (req, res, next) => {
-  try {
-    const companyId = req.user.companyId;
+const getNotifications = async (req, res) => {
+  const companyId = Number(req.user?.companyId);
 
-    const limit = Math.min(
-      Math.max(Number.parseInt(req.query.limit, 10) || 20, 1),
-      100,
-    );
-
-    const offset = Math.max(Number.parseInt(req.query.offset, 10) || 0, 0);
-
-    const notifications = await fetchNotifications({
-      companyId,
-      limit,
-      offset,
-    });
-
-    res.status(200).json({
-      success: true,
-      data: notifications,
-    });
-  } catch (error) {
-    next(error);
+  if (!Number.isInteger(companyId) || companyId <= 0) {
+    throw ApiError.unauthorized("Authenticated company not found");
   }
+
+  const rawLimit = req.query.limit ?? "20";
+  const rawOffset = req.query.offset ?? "0";
+
+  if (!/^\d+$/.test(String(rawLimit)) || !/^\d+$/.test(String(rawOffset))) {
+    return res.status(400).json({
+      success: false,
+      message: "Limit and offset must be valid non-negative integers",
+    });
+  }
+
+  const limit = Number(rawLimit);
+  const offset = Number(rawOffset);
+
+  if (limit < 1 || limit > 100 || !Number.isSafeInteger(offset)) {
+    return res.status(400).json({
+      success: false,
+      message: "Limit must be 1–100 and offset must be valid",
+    });
+  }
+
+  const notifications = await fetchNotifications({
+    companyId,
+    limit,
+    offset,
+  });
+
+  return res.status(200).json({
+    success: true,
+    count: notifications.length,
+    data: notifications,
+  });
 };
 
-export const createNotification = async (req, res, next) => {
-  try {
-    const { type, title, message, entityId } = req.body;
-
-    if (!type || !title || !message || entityId == null) {
-      return res.status(400).json({
-        success: false,
-        message: "type, title, message and entityId are required",
-      });
-    }
-
-    const io = req.app.get("io");
-
-    if (!io) {
-      return res.status(500).json({
-        success: false,
-        message: "Socket.IO server is unavailable",
-      });
-    }
-
-    const notification = await createAndEmitNotification({
-      io,
-      companyId: req.user.companyId,
-      type,
-      title,
-      message,
-      entityId,
-    });
-
-    res.status(201).json({
-      success: true,
-      data: notification,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+export { getNotifications };

@@ -5,7 +5,12 @@ import app from "./app.js";
 import db from "./config/db.js";
 import { socketAuthMiddleware } from "./middleware/socket-auth.middleware.js";
 
-const PORT = process.env.PORT || 5000;
+import {
+  startComplaintNotificationPolling,
+  stopComplaintNotificationPolling,
+} from "./services/complaint-notification.service.js";
+
+const PORT = Number(process.env.PORT) || 5000;
 
 const httpServer = http.createServer(app);
 
@@ -28,20 +33,62 @@ io.on("connection", (socket) => {
     console.log(`Socket disconnected: User ${userId}`);
   });
 });
+
 app.set("io", io);
+
+let isShuttingDown = false;
 
 async function startServer() {
   try {
     await db.query("SELECT 1");
-    console.log("MySql Connected Successfully");
+    console.log("MySQL connected successfully");
 
     httpServer.listen(PORT, "0.0.0.0", () => {
       console.log(`Server is running on port ${PORT}`);
+
+      // Start automatic detection of new complaints.
+      startComplaintNotificationPolling(io);
     });
   } catch (error) {
-    console.error("MySql Connection Failed");
-    console.error(error.message);
+    console.error("Server startup failed:", error.message);
+    process.exitCode = 1;
   }
 }
 
-startServer();
+async function shutdown(signal) {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+
+  console.log(`${signal} received. Shutting down...`);
+
+  try {
+    await stopComplaintNotificationPolling();
+
+    // Stop accepting new HTTP connections.
+    await new Promise((resolve, reject) => {
+      httpServer.close((error) => {
+        if (error) reject(error);
+        else resolve();
+      });
+
+      // Close Socket.IO connections and its underlying server.
+      io.close();
+    });
+
+    // Close the MySQL pool only if db exports a pool.
+    if (typeof db.end === "function") {
+      await db.end();
+    }
+
+    console.log("Server shut down successfully");
+    process.exitCode = 0;
+  } catch (error) {
+    console.error("Graceful shutdown failed:", error.message);
+    process.exitCode = 1;
+  }
+}
+
+process.once("SIGINT", () => void shutdown("SIGINT"));
+process.once("SIGTERM", () => void shutdown("SIGTERM"));
+
+void startServer();
