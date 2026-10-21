@@ -466,7 +466,7 @@ const DashboardView = ({ selectedCpo }) => {
     <div className="space-y-6 pb-12">
       {/* Metric Cards Grid */}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 lg:auto-rows-[minmax(180px,auto)] gap-4 items-stretch">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 lg:auto-rows-[minmax(0,1fr)] gap-4 items-stretch">
         {stats.map((stat, i) => {
           const Icon = stat.icon;
 
@@ -583,10 +583,10 @@ const DashboardView = ({ selectedCpo }) => {
 
       {/* Middle Dashboard Row: Activity Bar Chart + Donut Status + Recent Sessions */}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         {/* Charging Activity Chart (6 cols on lg) */}
 
-        <div className="lg:col-span-6 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
+        <div className="lg:col-span-8 self-start h-fit bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col">
           <div>
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <h3 className="text-sm font-bold text-slate-900">
@@ -714,7 +714,7 @@ const DashboardView = ({ selectedCpo }) => {
 
         {/* Station Status Donut (3 cols on lg) */}
 
-        <div className="lg:col-span-3 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
+        <div className="lg:col-span-4 self-start h-fit bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-bold text-slate-900">Station Status</h3>
 
@@ -723,7 +723,7 @@ const DashboardView = ({ selectedCpo }) => {
             </button>
           </div>
 
-          <div className="my-auto py-2 flex flex-col items-center">
+          <div className="py-3 flex flex-col items-center">
             {/* SVG Donut Chart */}
 
             <div className="relative w-40 h-40 flex items-center justify-center">
@@ -784,7 +784,7 @@ const DashboardView = ({ selectedCpo }) => {
 
         {/* Recent Sessions List (3 cols on lg) */}
 
-        <div className="lg:col-span-3 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
+        <div className="lg:col-span-12 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col">
           <div>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-bold text-slate-900">
