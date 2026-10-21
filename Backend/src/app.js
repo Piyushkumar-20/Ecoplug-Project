@@ -38,6 +38,8 @@ app.use("/api/chargers", chargersRoutes);
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/dashboard", dashboardRoutes)
 app.use("/api/complaints", complaintRoutes)
-app.use("/api/notification", notificationRoutes)
+app.use("/api/notifications", notificationRoutes);
+// Backwards-compatible alias for existing clients.
+app.use("/api/notification", notificationRoutes);
 
 export default app;
