@@ -466,7 +466,7 @@ const DashboardView = ({ selectedCpo }) => {
     <div className="space-y-6 pb-12">
       {/* Metric Cards Grid */}
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 items-start">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 lg:auto-rows-[minmax(180px,auto)] gap-4 items-stretch">
         {stats.map((stat, i) => {
           const Icon = stat.icon;
 
@@ -475,7 +475,7 @@ const DashboardView = ({ selectedCpo }) => {
               key={i}
               className={`${
                 i === 0
-                  ? "lg:col-span-2 bg-[#211F26] text-white p-5 rounded-2xl border border-slate-800 shadow-md hover:-translate-y-1 hover:shadow-xl"
+                  ? "lg:col-span-2 lg:row-span-2 bg-[#211F26] text-white p-5 rounded-2xl border border-slate-800 shadow-md hover:-translate-y-1 hover:shadow-xl flex flex-col"
                   : "lg:col-span-1 bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs hover:-translate-y-1 hover:shadow-md"
               } transition-all duration-300`}
             >

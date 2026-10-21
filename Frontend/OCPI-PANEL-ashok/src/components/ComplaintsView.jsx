@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Calendar,
   ChevronDown,
@@ -22,132 +22,43 @@ import {
   Trash2,
   Check,
   Tag,
-  AlertTriangle
+  AlertTriangle,
 } from 'lucide-react';
+import { apiRequest } from '../services/api';
 
-const initialComplaints = [
-  {
-    id: '273117',
-    emsp: 'Statiq Platform',
-    chargerName: 'IN*EPL.DC354874_1',
-    stationName: 'Ecoplug GANPATI DH...',
-    complaintType: 'Charging Session',
-    subType: 'Charging Not Stopping',
-    priority: 'Medium',
-    tat: '2h 16m',
-    date: '09-09-2026',
-    time: '14:05:14',
-    status: 'Resolved',
-    user: 'Suresh Kumar',
-    phone: '+91 98765 43210',
-    email: 'suresh.k@gmail.com',
-    vehicle: 'Tata Nexon EV Max',
-    notes: [
-      { sender: 'System', time: '09-09-2026 14:05:14', text: 'Ticket automatically raised via eMSP API.' },
-      { sender: 'Ashok (Manager)', time: '09-09-2026 15:10:00', text: 'Remote reset issued for charger IN*EPL.DC354874_1.' }
-    ]
-  },
-  {
-    id: '273112',
-    emsp: 'Statiq Platform',
-    chargerName: 'IN*EPL.010232',
-    stationName: 'Ecoplug Shri Ji Resort',
-    complaintType: 'Charging Session',
-    subType: 'Charging Not Stopping',
-    priority: 'Medium',
-    tat: '3h 10m',
-    date: '09-09-2026',
-    time: '13:10:14',
-    status: 'Resolved',
-    user: 'Kavita Roy',
-    phone: '+91 98112 34567',
-    email: 'kavita.roy@outlook.com',
-    vehicle: 'MG ZS EV',
-    notes: [
-      { sender: 'System', time: '09-09-2026 13:10:14', text: 'Session stop request pending.' }
-    ]
-  },
-  {
-    id: '273111',
-    emsp: 'Statiq Platform',
-    chargerName: 'IN*EPL.8476',
-    stationName: 'Ecoplug Hotel Mayan...',
-    complaintType: 'Charging Session',
-    subType: 'Charging Not Stopping',
-    priority: 'High',
-    tat: '3h 15m',
-    date: '09-09-2026',
-    time: '13:05:14',
-    status: 'Open',
-    user: 'Rahul Verma',
-    phone: '+91 97654 32109',
-    email: 'rahul.v@yahoo.com',
-    vehicle: 'Ather 450X',
-    notes: [{ sender: 'System', time: '09-09-2026 13:05:14', text: 'Gun lock error detected.' }]
-  },
-  {
-    id: '273098',
-    emsp: 'Statiq Platform',
-    chargerName: 'IN*EPL*EPLDC93413_1',
-    stationName: 'Laxmi Nagar (MCD P...',
-    complaintType: 'Charging Session',
-    subType: 'Charging Not Stopping',
-    priority: 'Medium',
-    tat: '4h 38m',
-    date: '09-09-2026',
-    time: '11:40:14',
-    status: 'In Progress',
-    user: 'Deepak Sharma',
-    phone: '+91 99887 76655',
-    email: 'deepak.s@gmail.com',
-    vehicle: 'Hyundai Ioniq 5',
-    notes: [{ sender: 'Tech Support', time: '09-09-2026 12:00:00', text: 'Technician assigned to inspect HMI.' }]
-  },
-  {
-    id: '273092',
-    emsp: 'Statiq Platform',
-    chargerName: 'IN*EPL.DC1853379_1',
-    stationName: 'Ecoplug Lords SKD R...',
-    complaintType: 'Charging Session',
-    subType: 'Charging Not Stopping',
-    priority: 'Medium',
-    tat: '4h 56m',
-    date: '09-09-2026',
-    time: '11:20:14',
-    status: 'Resolved',
-    user: 'Neha Gupta',
-    phone: '+91 98334 11223',
-    email: 'neha.gupta@corp.com',
-    vehicle: 'BYD Atto 3',
-    notes: []
-  },
-  {
-    id: '273088',
-    emsp: 'Statiq Platform',
-    chargerName: 'IN*EPL.AC838474_1',
-    stationName: 'Ecoplug R K Family R...',
-    complaintType: 'Charging Session',
-    subType: 'Charging Not Stopping',
-    priority: 'Medium',
-    tat: '5h 18m',
-    date: '09-09-2026',
-    time: '10:55:14',
-    status: 'Resolved',
-    user: 'Amitabh Sen',
-    phone: '+91 91234 56789',
-    email: 'amitabh.sen@tech.in',
-    vehicle: 'Tata Tiago EV',
-    notes: []
-  }
-];
+const formatDate = (value) => {
+  if (!value) return '—';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString('en-GB');
+};
+
+const formatTime = (value) => {
+  if (!value) return '';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? ''
+    : date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+};
+
+const getComplaintId = (ticket) => ticket.complaintId || `CMP-${ticket.id}`;
+const getCustomerName = (ticket) => ticket.customerName || ticket.user || '—';
+const getCustomerPhone = (ticket) => ticket.customerPhone || ticket.phone || '—';
+const getCustomerEmail = (ticket) => ticket.customerEmail || ticket.email || '—';
 
 const ComplaintsView = () => {
-  const [complaints, setComplaints] = useState(initialComplaints);
+  const [complaints, setComplaints] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [complaintIdSearch, setComplaintIdSearch] = useState('');
   const [sessionIdSearch, setSessionIdSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [priorityFilter, setPriorityFilter] = useState('All');
   const [selectedTicket, setSelectedTicket] = useState(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [detailsError, setDetailsError] = useState('');
   const [newResponseText, setNewResponseText] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [notice, setNotice] = useState('');
   const [newTicketForm, setNewTicketForm] = useState({
     emsp: 'Statiq Platform',
     chargerName: 'IN*EPL.NEW01',
@@ -155,57 +66,171 @@ const ComplaintsView = () => {
     complaintType: 'Charging Session',
     subType: 'Charging Not Stopping',
     priority: 'Medium',
-    user: ''
+    user: '',
   });
 
-  const filteredComplaints = useMemo(() => {
-    return complaints.filter((item) => {
-      const matchesId = item.id.toLowerCase().includes(complaintIdSearch.toLowerCase()) ||
-        item.stationName.toLowerCase().includes(complaintIdSearch.toLowerCase()) ||
-        item.user.toLowerCase().includes(complaintIdSearch.toLowerCase());
-      const matchesSession = sessionIdSearch === '' || item.emsp === sessionIdSearch;
-      return matchesId && matchesSession;
-    });
-  }, [complaints, complaintIdSearch, sessionIdSearch]);
-
-  const handleAddNote = (e) => {
-    e.preventDefault();
-    if (!newResponseText.trim() || !selectedTicket) return;
-    const newNote = {
-      sender: 'Ashok (Manager)',
-      time: 'Just now',
-      text: newResponseText.trim()
-    };
-    const updatedNotes = [...(selectedTicket.notes || []), newNote];
-    const updatedTicket = { ...selectedTicket, notes: updatedNotes };
-    setComplaints(prev => prev.map(c => c.id === selectedTicket.id ? updatedTicket : c));
-    setSelectedTicket(updatedTicket);
-    setNewResponseText('');
+  const fetchComplaints = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const response = await apiRequest('/api/complaints');
+      const rows = Array.isArray(response?.data)
+        ? response.data
+        : Array.isArray(response?.data?.data)
+          ? response.data.data
+          : [];
+      setComplaints(rows);
+    } catch (err) {
+      setError(err?.message || 'Failed to load complaints. Please try again.');
+      setComplaints([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleCreateTicketSubmit = (e) => {
-    e.preventDefault();
-    if (!newTicketForm.stationName || !newTicketForm.user) return;
-    const newId = `#${Math.floor(273000 + Math.random() * 900)}`;
-    const newTicket = {
-      id: newId,
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        setLoading(true);
+        setError('');
+        const response = await apiRequest('/api/complaints');
+        if (cancelled) return;
+
+        const rows = Array.isArray(response?.data)
+          ? response.data
+          : Array.isArray(response?.data?.data)
+            ? response.data.data
+            : [];
+        setComplaints(rows);
+      } catch (err) {
+        if (!cancelled) {
+          setError(err?.message || 'Failed to load complaints. Please try again.');
+          setComplaints([]);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filteredComplaints = useMemo(() => {
+    const search = complaintIdSearch.trim().toLowerCase();
+    const sessionSearch = sessionIdSearch.trim().toLowerCase();
+
+    return complaints.filter((item) => {
+      const matchesSearch = [
+        item.id,
+        item.complaintId,
+        item.sessionId,
+        item.stationName,
+        item.customerName,
+        item.chargerName,
+        item.emsp,
+        item.complaintType,
+        item.subType,
+      ].some((value) => String(value ?? '').toLowerCase().includes(search));
+
+      const matchesSession =
+        !sessionSearch || String(item.sessionId ?? '').toLowerCase().includes(sessionSearch);
+      const matchesStatus = statusFilter === 'All' || item.status === statusFilter;
+      const matchesPriority = priorityFilter === 'All' || item.priority === priorityFilter;
+
+      return matchesSearch && matchesSession && matchesStatus && matchesPriority;
+    });
+  }, [complaints, complaintIdSearch, sessionIdSearch, statusFilter, priorityFilter]);
+
+  const openTicketDetails = async (ticket) => {
+    setSelectedTicket(ticket);
+    setDetailsError('');
+    setDetailsLoading(true);
+
+    try {
+      // Backend supports GET /api/complaints/:id. If detail fetch fails,
+      // the list row is still shown in the modal.
+      const response = await apiRequest(`/api/complaints/${ticket.id}`);
+      const detail = response?.data?.data || response?.data;
+      if (detail && typeof detail === 'object' && !Array.isArray(detail)) {
+        setSelectedTicket((current) =>
+          current && String(current.id) === String(ticket.id)
+            ? { ...current, ...detail }
+            : current
+        );
+      }
+    } catch (err) {
+      setDetailsError(err?.message || 'Could not load additional complaint details.');
+    } finally {
+      setDetailsLoading(false);
+    }
+  };
+
+  const handleAddNote = (event) => {
+    event.preventDefault();
+    if (!newResponseText.trim() || !selectedTicket) return;
+
+    // No note-create endpoint was provided in the existing backend.
+    // Keep this UI interaction local and do not imply it was saved to the server.
+    const newNote = {
+      sender: 'Manager (local note)',
+      time: new Date().toLocaleString('en-GB'),
+      text: newResponseText.trim(),
+    };
+    const updatedTicket = {
+      ...selectedTicket,
+      notes: [...(selectedTicket.notes || []), newNote],
+    };
+
+    setSelectedTicket(updatedTicket);
+    setComplaints((previous) =>
+      previous.map((item) =>
+        String(item.id) === String(selectedTicket.id) ? updatedTicket : item
+      )
+    );
+    setNewResponseText('');
+    setNotice('Note added in this view only. The backend does not currently provide a note-save endpoint.');
+  };
+
+  const handleCreateTicketSubmit = (event) => {
+    event.preventDefault();
+    if (!newTicketForm.stationName.trim() || !newTicketForm.user.trim()) return;
+
+    // No complaint-create endpoint was provided in the existing backend.
+    // Add a temporary UI-only record, clearly marked as not saved to the server.
+    const localTicket = {
+      id: `local-${Date.now()}`,
+      complaintId: 'Local draft',
       emsp: newTicketForm.emsp,
       chargerName: newTicketForm.chargerName,
-      stationName: newTicketForm.stationName,
+      stationName: newTicketForm.stationName.trim(),
       complaintType: newTicketForm.complaintType,
       subType: newTicketForm.subType,
       priority: newTicketForm.priority,
-      tat: '0h 05m',
-      date: '09-09-2026',
-      time: '16:00:00',
+      tat: '—',
+      tatMinutes: 0,
+      raisedAt: new Date().toISOString(),
       status: 'Open',
-      user: newTicketForm.user,
-      phone: '+91 98000 00000',
-      email: 'user@ecoplug.in',
-      vehicle: 'EV',
-      notes: [{ sender: 'System', time: 'Just now', text: 'Ticket logged manually.' }]
+      customerName: newTicketForm.user.trim(),
+      customerPhone: '',
+      customerEmail: '',
+      vehicle: '',
+      sessionId: null,
+      notes: [
+        {
+          sender: 'System (local draft)',
+          time: new Date().toLocaleString('en-GB'),
+          text: 'This complaint was created in the frontend only and has not been saved to the backend.',
+        },
+      ],
+      _localOnly: true,
     };
-    setComplaints([newTicket, ...complaints]);
+
+    setComplaints((previous) => [localTicket, ...previous]);
     setIsCreateModalOpen(false);
     setNewTicketForm({
       emsp: 'Statiq Platform',
@@ -214,259 +239,228 @@ const ComplaintsView = () => {
       complaintType: 'Charging Session',
       subType: 'Charging Not Stopping',
       priority: 'Medium',
-      user: ''
+      user: '',
     });
+    setNotice('Complaint added as a local draft only. The backend does not currently provide a create endpoint.');
   };
 
+  const resetFilters = () => {
+    setComplaintIdSearch('');
+    setSessionIdSearch('');
+    setStatusFilter('All');
+    setPriorityFilter('All');
+  };
+
+  const totalCount = complaints.length;
+  const openCount = complaints.filter((item) => item.status === 'Open').length;
+  const inProgressCount = complaints.filter((item) => item.status === 'In Progress').length;
+  const resolvedCount = complaints.filter((item) => item.status === 'Resolved').length;
+
   return (
-    <div className="space-y-5 pb-12 select-none">
-      {/* Top Header & Actions */}
-
-
-      {/* KPI Overview Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
-          <div>
-            <p className="text-[10px] font-bold uppercase text-slate-400">Total Tickets</p>
-            <h3 className="text-xl font-extrabold text-slate-900 mt-0.5">{complaints.length}</h3>
-          </div>
-          <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center">
-            <MessageSquare className="w-4 h-4" />
-          </div>
+    <div className="space-y-5 pb-12">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-xl font-extrabold text-slate-900">Complaints</h1>
+          <p className="mt-1 text-xs text-slate-500">Monitor and review customer complaints.</p>
         </div>
-
-        <div className="bg-white p-3.5 rounded-2xl border border-rose-200/80 shadow-2xs flex items-center justify-between">
-          <div>
-            <p className="text-[10px] font-bold uppercase text-rose-600">Open Tickets</p>
-            <h3 className="text-xl font-extrabold text-rose-700 mt-0.5">{complaints.filter(c => c.status === 'Open').length}</h3>
-          </div>
-          <div className="w-8 h-8 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center">
-            <AlertCircle className="w-4 h-4" />
-          </div>
-        </div>
-
-        <div className="bg-white p-3.5 rounded-2xl border border-amber-200/80 shadow-2xs flex items-center justify-between">
-          <div>
-            <p className="text-[10px] font-bold uppercase text-amber-600">In Progress</p>
-            <h3 className="text-xl font-extrabold text-amber-700 mt-0.5">{complaints.filter(c => c.status === 'In Progress').length}</h3>
-          </div>
-          <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
-            <Clock className="w-4 h-4" />
-          </div>
-        </div>
-
-        <div className="bg-white p-3.5 rounded-2xl border border-emerald-200/80 shadow-2xs flex items-center justify-between">
-          <div>
-            <p className="text-[10px] font-bold uppercase text-emerald-600">Resolved</p>
-            <h3 className="text-xl font-extrabold text-emerald-700 mt-0.5">{complaints.filter(c => c.status === 'Resolved').length}</h3>
-          </div>
-          <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
-            <CheckCircle2 className="w-4 h-4" />
-          </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={fetchComplaints}
+            disabled={loading}
+            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition hover:bg-slate-50 disabled:opacity-50"
+          >
+            <RotateCcw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsCreateModalOpen(true)}
+            className="flex items-center gap-2 rounded-xl bg-[#C05621] px-3.5 py-2 text-xs font-bold text-white shadow-2xs transition hover:bg-[#A0461A]"
+          >
+            <Plus className="h-4 w-4" />
+            New Ticket
+          </button>
         </div>
       </div>
 
-      {/* Filter & Action Toolbar */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs">
-        {/* Left Inputs */}
-        <div className="flex flex-wrap items-center gap-2 flex-1">
-          {/* Complaint ID Search */}
-          <div className="relative min-w-[200px]">
+      {notice && (
+        <div className="flex items-start justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3 text-xs text-amber-800">
+          <span>{notice}</span>
+          <button type="button" onClick={() => setNotice('')} aria-label="Dismiss notice">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-2xs">
+          <div><p className="text-[10px] font-bold uppercase text-slate-400">Total Tickets</p><h3 className="mt-0.5 text-xl font-extrabold text-slate-900">{totalCount}</h3></div>
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-slate-600"><MessageSquare className="h-4 w-4" /></div>
+        </div>
+        <div className="flex items-center justify-between rounded-2xl border border-rose-200/80 bg-white p-3.5 shadow-2xs">
+          <div><p className="text-[10px] font-bold uppercase text-rose-600">Open Tickets</p><h3 className="mt-0.5 text-xl font-extrabold text-rose-700">{openCount}</h3></div>
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-100 text-rose-600"><AlertCircle className="h-4 w-4" /></div>
+        </div>
+        <div className="flex items-center justify-between rounded-2xl border border-amber-200/80 bg-white p-3.5 shadow-2xs">
+          <div><p className="text-[10px] font-bold uppercase text-amber-600">In Progress</p><h3 className="mt-0.5 text-xl font-extrabold text-amber-700">{inProgressCount}</h3></div>
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-100 text-amber-600"><Clock className="h-4 w-4" /></div>
+        </div>
+        <div className="flex items-center justify-between rounded-2xl border border-emerald-200/80 bg-white p-3.5 shadow-2xs">
+          <div><p className="text-[10px] font-bold uppercase text-emerald-600">Resolved</p><h3 className="mt-0.5 text-xl font-extrabold text-emerald-700">{resolvedCount}</h3></div>
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600"><CheckCircle2 className="h-4 w-4" /></div>
+        </div>
+      </div>
+
+      <div className="flex flex-col justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-2xs lg:flex-row lg:items-center">
+        <div className="flex flex-1 flex-wrap items-center gap-2">
+          <div className="relative min-w-[200px] flex-1 sm:flex-none">
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               value={complaintIdSearch}
-              onChange={(e) => setComplaintIdSearch(e.target.value)}
+              onChange={(event) => setComplaintIdSearch(event.target.value)}
               placeholder="Complaint ID / Station / User"
-              className="w-full px-3.5 py-2 bg-slate-50/80 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-amber-400/40 focus:bg-white transition-all"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/80 py-2 pl-8 pr-3.5 text-xs text-slate-800 placeholder-slate-400 transition-all focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-amber-400/40"
             />
           </div>
-
+          <input
+            type="text"
+            value={sessionIdSearch}
+            onChange={(event) => setSessionIdSearch(event.target.value)}
+            placeholder="Session ID"
+            className="w-full min-w-[120px] rounded-xl border border-slate-200 bg-slate-50/80 px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-amber-400/40 sm:w-32"
+          />
+          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700">
+            <option value="All">All statuses</option><option value="Open">Open</option><option value="In Progress">In Progress</option><option value="Resolved">Resolved</option>
+          </select>
+          <select value={priorityFilter} onChange={(event) => setPriorityFilter(event.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700">
+            <option value="All">All priorities</option><option value="High">High</option><option value="Medium">Medium</option><option value="Low">Low</option>
+          </select>
+          <button type="button" onClick={resetFilters} className="flex items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"><RotateCcw className="h-3.5 w-3.5" />Reset</button>
         </div>
-
-        {/* Right Actions */}
-        <div className="flex items-center space-x-2 shrink-0">
-          <button className="flex items-center space-x-2 bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 transition-all cursor-pointer shadow-2xs">
-            <Upload className="w-3.5 h-3.5 text-slate-500 rotate-180" />
-            <span>Export</span>
-          </button>
-
-          <button className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-all cursor-pointer shadow-2xs">
-            <LayoutGrid className="w-4 h-4" />
-          </button>
+        <div className="flex shrink-0 items-center gap-2">
+          <button type="button" onClick={() => {
+            const header = ['Complaint ID', 'eMSP', 'Charger Name', 'Station Name', 'Complaint Type', 'Sub Type', 'Priority', 'TAT', 'Raised At', 'Status'];
+            const rows = filteredComplaints.map((item) => [
+              getComplaintId(item), item.emsp, item.chargerName, item.stationName, item.complaintType,
+              item.subType, item.priority, item.tat, item.raisedAt, item.status,
+            ]);
+            const csv = [header, ...rows].map((row) => row.map((value) => `"${String(value ?? '').replaceAll('"', '""')}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'complaints.csv';
+            link.click();
+            URL.revokeObjectURL(url);
+          }} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50"><Upload className="h-3.5 w-3.5 rotate-180 text-slate-500" />Export CSV</button>
+          <button type="button" onClick={() => { setComplaintIdSearch(''); setSessionIdSearch(''); }} title="Clear search" className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50"><LayoutGrid className="h-4 w-4" /></button>
         </div>
       </div>
 
-      {/* Main Table Card */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
+      <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-2xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#FAFAFA] border-b border-slate-200/80 text-slate-700 font-bold text-[11px]">
+            <thead className="border-b border-slate-200/80 bg-[#FAFAFA] text-[11px] font-bold text-slate-700">
               <tr>
-                <th className="py-3.5 px-4">ID</th>
-                <th className="py-3.5 px-4">eMSP</th>
-                <th className="py-3.5 px-4">Charger Name</th>
-                <th className="py-3.5 px-4">Station Name</th>
-                <th className="py-3.5 px-4">Complaint Type</th>
-                <th className="py-3.5 px-4">Sub Type</th>
-                <th className="py-3.5 px-4 text-center">Priority</th>
-                <th className="py-3.5 px-4 text-center">TAT</th>
-                <th className="py-3.5 px-4">Raised At</th>
-                <th className="py-3.5 px-4 text-center">Status</th>
+                <th className="whitespace-nowrap px-4 py-3.5">ID</th>
+                <th className="whitespace-nowrap px-4 py-3.5">eMSP</th>
+                <th className="whitespace-nowrap px-4 py-3.5">Charger Name</th>
+                <th className="whitespace-nowrap px-4 py-3.5">Station Name</th>
+                <th className="whitespace-nowrap px-4 py-3.5">Complaint Type</th>
+                <th className="whitespace-nowrap px-4 py-3.5">Sub Type</th>
+                <th className="whitespace-nowrap px-4 py-3.5 text-center">Priority</th>
+                <th className="whitespace-nowrap px-4 py-3.5 text-center">TAT</th>
+                <th className="whitespace-nowrap px-4 py-3.5">Raised At</th>
+                <th className="whitespace-nowrap px-4 py-3.5 text-center">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
-              {filteredComplaints.map((item) => (
-                <tr
-                  key={item.id}
-                  onClick={() => setSelectedTicket(item)}
-                  className="hover:bg-slate-50/70 transition-colors cursor-pointer"
-                >
-                  {/* ID */}
-                  <td className="py-3.5 px-4 font-mono font-bold text-[#C05621] underline hover:text-[#A0461A]">
-                    {item.id}
-                  </td>
-
-                  {/* eMSP */}
-                  <td className="py-3.5 px-4 font-medium text-slate-700">{item.emsp}</td>
-
-                  {/* Charger Name */}
-                  <td className="py-3.5 px-4 font-mono text-[11px] text-slate-600">{item.chargerName}</td>
-
-                  {/* Station Name */}
-                  <td className="py-3.5 px-4 font-medium text-slate-700 truncate max-w-[180px]">{item.stationName}</td>
-
-                  {/* Complaint Type */}
-                  <td className="py-3.5 px-4 text-slate-700">{item.complaintType}</td>
-
-                  {/* Sub Type */}
-                  <td className="py-3.5 px-4 text-slate-600">{item.subType}</td>
-
-                  {/* Priority */}
-                  <td className="py-3.5 px-4 text-center">
-                    <span className={`px-3 py-0.5 rounded-full text-[11px] font-bold ${item.priority === 'High' ? 'bg-rose-100 text-rose-700' : 'bg-[#FEF3C7] text-[#D97706]'
-                      }`}>
-                      {item.priority}
-                    </span>
-                  </td>
-
-                  {/* TAT */}
-                  <td className="py-3.5 px-4 text-center text-slate-600 font-medium">{item.tat}</td>
-
-                  {/* Raised At */}
-                  <td className="py-3.5 px-4">
-                    <div className="text-[11px]">
-                      <span className="font-bold text-slate-800 block">{item.date}</span>
-                      <span className="text-[10px] text-slate-400 block">{item.time}</span>
-                    </div>
-                  </td>
-
-                  {/* Status */}
-                  <td className="py-3.5 px-4 text-center">
-                    <span className={`px-3 py-0.5 rounded-full text-[11px] font-bold ${item.status === 'Resolved' ? 'bg-[#ECFDF5] text-[#059669]' :
-                      item.status === 'In Progress' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-700'
-                      }`}>
-                      {item.status}
-                    </span>
-                  </td>
+              {loading && <tr><td colSpan={10} className="py-10 text-center text-slate-500">Loading complaints...</td></tr>}
+              {!loading && error && <tr><td colSpan={10} className="py-10 text-center text-rose-600">{error}<button type="button" onClick={fetchComplaints} className="ml-2 underline">Retry</button></td></tr>}
+              {!loading && !error && filteredComplaints.length === 0 && <tr><td colSpan={10} className="py-10 text-center text-slate-500">No complaints found.</td></tr>}
+              {!loading && !error && filteredComplaints.map((item) => (
+                <tr key={item.id} onClick={() => openTicketDetails(item)} className="cursor-pointer transition-colors hover:bg-slate-50/70">
+                  <td className="whitespace-nowrap px-4 py-3.5 font-mono font-bold text-[#C05621] underline hover:text-[#A0461A]">{getComplaintId(item)}</td>
+                  <td className="whitespace-nowrap px-4 py-3.5 text-slate-700">{item.emsp || '—'}</td>
+                  <td className="whitespace-nowrap px-4 py-3.5 font-mono text-[11px] text-slate-600">{item.chargerName || item.ChrgerName || '—'}</td>
+                  <td className="max-w-[180px] truncate px-4 py-3.5 text-slate-700">{item.stationName || '—'}</td>
+                  <td className="whitespace-nowrap px-4 py-3.5 text-slate-700">{item.complaintType || '—'}</td>
+                  <td className="whitespace-nowrap px-4 py-3.5 text-slate-600">{item.subType || '—'}</td>
+                  <td className="whitespace-nowrap px-4 py-3.5 text-center"><span className={`rounded-full px-3 py-0.5 text-[11px] font-bold ${item.priority === 'High' ? 'bg-rose-100 text-rose-700' : item.priority === 'Low' ? 'bg-slate-100 text-slate-600' : 'bg-[#FEF3C7] text-[#D97706]'}`}>{item.priority || '—'}</span></td>
+                  <td className="whitespace-nowrap px-4 py-3.5 text-center font-medium text-slate-600">{item.tat || '—'}</td>
+                  <td className="whitespace-nowrap px-4 py-3.5"><span className="block text-[11px] font-bold text-slate-800">{formatDate(item.raisedAt)}</span><span className="block text-[10px] text-slate-400">{formatTime(item.raisedAt)}</span></td>
+                  <td className="whitespace-nowrap px-4 py-3.5 text-center"><span className={`rounded-full px-3 py-0.5 text-[11px] font-bold ${item.status === 'Resolved' ? 'bg-[#ECFDF5] text-[#059669]' : item.status === 'In Progress' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-700'}`}>{item.status || '—'}</span></td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-
-        {/* Footer Pagination */}
-        <div className="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-          <div className="flex items-center space-x-2">
-            <span>Rows per page</span>
-            <select className="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 font-semibold text-slate-700 cursor-pointer">
-              <option value="25">25</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-            </select>
-          </div>
-
-          <div>
-            Showing <strong className="text-slate-800">1 - {filteredComplaints.length}</strong> of <strong className="text-slate-800">{complaints.length} items</strong>
-          </div>
-
-          <div className="flex items-center space-x-2 font-semibold">
-            <button className="px-2 py-1 rounded-md text-slate-400 hover:text-slate-700">«</button>
-            <span>Page <span className="px-2 py-0.5 rounded-md bg-slate-100 font-bold text-slate-900 border border-slate-200">1</span> of 1</span>
-            <button className="px-2 py-1 rounded-md text-slate-400 hover:text-slate-700">»</button>
-          </div>
+        <div className="flex flex-col items-center justify-between gap-3 border-t border-slate-100 p-4 text-xs text-slate-500 sm:flex-row">
+          <span>Showing <strong className="text-slate-800">{filteredComplaints.length ? 1 : 0} - {filteredComplaints.length}</strong> of <strong className="text-slate-800">{complaints.length} items</strong></span>
         </div>
       </div>
 
-      {/* Ticket Response Modal */}
       {selectedTicket && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
-              <div>
-                <span className="font-mono font-bold text-amber-400 text-xs">{selectedTicket.id}</span>
-                <h3 className="text-sm font-bold text-white mt-0.5">{selectedTicket.stationName}</h3>
-              </div>
-              <button onClick={() => setSelectedTicket(null)} className="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-xs" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelectedTicket(null); }}>
+          <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+            <div className="flex items-center justify-between bg-slate-900 p-4 text-white">
+              <div><span className="font-mono text-xs font-bold text-amber-400">{getComplaintId(selectedTicket)}</span><h3 className="mt-0.5 text-sm font-bold">{selectedTicket.stationName || 'Complaint details'}</h3></div>
+              <button type="button" onClick={() => setSelectedTicket(null)} className="cursor-pointer rounded-lg p-1 text-slate-400 hover:text-white"><X className="h-5 w-5" /></button>
             </div>
-            <div className="p-4 overflow-y-auto space-y-4 text-xs">
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1">
-                <p>User: <strong>{selectedTicket.user}</strong></p>
-                <p>Type: <strong>{selectedTicket.complaintType} - {selectedTicket.subType}</strong></p>
-                <p>Charger: <strong className="font-mono">{selectedTicket.chargerName}</strong></p>
-                <p>Status: <strong className="text-emerald-600">{selectedTicket.status}</strong></p>
+            <div className="space-y-4 overflow-y-auto p-4 text-xs">
+              {detailsLoading && <p className="text-slate-500">Loading complaint details...</p>}
+              {detailsError && <p className="rounded-lg bg-amber-50 p-2 text-amber-800">{detailsError}</p>}
+              {selectedTicket._localOnly && <p className="rounded-lg bg-amber-50 p-2 text-amber-800">This is a frontend-only draft; it is not saved in the backend.</p>}
+              <div className="space-y-1 rounded-xl border border-slate-100 bg-slate-50 p-3">
+                <p className="flex items-center gap-2"><User className="h-3.5 w-3.5 text-slate-400" />Customer: <strong>{getCustomerName(selectedTicket)}</strong></p>
+                <p className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-slate-400" />Phone: <strong>{getCustomerPhone(selectedTicket)}</strong></p>
+                <p className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-slate-400" />Email: <strong>{getCustomerEmail(selectedTicket)}</strong></p>
+                <p className="flex items-center gap-2"><Tag className="h-3.5 w-3.5 text-slate-400" />Type: <strong>{selectedTicket.complaintType || '—'} - {selectedTicket.subType || '—'}</strong></p>
+                <p className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-slate-400" />Charger: <strong className="font-mono">{selectedTicket.chargerName || selectedTicket.ChrgerName || '—'}</strong></p>
+                <p className="flex items-center gap-2"><Clock className="h-3.5 w-3.5 text-slate-400" />Session ID: <strong>{selectedTicket.sessionId ?? '—'}</strong></p>
+                <p>Status: <strong className={selectedTicket.status === 'Resolved' ? 'text-emerald-600' : 'text-amber-700'}>{selectedTicket.status || '—'}</strong></p>
+                <p>Priority: <strong>{selectedTicket.priority || '—'}</strong></p>
+                <p>Vehicle: <strong>{selectedTicket.vehicle || '—'}</strong></p>
+                <p>Raised: <strong>{formatDate(selectedTicket.raisedAt)} {formatTime(selectedTicket.raisedAt)}</strong></p>
+                <p>Resolved: <strong>{formatDate(selectedTicket.resolvedAt)}</strong></p>
               </div>
-
               <div className="space-y-2">
                 <h4 className="font-bold text-slate-800">Activity Log & Responses</h4>
-                {selectedTicket.notes?.map((n, i) => (
-                  <div key={i} className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                    <div className="flex justify-between text-[10px] text-slate-400">
-                      <span>{n.sender}</span>
-                      <span>{n.time}</span>
-                    </div>
-                    <p className="text-slate-700 mt-1">{n.text}</p>
+                {selectedTicket.notes?.length ? selectedTicket.notes.map((note, index) => (
+                  <div key={`${note.time || 'note'}-${index}`} className="rounded-lg border border-slate-100 bg-slate-50 p-2.5">
+                    <div className="flex justify-between gap-2 text-[10px] text-slate-400"><span>{note.sender || note.author || 'System'}</span><span>{note.time || note.createdAt || ''}</span></div>
+                    <p className="mt-1 text-slate-700">{note.text || note.message || ''}</p>
                   </div>
-                ))}
+                )) : <p className="text-slate-500">No activity notes are available for this complaint.</p>}
               </div>
-
-              <form onSubmit={handleAddNote} className="flex items-center space-x-2 pt-2 border-t border-slate-100">
-                <input
-                  type="text"
-                  value={newResponseText}
-                  onChange={(e) => setNewResponseText(e.target.value)}
-                  placeholder="Type note or response..."
-                  className="flex-1 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800"
-                />
-                <button type="submit" className="bg-[#C05621] text-white px-3.5 py-1.5 rounded-xl font-bold cursor-pointer">Send</button>
+              <form onSubmit={handleAddNote} className="flex items-center gap-2 border-t border-slate-100 pt-3">
+                <input type="text" value={newResponseText} onChange={(event) => setNewResponseText(event.target.value)} placeholder="Add a local note..." className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-800" />
+                <button type="submit" className="flex items-center gap-1.5 rounded-xl bg-[#C05621] px-3.5 py-2 font-bold text-white"><Send className="h-3.5 w-3.5" />Add</button>
               </form>
+              <p className="text-[10px] text-slate-400">Notes are kept in this page only because no backend note-save endpoint was provided.</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Add Ticket Modal */}
       {isCreateModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
-            <div className="p-4 bg-slate-900 text-white flex justify-between items-center">
-              <h3 className="text-xs font-bold">Add New Complaint</h3>
-              <button onClick={() => setIsCreateModalOpen(false)} className="text-slate-400 hover:text-white cursor-pointer"><X className="w-4 h-4" /></button>
-            </div>
-            <form onSubmit={handleCreateTicketSubmit} className="p-4 space-y-3 text-xs">
-              <div>
-                <label className="block font-semibold mb-1">Station Name *</label>
-                <input required type="text" value={newTicketForm.stationName} onChange={(e) => setNewTicketForm({ ...newTicketForm, stationName: e.target.value })} placeholder="Ecoplug Resort Hub" className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-xs" onMouseDown={(event) => { if (event.target === event.currentTarget) setIsCreateModalOpen(false); }}>
+          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+            <div className="flex items-center justify-between bg-slate-900 p-4 text-white"><h3 className="text-xs font-bold">Add New Complaint (Local Draft)</h3><button type="button" onClick={() => setIsCreateModalOpen(false)} className="text-slate-400 hover:text-white"><X className="h-4 w-4" /></button></div>
+            <form onSubmit={handleCreateTicketSubmit} className="space-y-3 p-4 text-xs">
+              <p className="rounded-lg bg-amber-50 p-2 text-amber-800">The current backend code does not expose a complaint-create endpoint. Saving here creates a temporary frontend-only draft.</p>
+              <div><label className="mb-1 block font-semibold">eMSP</label><input value={newTicketForm.emsp} onChange={(event) => setNewTicketForm({ ...newTicketForm, emsp: event.target.value })} className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2" /></div>
+              <div><label className="mb-1 block font-semibold">Charger Name</label><input value={newTicketForm.chargerName} onChange={(event) => setNewTicketForm({ ...newTicketForm, chargerName: event.target.value })} className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2" /></div>
+              <div><label className="mb-1 block font-semibold">Station Name *</label><input required value={newTicketForm.stationName} onChange={(event) => setNewTicketForm({ ...newTicketForm, stationName: event.target.value })} placeholder="Ecoplug Resort Hub" className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2" /></div>
+              <div><label className="mb-1 block font-semibold">Customer Name *</label><input required value={newTicketForm.user} onChange={(event) => setNewTicketForm({ ...newTicketForm, user: event.target.value })} placeholder="Ramesh Kumar" className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2" /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="mb-1 block font-semibold">Complaint Type</label><select value={newTicketForm.complaintType} onChange={(event) => setNewTicketForm({ ...newTicketForm, complaintType: event.target.value })} className="w-full rounded-xl border border-slate-200 bg-white p-2"><option>Charging Session</option><option>Charger Hardware</option><option>Payment</option><option>Mobile App</option><option>Other</option></select></div>
+                <div><label className="mb-1 block font-semibold">Sub Type</label><input value={newTicketForm.subType} onChange={(event) => setNewTicketForm({ ...newTicketForm, subType: event.target.value })} className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2" /></div>
               </div>
-              <div>
-                <label className="block font-semibold mb-1">User Name *</label>
-                <input required type="text" value={newTicketForm.user} onChange={(e) => setNewTicketForm({ ...newTicketForm, user: e.target.value })} placeholder="Ramesh Kumar" className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl" />
-              </div>
-              <div className="flex justify-end space-x-2 pt-2">
-                <button type="button" onClick={() => setIsCreateModalOpen(false)} className="px-3 py-1.5 font-bold text-slate-500 cursor-pointer">Cancel</button>
-                <button type="submit" className="px-4 py-1.5 bg-[#C05621] text-white font-bold rounded-xl cursor-pointer">Save</button>
-              </div>
+              <div><label className="mb-1 block font-semibold">Priority</label><select value={newTicketForm.priority} onChange={(event) => setNewTicketForm({ ...newTicketForm, priority: event.target.value })} className="w-full rounded-xl border border-slate-200 bg-white p-2"><option>Low</option><option>Medium</option><option>High</option></select></div>
+              <div className="flex justify-end gap-2 pt-2"><button type="button" onClick={() => setIsCreateModalOpen(false)} className="px-3 py-1.5 font-bold text-slate-500">Cancel</button><button type="submit" className="rounded-xl bg-[#C05621] px-4 py-1.5 font-bold text-white">Add Local Draft</button></div>
             </form>
           </div>
         </div>
