@@ -10,6 +10,7 @@ import chargersRoutes from "./routes/chargers.router.js";
 import sessionRoutes from "./routes/session.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js"
 import complaintRoutes from "./routes/complaints.routes.js"
+import notificationRoutes from "./routes/notification.routes.js"
 import cookieParser from "cookie-parser";
 
 const app = express();
@@ -37,5 +38,6 @@ app.use("/api/chargers", chargersRoutes);
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/dashboard", dashboardRoutes)
 app.use("/api/complaints", complaintRoutes)
+app.use("/api/notification", notificationRoutes)
 
 export default app;
