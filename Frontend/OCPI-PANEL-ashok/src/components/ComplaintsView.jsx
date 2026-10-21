@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Calendar,
   ChevronDown,
@@ -53,6 +53,14 @@ const ComplaintsView = () => {
   const [sessionIdSearch, setSessionIdSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [priorityFilter, setPriorityFilter] = useState('All');
+  const [emspFilter, setEmspFilter] = useState('');
+  const [complaintTypeFilter, setComplaintTypeFilter] = useState('');
+  const [fromDateFilter, setFromDateFilter] = useState('');
+  const [toDateFilter, setToDateFilter] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [pagination, setPagination] = useState({ page: 1, pageSize: 10, total: 0, totalPages: 0 });
+  const [summary, setSummary] = useState({ total: 0, open: 0, inProgress: 0, resolved: 0 });
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [detailsError, setDetailsError] = useState('');
@@ -73,16 +81,28 @@ const ComplaintsView = () => {
     try {
       setLoading(true);
       setError('');
-      const response = await apiRequest('/api/complaints');
-      const rows = Array.isArray(response?.data)
-        ? response.data
-        : Array.isArray(response?.data?.data)
-          ? response.data.data
-          : [];
-      setComplaints(rows);
+
+      const params = new URLSearchParams({
+        page: String(page),
+        pageSize: String(pageSize),
+      });
+      if (complaintIdSearch.trim()) params.set('search', complaintIdSearch.trim());
+      if (sessionIdSearch.trim()) params.set('sessionId', sessionIdSearch.trim());
+      if (statusFilter !== 'All') params.set('status', statusFilter);
+      if (priorityFilter !== 'All') params.set('priority', priorityFilter);
+      if (emspFilter.trim()) params.set('emsp', emspFilter.trim());
+      if (complaintTypeFilter.trim()) params.set('complaintType', complaintTypeFilter.trim());
+      if (fromDateFilter) params.set('fromDate', fromDateFilter);
+      if (toDateFilter) params.set('toDate', toDateFilter);
+
+      const response = await apiRequest(`/api/complaints?${params.toString()}`);
+      setComplaints(Array.isArray(response?.data) ? response.data : []);
+      setPagination(response?.pagination || { page, pageSize, total: 0, totalPages: 0 });
+      setSummary(response?.summary || { total: 0, open: 0, inProgress: 0, resolved: 0 });
     } catch (err) {
       setError(err?.message || 'Failed to load complaints. Please try again.');
       setComplaints([]);
+      setPagination({ page, pageSize, total: 0, totalPages: 0 });
     } finally {
       setLoading(false);
     }
@@ -95,19 +115,31 @@ const ComplaintsView = () => {
       try {
         setLoading(true);
         setError('');
-        const response = await apiRequest('/api/complaints');
+
+        const params = new URLSearchParams({
+          page: String(page),
+          pageSize: String(pageSize),
+        });
+        if (complaintIdSearch.trim()) params.set('search', complaintIdSearch.trim());
+        if (sessionIdSearch.trim()) params.set('sessionId', sessionIdSearch.trim());
+        if (statusFilter !== 'All') params.set('status', statusFilter);
+        if (priorityFilter !== 'All') params.set('priority', priorityFilter);
+        if (emspFilter.trim()) params.set('emsp', emspFilter.trim());
+        if (complaintTypeFilter.trim()) params.set('complaintType', complaintTypeFilter.trim());
+        if (fromDateFilter) params.set('fromDate', fromDateFilter);
+        if (toDateFilter) params.set('toDate', toDateFilter);
+
+        const response = await apiRequest(`/api/complaints?${params.toString()}`);
         if (cancelled) return;
 
-        const rows = Array.isArray(response?.data)
-          ? response.data
-          : Array.isArray(response?.data?.data)
-            ? response.data.data
-            : [];
-        setComplaints(rows);
+        setComplaints(Array.isArray(response?.data) ? response.data : []);
+        setPagination(response?.pagination || { page, pageSize, total: 0, totalPages: 0 });
+        setSummary(response?.summary || { total: 0, open: 0, inProgress: 0, resolved: 0 });
       } catch (err) {
         if (!cancelled) {
           setError(err?.message || 'Failed to load complaints. Please try again.');
           setComplaints([]);
+          setPagination({ page, pageSize, total: 0, totalPages: 0 });
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -118,33 +150,20 @@ const ComplaintsView = () => {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [
+    page,
+    pageSize,
+    complaintIdSearch,
+    sessionIdSearch,
+    statusFilter,
+    priorityFilter,
+    emspFilter,
+    complaintTypeFilter,
+    fromDateFilter,
+    toDateFilter,
+  ]);
 
-  const filteredComplaints = useMemo(() => {
-    const search = complaintIdSearch.trim().toLowerCase();
-    const sessionSearch = sessionIdSearch.trim().toLowerCase();
-
-    return complaints.filter((item) => {
-      const matchesSearch = [
-        item.id,
-        item.complaintId,
-        item.sessionId,
-        item.stationName,
-        item.customerName,
-        item.chargerName,
-        item.emsp,
-        item.complaintType,
-        item.subType,
-      ].some((value) => String(value ?? '').toLowerCase().includes(search));
-
-      const matchesSession =
-        !sessionSearch || String(item.sessionId ?? '').toLowerCase().includes(sessionSearch);
-      const matchesStatus = statusFilter === 'All' || item.status === statusFilter;
-      const matchesPriority = priorityFilter === 'All' || item.priority === priorityFilter;
-
-      return matchesSearch && matchesSession && matchesStatus && matchesPriority;
-    });
-  }, [complaints, complaintIdSearch, sessionIdSearch, statusFilter, priorityFilter]);
+  const filteredComplaints = complaints;
 
   const openTicketDetails = async (ticket) => {
     setSelectedTicket(ticket);
@@ -249,12 +268,17 @@ const ComplaintsView = () => {
     setSessionIdSearch('');
     setStatusFilter('All');
     setPriorityFilter('All');
+    setEmspFilter('');
+    setComplaintTypeFilter('');
+    setFromDateFilter('');
+    setToDateFilter('');
+    setPage(1);
   };
 
-  const totalCount = complaints.length;
-  const openCount = complaints.filter((item) => item.status === 'Open').length;
-  const inProgressCount = complaints.filter((item) => item.status === 'In Progress').length;
-  const resolvedCount = complaints.filter((item) => item.status === 'Resolved').length;
+  const totalCount = summary.total;
+  const openCount = summary.open;
+  const inProgressCount = summary.inProgress;
+  const resolvedCount = summary.resolved;
 
   return (
     <div className="space-y-5 pb-12">
@@ -319,7 +343,7 @@ const ComplaintsView = () => {
             <input
               type="text"
               value={complaintIdSearch}
-              onChange={(event) => setComplaintIdSearch(event.target.value)}
+              onChange={(event) => { setComplaintIdSearch(event.target.value); setPage(1); }}
               placeholder="Complaint ID / Station / User"
               className="w-full rounded-xl border border-slate-200 bg-slate-50/80 py-2 pl-8 pr-3.5 text-xs text-slate-800 placeholder-slate-400 transition-all focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-amber-400/40"
             />
@@ -327,16 +351,49 @@ const ComplaintsView = () => {
           <input
             type="text"
             value={sessionIdSearch}
-            onChange={(event) => setSessionIdSearch(event.target.value)}
+            onChange={(event) => { setSessionIdSearch(event.target.value); setPage(1); }}
             placeholder="Session ID"
             className="w-full min-w-[120px] rounded-xl border border-slate-200 bg-slate-50/80 px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-amber-400/40 sm:w-32"
           />
-          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700">
+          <select value={statusFilter} onChange={(event) => { setStatusFilter(event.target.value); setPage(1); }} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700">
             <option value="All">All statuses</option><option value="Open">Open</option><option value="In Progress">In Progress</option><option value="Resolved">Resolved</option>
           </select>
-          <select value={priorityFilter} onChange={(event) => setPriorityFilter(event.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700">
+          <select value={priorityFilter} onChange={(event) => { setPriorityFilter(event.target.value); setPage(1); }} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700">
             <option value="All">All priorities</option><option value="High">High</option><option value="Medium">Medium</option><option value="Low">Low</option>
           </select>
+          <input
+            type="text"
+            value={emspFilter}
+            onChange={(event) => { setEmspFilter(event.target.value); setPage(1); }}
+            placeholder="eMSP"
+            aria-label="Filter by eMSP"
+            className="w-full min-w-[110px] rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-xs text-slate-800 sm:w-28"
+          />
+          <input
+            type="text"
+            value={complaintTypeFilter}
+            onChange={(event) => { setComplaintTypeFilter(event.target.value); setPage(1); }}
+            placeholder="Complaint type"
+            aria-label="Filter by complaint type"
+            className="w-full min-w-[130px] rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-xs text-slate-800 sm:w-36"
+          />
+          <input
+            type="date"
+            value={fromDateFilter}
+            onChange={(event) => { setFromDateFilter(event.target.value); setPage(1); }}
+            aria-label="From date"
+            title="From date"
+            className="rounded-xl border border-slate-200 bg-white px-2 py-2 text-xs text-slate-700"
+          />
+          <input
+            type="date"
+            value={toDateFilter}
+            min={fromDateFilter || undefined}
+            onChange={(event) => { setToDateFilter(event.target.value); setPage(1); }}
+            aria-label="To date"
+            title="To date"
+            className="rounded-xl border border-slate-200 bg-white px-2 py-2 text-xs text-slate-700"
+          />
           <button type="button" onClick={resetFilters} className="flex items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"><RotateCcw className="h-3.5 w-3.5" />Reset</button>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -355,7 +412,7 @@ const ComplaintsView = () => {
             link.click();
             URL.revokeObjectURL(url);
           }} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50"><Upload className="h-3.5 w-3.5 rotate-180 text-slate-500" />Export CSV</button>
-          <button type="button" onClick={() => { setComplaintIdSearch(''); setSessionIdSearch(''); }} title="Clear search" className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50"><LayoutGrid className="h-4 w-4" /></button>
+          <button type="button" onClick={() => { setComplaintIdSearch(''); setSessionIdSearch(''); setPage(1); }} title="Clear search" className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50"><LayoutGrid className="h-4 w-4" /></button>
         </div>
       </div>
 
@@ -398,7 +455,41 @@ const ComplaintsView = () => {
           </table>
         </div>
         <div className="flex flex-col items-center justify-between gap-3 border-t border-slate-100 p-4 text-xs text-slate-500 sm:flex-row">
-          <span>Showing <strong className="text-slate-800">{filteredComplaints.length ? 1 : 0} - {filteredComplaints.length}</strong> of <strong className="text-slate-800">{complaints.length} items</strong></span>
+          <span>
+            Showing <strong className="text-slate-800">{pagination.total ? ((page - 1) * pageSize) + 1 : 0} - {Math.min(page * pageSize, pagination.total)}</strong>
+            {' '}of <strong className="text-slate-800">{pagination.total} items</strong>
+          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <label htmlFor="complaints-page-size">Rows per page</label>
+            <select
+              id="complaints-page-size"
+              value={pageSize}
+              onChange={(event) => { setPageSize(Number(event.target.value)); setPage(1); }}
+              className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-700"
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+            <button
+              type="button"
+              disabled={loading || page <= 1}
+              onClick={() => setPage((current) => Math.max(1, current - 1))}
+              className="rounded-lg border border-slate-200 px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Previous
+            </button>
+            <span className="min-w-20 text-center">Page {page} of {Math.max(1, pagination.totalPages)}</span>
+            <button
+              type="button"
+              disabled={loading || page >= pagination.totalPages}
+              onClick={() => setPage((current) => current + 1)}
+              className="rounded-lg border border-slate-200 px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
 

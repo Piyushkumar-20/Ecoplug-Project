@@ -13,26 +13,58 @@ const getComplaintsController = async (req, res) => {
     }
 
     const filters = {
-      status: req.query.status,
-      priority: req.query.priority,
-      emsp: req.query.emsp,
-      complaintType: req.query.complaintType,
-      fromDate: req.query.fromDate,
-      toDate: req.query.toDate,
-      search: req.query.search,
+      status: req.query.status || undefined,
+      priority: req.query.priority || undefined,
+      emsp: req.query.emsp || undefined,
+      complaintType: req.query.complaintType || undefined,
+      fromDate: req.query.fromDate || undefined,
+      toDate: req.query.toDate || undefined,
+      search: req.query.search?.trim() || undefined,
+      sessionId: req.query.sessionId?.trim() || undefined,
     };
 
-    const complaints = await getComplaints(companyId, filters);
+    const requestedPage = Number.parseInt(req.query.page, 10);
+    const requestedPageSize = Number.parseInt(req.query.pageSize, 10);
+    const page = Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+    const pageSize = Number.isFinite(requestedPageSize) && requestedPageSize > 0
+      ? Math.min(requestedPageSize, 100)
+      : 10;
+
+    if (
+      (filters.fromDate && Number.isNaN(Date.parse(filters.fromDate))) ||
+      (filters.toDate && Number.isNaN(Date.parse(filters.toDate)))
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid date filter. Use YYYY-MM-DD.",
+      });
+    }
+
+    const result = await getComplaints(companyId, filters, { page, pageSize });
+    const totalPages = Math.ceil(result.total / result.pageSize);
 
     return res.status(200).json({
       success: true,
-      count: complaints.length,
-      data: complaints,
+      count: result.total,
+      data: result.rows,
+      summary: result.summary,
+      pagination: {
+        page: result.page,
+        pageSize: result.pageSize,
+        total: result.total,
+        totalPages,
+        hasPreviousPage: result.page > 1,
+        hasNextPage: result.page < totalPages,
+      },
     });
   } catch (error) {
     console.error("Error fetching complaints:", error);
 
-    throw new ApiError.internal("Failed to fetch complaints");
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
+    throw ApiError.internal("Failed to fetch complaints");
   }
 };
 
@@ -45,7 +77,7 @@ const getComplaintDetailsController = async (req, res) => {
       throw ApiError.unauthorized("Authenticated company not found");
     }
 
-    if (!/^\d+$/.test(id) || Number(id) < 1) {
+    if (!/^\\d+$/.test(id) || Number(id) < 1) {
       return res.status(400).json({
         success: false,
         message: "Invalid complaint ID",
@@ -64,7 +96,12 @@ const getComplaintDetailsController = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching complaint details:", error);
-    throw ApiError.unauthorized("Failed to fetch complaint details");
+
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
+    throw ApiError.internal("Failed to fetch complaint details");
   }
 };
 

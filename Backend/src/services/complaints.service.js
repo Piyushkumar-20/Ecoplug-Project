@@ -1,5 +1,6 @@
 import {
   getComplaintsByCompanyId,
+  getComplaintSummaryByCompanyId,
   getComplaintByIdAndCompanyId,
   getComplaintNotesById,
 } from "../models/complaints.model.js";
@@ -18,13 +19,18 @@ const formatTat = (totalMinutes) => {
   return `${hours}h ${remainingMinutes}m`;
 };
 
-const getComplaints = async (companyId, filters = {}) => {
-  const complaints = await getComplaintsByCompanyId(companyId, filters);
+const getComplaints = async (companyId, filters = {}, pagination = {}) => {
+  const result = await getComplaintsByCompanyId(companyId, filters, pagination);
+  const summary = await getComplaintSummaryByCompanyId(companyId);
 
-  return complaints.map((complaint) => ({
-    ...complaint,
-    tat: formatTat(complaint.tatMinutes),
-  }));
+  return {
+    ...result,
+    rows: result.rows.map((complaint) => ({
+      ...complaint,
+      tat: formatTat(complaint.tatMinutes),
+    })),
+    summary,
+  };
 };
 
 const getComplaintNotes = async (complaintId) => {
@@ -46,4 +52,5 @@ const getComplaintDetails = async (complaintId, companyId) => {
     notes,
   };
 };
+
 export { getComplaints, getComplaintDetails, getComplaintNotes };
