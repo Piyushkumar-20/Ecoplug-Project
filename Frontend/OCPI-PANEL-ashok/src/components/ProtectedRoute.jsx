@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { apiRequest, restoreSession } from "../services/api";
+import { socket } from "../services/socket";
 
 const ProtectedRoute = () => {
   const [status, setStatus] = useState("checking");
@@ -20,6 +21,7 @@ const ProtectedRoute = () => {
         if (response?.data) {
           localStorage.setItem("user", JSON.stringify(response.data));
         }
+        socket.connect();
         if (active) setStatus("signed-in");
       } catch {
         if (active) setStatus("signed-out");
@@ -27,7 +29,9 @@ const ProtectedRoute = () => {
     };
 
     checkSession();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   if (status === "checking") {

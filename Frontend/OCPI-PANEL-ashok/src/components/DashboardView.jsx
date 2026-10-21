@@ -37,6 +37,8 @@ const DashboardView = ({ selectedCpo }) => {
   const [dashboardLoading, setDashboardLoading] = useState(true);
 
   const [dashboardError, setDashboardError] = useState("");
+  const [selectedChargerStatus, setSelectedChargerStatus] = useState(null);
+  const [hoveredChargerStatus, setHoveredChargerStatus] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -466,7 +468,7 @@ const DashboardView = ({ selectedCpo }) => {
     <div className="space-y-6 pb-12">
       {/* Metric Cards Grid */}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 lg:auto-rows-[minmax(0,1fr)] gap-4 items-stretch">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 lg:auto-rows-[minmax(180px,auto)] gap-4 items-stretch">
         {stats.map((stat, i) => {
           const Icon = stat.icon;
 
@@ -584,7 +586,7 @@ const DashboardView = ({ selectedCpo }) => {
       {/* Middle Dashboard Row: Activity Bar Chart + Donut Status + Recent Sessions */}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-        {/* Charging Activity Chart (6 cols on lg) */}
+        {/* Charging Activity Chart (8 cols on lg) */}
 
         <div className="lg:col-span-8 self-start h-fit bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col">
           <div>
@@ -653,7 +655,7 @@ const DashboardView = ({ selectedCpo }) => {
 
               {/* Chart Grid background lines */}
 
-              <div className="h-44 w-full flex items-end justify-between gap-1 sm:gap-1.5 pt-4 border-b border-slate-200/80 relative">
+              <div className="h-64 w-full flex items-end justify-between gap-1 sm:gap-1.5 pt-4 border-b border-slate-200/80 relative">
                 <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-30">
                   <div className="border-b border-dashed border-slate-300 w-full" />
 
@@ -712,7 +714,7 @@ const DashboardView = ({ selectedCpo }) => {
           </div>
         </div>
 
-        {/* Station Status Donut (3 cols on lg) */}
+        {/* Station Status Donut (4 cols on lg) */}
 
         <div className="lg:col-span-4 self-start h-fit bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col">
           <div className="flex items-center justify-between mb-2">
@@ -724,15 +726,14 @@ const DashboardView = ({ selectedCpo }) => {
           </div>
 
           <div className="py-3 flex flex-col items-center">
-            {/* SVG Donut Chart */}
-
-            <div className="relative w-40 h-40 flex items-center justify-center">
+            {/* Clickable and hoverable charger status donut */}
+           <div className="relative w-48 h-48 flex items-center justify-center outline-none border-0 ring-0 focus:outline-none focus:ring-0">
               <svg
-                className="w-full h-full transform -rotate-90"
+                className="w-full h-full transform -rotate-90 overflow-visible outline-none focus:outline-none"
                 viewBox="0 0 36 36"
+                role="img"
+                aria-label="Charger status breakdown"
               >
-                {/* Background circle */}
-
                 <path
                   className="text-slate-100"
                   strokeWidth="3.8"
@@ -740,34 +741,108 @@ const DashboardView = ({ selectedCpo }) => {
                   fill="none"
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 />
-
-                {chargerStatusSegments.map((segment) => (
-                  <path
-                    key={segment.key}
-                    className={`${segment.color} stroke-current transition-all duration-1000`}
-                    strokeWidth="4"
-                    strokeDasharray={`${segment.percentage}, ${100 - segment.percentage}`}
-                    strokeDashoffset={`${-segment.offset}`}
-                    strokeLinecap="round"
-                    fill="none"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                ))}
+                {chargerStatusSegments.map((segment) => {
+                  const isSelected = selectedChargerStatus === segment.key;
+                  const isHovered = hoveredChargerStatus === segment.key;
+                  return (
+                    <path
+                      key={segment.key}
+                      className={`${segment.color} stroke-current cursor-pointer transition-all duration-200`}
+                      strokeWidth={isSelected || isHovered ? 5 : 4}
+                      strokeDasharray={`${segment.percentage}, ${100 - segment.percentage}`}
+                      strokeDashoffset={`${-segment.offset}`}
+                      strokeLinecap="round"
+                      fill="none"
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`${segment.label}: ${segment.count} chargers`}
+                      onClick={() =>
+                        setSelectedChargerStatus(
+                          selectedChargerStatus === segment.key ? null : segment.key,
+                        )
+                      }
+                      onMouseEnter={() => setHoveredChargerStatus(segment.key)}
+                      onMouseLeave={() => setHoveredChargerStatus(null)}
+                      onFocus={() => setHoveredChargerStatus(segment.key)}
+                      onBlur={() => setHoveredChargerStatus(null)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          setSelectedChargerStatus(
+                            selectedChargerStatus === segment.key ? null : segment.key,
+                          );
+                        }
+                      }}
+                    >
+                      <title>{`${segment.label}: ${formatCount(segment.count)} chargers`}</title>
+                    </path>
+                  );
+                })}
               </svg>
 
-              <span className="text-lg font-black text-slate-900 leading-none">
-                {formatCount(summary.totalChargers)}
-              </span>
-              <span className="text-[10px] font-semibold text-slate-400 mt-0.5">
-                Chargers
-              </span>
+              {/* Total remains visible in the centre at all times */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+                <span className="text-2xl font-black text-slate-900 leading-none">
+                  {formatCount(summary.totalChargers)}
+                </span>
+                <span className="mt-1 text-[11px] font-semibold text-slate-400">
+                  Total Chargers
+                </span>
+              </div>
             </div>
+
+            {/* Selected/hovered status detail is shown below the donut, never over the total */}
+            {(() => {
+              const activeStatusKey = hoveredChargerStatus || selectedChargerStatus;
+              const activeStatus = chargerStatusData.find(
+                (item) => item.key === activeStatusKey,
+              );
+              return activeStatus ? (
+                <div className="mt-2 min-h-8 rounded-lg bg-slate-50 border border-slate-100 px-3 py-1.5 text-center text-xs text-slate-700">
+                  <span className={`inline-block w-2 h-2 rounded-full ${activeStatus.dot} mr-2`} />
+                  <span className="font-semibold">{activeStatus.label}:</span>{" "}
+                  <span className="font-bold">{formatCount(activeStatus.count)} chargers</span>
+                  <button
+                    type="button"
+                    className="ml-2 text-slate-400 hover:text-slate-700"
+                    aria-label="Clear selected charger status"
+                    onClick={() => {
+                      setSelectedChargerStatus(null);
+                      setHoveredChargerStatus(null);
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-2 min-h-8 flex items-center text-center text-[11px] text-slate-400">
+                  Hover or click a colour to view its count
+                </div>
+              );
+            })()}
           </div>
 
           {/* Live charger status legend */}
           <div className="grid grid-cols-2 gap-2 text-xs pt-3 border-t border-slate-100">
             {chargerStatusData.map((item) => (
-              <div key={item.key} className="flex items-center space-x-1.5">
+              <button
+                type="button"
+                key={item.key}
+                onClick={() =>
+                  setSelectedChargerStatus(
+                    selectedChargerStatus === item.key ? null : item.key,
+                  )
+                }
+                onMouseEnter={() => setHoveredChargerStatus(item.key)}
+                onMouseLeave={() => setHoveredChargerStatus(null)}
+                className={`flex items-center space-x-1.5 text-left rounded-md px-1.5 py-1 transition-colors cursor-pointer ${
+                  selectedChargerStatus === item.key
+                    ? "bg-slate-100 ring-1 ring-slate-200"
+                    : "hover:bg-slate-50"
+                }`}
+                aria-pressed={selectedChargerStatus === item.key}
+              >
                 <span
                   className={`w-2.5 h-2.5 rounded-full ${item.dot} shrink-0`}
                 />
@@ -777,12 +852,12 @@ const DashboardView = ({ selectedCpo }) => {
                 <span className="font-bold text-slate-900 ml-auto text-[11px]">
                   {item.count.toLocaleString("en-IN")}
                 </span>
-              </div>
+              </button>
             ))}
           </div>
         </div>
 
-        {/* Recent Sessions List (3 cols on lg) */}
+        {/* Recent Sessions on its own row */}
 
         <div className="lg:col-span-12 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col">
           <div>
