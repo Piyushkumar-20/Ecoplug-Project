@@ -1,0 +1,3215 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "EcoPlug",
+    "description": "## EcoPlug API Collection\n\nThis collection covers the core backend API workflows for the **EcoPlug** platform — a system for managing EV charger infrastructure across companies and their employees.\n\n### What's included\n\n- **Health & Auth** — Health check, authentication verification (`Auth Check`), admin login, and employee login endpoints to validate service availability and manage access.\n- **Company Management** — Register a company, view and manage the company profile, and handle admin-level operations.\n- **Employee Management** — Create employees, retrieve employee profile data (`Employee Me`), and manage employee access levels.\n- **Charger & Location Data** — Fetch data on chargers, their locations, and associated tariff information.\n\n### Authentication\n\nThe collection uses JWT-based authentication. Multiple JWT tokens are stored as secret collection variables (e.g. `{{json_web_token_0v01}}`), supporting different user roles and access levels across requests.",
+    "version": "1.0.0"
+  },
+  "tags": [],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Health Check",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/companies/register": {
+      "post": {
+        "summary": "Company Register",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "example": "application/json",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "adminName": {
+                    "type": "string"
+                  },
+                  "adminEmail": {
+                    "type": "string"
+                  },
+                  "adminPassword": {
+                    "type": "string"
+                  },
+                  "confirmPassword": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "adminName",
+                  "adminEmail",
+                  "adminPassword",
+                  "confirmPassword"
+                ]
+              },
+              "example": {
+                "name": "CodeHouse Energy Limited",
+                "adminName": "Piyush",
+                "adminEmail": "piyush.test@company.com",
+                "adminPassword": "Piyush@123",
+                "confirmPassword": "Piyush@123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Employee Login",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              },
+              "example": {
+                "email": "amit.test@gmail.com",
+                "password": "Amit@123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "summary": "Auth Check",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/users": {
+      "post": {
+        "summary": "Employee Created",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "example": "application/json",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "email",
+                  "password"
+                ]
+              },
+              "example": {
+                "name": "Piyush",
+                "email": "piyush.test@gmail.com",
+                "password": "Piyush@123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "Emp. Access level",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/companies/profile": {
+      "get": {
+        "summary": "Company Profile",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "example": "application/json",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/tariffs": {
+      "get": {
+        "summary": "Tariff Data",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/apilocations": {
+      "get": {
+        "summary": "Location Data",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "example": "application/json",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/chargers": {
+      "get": {
+        "summary": "Chargers Data",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "chargerId": {
+                            "type": "string"
+                          },
+                          "locationName": {
+                            "type": "string"
+                          },
+                          "city": {
+                            "type": "string"
+                          },
+                          "connectorType": {
+                            "type": "string"
+                          },
+                          "maxOutputKW": {
+                            "type": "integer"
+                          },
+                          "lastActive": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "emsp": {
+                            "type": "string"
+                          },
+                          "hardwareModel": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "chargerId",
+                          "locationName",
+                          "city",
+                          "connectorType",
+                          "maxOutputKW",
+                          "lastActive",
+                          "status",
+                          "emsp",
+                          "hardwareModel"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data"
+                  ]
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "LOC-203-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-203*4",
+                      "locationName": "Ecoplug Smart Point 3",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-10-09T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Adani TotalEnergies",
+                      "hardwareModel": "Tritium Veefil-PK 175"
+                    },
+                    {
+                      "id": "LOC-204-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-204*2",
+                      "locationName": "Ecoplug Charging Plaza 4",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-10-09T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-208-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-208*2",
+                      "locationName": "Ecoplug Smart Point 8",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-10-09T11:46:07.000Z",
+                      "status": "INOPERATIVE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-212-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-212*1",
+                      "locationName": "Ecoplug Highway Station 12",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-10-09T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-220-EVSE-05",
+                      "chargerId": "*IN*EPL*LOC-220*5",
+                      "locationName": "Ecoplug Fast Charge 20",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-10-09T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-224-EVSE-05",
+                      "chargerId": "*IN*EPL*LOC-224*5",
+                      "locationName": "Ecoplug Charging Plaza 24",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-10-09T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-225-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-225*3",
+                      "locationName": "Ecoplug Fast Charge 25",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-10-09T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-242-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-242*1",
+                      "locationName": "Ecoplug Highway Station 42",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-10-09T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-203-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-203*3",
+                      "locationName": "Ecoplug Smart Point 3",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-10-08T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-208-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-208*4",
+                      "locationName": "Ecoplug Smart Point 8",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-10-08T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-232-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-232*3",
+                      "locationName": "Ecoplug Highway Station 32",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-10-08T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-240-EVSE-05",
+                      "chargerId": "*IN*EPL*LOC-240*5",
+                      "locationName": "Ecoplug Fast Charge 40",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-10-08T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Adani TotalEnergies",
+                      "hardwareModel": "Tritium Veefil-PK 175"
+                    },
+                    {
+                      "id": "LOC-245-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-245*2",
+                      "locationName": "Ecoplug Fast Charge 45",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-10-08T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-247-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-247*3",
+                      "locationName": "Ecoplug Highway Station 47",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-10-08T11:46:07.000Z",
+                      "status": "INOPERATIVE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-250-EVSE-06",
+                      "chargerId": "*IN*EPL*LOC-250*6",
+                      "locationName": "Ecoplug Fast Charge 50",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-10-08T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-209-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-209*4",
+                      "locationName": "Ecoplug Charging Plaza 9",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-10-07T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-223-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-223*3",
+                      "locationName": "Ecoplug Smart Point 23",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-10-07T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-234-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-234*4",
+                      "locationName": "Ecoplug Charging Plaza 34",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-10-07T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-244-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-244*1",
+                      "locationName": "Ecoplug Charging Plaza 44",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-10-07T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-207-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-207*3",
+                      "locationName": "Ecoplug Highway Station 7",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-10-06T11:46:07.000Z",
+                      "status": "INOPERATIVE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-215-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-215*1",
+                      "locationName": "Ecoplug Fast Charge 15",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-10-06T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-217-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-217*1",
+                      "locationName": "Ecoplug Highway Station 17",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-10-06T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Adani TotalEnergies",
+                      "hardwareModel": "Tritium Veefil-PK 175"
+                    },
+                    {
+                      "id": "LOC-230-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-230*1",
+                      "locationName": "Ecoplug Fast Charge 30",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-10-06T11:46:07.000Z",
+                      "status": "UNKNOWN",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-212-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-212*2",
+                      "locationName": "Ecoplug Highway Station 12",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-10-05T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-218-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-218*2",
+                      "locationName": "Ecoplug Smart Point 18",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-10-05T11:46:07.000Z",
+                      "status": "INOPERATIVE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-227-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-227*1",
+                      "locationName": "Ecoplug Highway Station 27",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-10-05T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-237-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-237*1",
+                      "locationName": "Ecoplug Highway Station 37",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-10-05T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-207-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-207*1",
+                      "locationName": "Ecoplug Highway Station 7",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-10-04T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-225-EVSE-05",
+                      "chargerId": "*IN*EPL*LOC-225*5",
+                      "locationName": "Ecoplug Fast Charge 25",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-10-04T11:46:07.000Z",
+                      "status": "INOPERATIVE",
+                      "emsp": "Adani TotalEnergies",
+                      "hardwareModel": "Tritium Veefil-PK 175"
+                    },
+                    {
+                      "id": "LOC-238-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-238*1",
+                      "locationName": "Ecoplug Smart Point 38",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-10-04T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-240-EVSE-06",
+                      "chargerId": "*IN*EPL*LOC-240*6",
+                      "locationName": "Ecoplug Fast Charge 40",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-10-04T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-243-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-243*3",
+                      "locationName": "Ecoplug Smart Point 43",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-10-04T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Adani TotalEnergies",
+                      "hardwareModel": "Tritium Veefil-PK 175"
+                    },
+                    {
+                      "id": "LOC-208-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-208*1",
+                      "locationName": "Ecoplug Smart Point 8",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-10-03T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-248-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-248*1",
+                      "locationName": "Ecoplug Smart Point 48",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-10-03T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-228-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-228*1",
+                      "locationName": "Ecoplug Smart Point 28",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-10-02T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-232-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-232*2",
+                      "locationName": "Ecoplug Highway Station 32",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-10-02T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-239-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-239*4",
+                      "locationName": "Ecoplug Charging Plaza 39",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-10-02T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-249-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-249*3",
+                      "locationName": "Ecoplug Charging Plaza 49",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-10-02T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-250-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-250*4",
+                      "locationName": "Ecoplug Fast Charge 50",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-10-02T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Adani TotalEnergies",
+                      "hardwareModel": "Tritium Veefil-PK 175"
+                    },
+                    {
+                      "id": "LOC-202-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-202*2",
+                      "locationName": "Ecoplug Highway Station 2",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-10-01T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-212-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-212*3",
+                      "locationName": "Ecoplug Highway Station 12",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-10-01T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-213-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-213*4",
+                      "locationName": "Ecoplug Smart Point 13",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-10-01T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-215-EVSE-05",
+                      "chargerId": "*IN*EPL*LOC-215*5",
+                      "locationName": "Ecoplug Fast Charge 15",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-10-01T11:46:07.000Z",
+                      "status": "INOPERATIVE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-230-EVSE-05",
+                      "chargerId": "*IN*EPL*LOC-230*5",
+                      "locationName": "Ecoplug Fast Charge 30",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-10-01T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-235-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-235*1",
+                      "locationName": "Ecoplug Fast Charge 35",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-10-01T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-237-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-237*3",
+                      "locationName": "Ecoplug Highway Station 37",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-10-01T11:46:07.000Z",
+                      "status": "INOPERATIVE",
+                      "emsp": "Adani TotalEnergies",
+                      "hardwareModel": "Tritium Veefil-PK 175"
+                    },
+                    {
+                      "id": "LOC-240-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-240*1",
+                      "locationName": "Ecoplug Fast Charge 40",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-10-01T11:46:07.000Z",
+                      "status": "UNKNOWN",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-245-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-245*4",
+                      "locationName": "Ecoplug Fast Charge 45",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-10-01T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-245-EVSE-05",
+                      "chargerId": "*IN*EPL*LOC-245*5",
+                      "locationName": "Ecoplug Fast Charge 45",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-10-01T11:46:07.000Z",
+                      "status": "INOPERATIVE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-249-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-249*4",
+                      "locationName": "Ecoplug Charging Plaza 49",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-10-01T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-203-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-203*1",
+                      "locationName": "Ecoplug Smart Point 3",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-30T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-205-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-205*3",
+                      "locationName": "Ecoplug Fast Charge 5",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-30T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-217-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-217*2",
+                      "locationName": "Ecoplug Highway Station 17",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-30T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-222-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-222*3",
+                      "locationName": "Ecoplug Highway Station 22",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-30T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-225-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-225*4",
+                      "locationName": "Ecoplug Fast Charge 25",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-30T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-225-EVSE-06",
+                      "chargerId": "*IN*EPL*LOC-225*6",
+                      "locationName": "Ecoplug Fast Charge 25",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-30T11:46:07.000Z",
+                      "status": "UNKNOWN",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-244-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-244*4",
+                      "locationName": "Ecoplug Charging Plaza 44",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-30T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-249-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-249*1",
+                      "locationName": "Ecoplug Charging Plaza 49",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-30T11:46:07.000Z",
+                      "status": "INOPERATIVE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-249-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-249*2",
+                      "locationName": "Ecoplug Charging Plaza 49",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-30T11:46:07.000Z",
+                      "status": "UNKNOWN",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-250-EVSE-05",
+                      "chargerId": "*IN*EPL*LOC-250*5",
+                      "locationName": "Ecoplug Fast Charge 50",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-30T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-216-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-216*1",
+                      "locationName": "Ecoplug City Hub 16",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-29T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-225-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-225*2",
+                      "locationName": "Ecoplug Fast Charge 25",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-29T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-231-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-231*2",
+                      "locationName": "Ecoplug City Hub 31",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-29T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-233-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-233*3",
+                      "locationName": "Ecoplug Smart Point 33",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-29T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-235-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-235*3",
+                      "locationName": "Ecoplug Fast Charge 35",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-29T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-242-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-242*2",
+                      "locationName": "Ecoplug Highway Station 42",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-29T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-246-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-246*2",
+                      "locationName": "Ecoplug City Hub 46",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-29T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-248-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-248*3",
+                      "locationName": "Ecoplug Smart Point 48",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-29T11:46:07.000Z",
+                      "status": "UNKNOWN",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-250-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-250*2",
+                      "locationName": "Ecoplug Fast Charge 50",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-29T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-205-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-205*1",
+                      "locationName": "Ecoplug Fast Charge 5",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-28T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-211-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-211*2",
+                      "locationName": "Ecoplug City Hub 11",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-28T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-215-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-215*2",
+                      "locationName": "Ecoplug Fast Charge 15",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-28T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-217-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-217*3",
+                      "locationName": "Ecoplug Highway Station 17",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-28T11:46:07.000Z",
+                      "status": "INOPERATIVE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-224-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-224*1",
+                      "locationName": "Ecoplug Charging Plaza 24",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-28T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-224-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-224*2",
+                      "locationName": "Ecoplug Charging Plaza 24",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-28T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-232-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-232*1",
+                      "locationName": "Ecoplug Highway Station 32",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-28T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Adani TotalEnergies",
+                      "hardwareModel": "Tritium Veefil-PK 175"
+                    },
+                    {
+                      "id": "LOC-239-EVSE-05",
+                      "chargerId": "*IN*EPL*LOC-239*5",
+                      "locationName": "Ecoplug Charging Plaza 39",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-28T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-247-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-247*1",
+                      "locationName": "Ecoplug Highway Station 47",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-28T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-210-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-210*3",
+                      "locationName": "Ecoplug Fast Charge 10",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-27T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-221-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-221*1",
+                      "locationName": "Ecoplug City Hub 21",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-27T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-224-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-224*4",
+                      "locationName": "Ecoplug Charging Plaza 24",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-27T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-233-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-233*1",
+                      "locationName": "Ecoplug Smart Point 33",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-27T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-204-EVSE-05",
+                      "chargerId": "*IN*EPL*LOC-204*5",
+                      "locationName": "Ecoplug Charging Plaza 4",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-26T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-209-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-209*1",
+                      "locationName": "Ecoplug Charging Plaza 9",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-26T11:46:07.000Z",
+                      "status": "INOPERATIVE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-210-EVSE-05",
+                      "chargerId": "*IN*EPL*LOC-210*5",
+                      "locationName": "Ecoplug Fast Charge 10",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-26T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-218-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-218*4",
+                      "locationName": "Ecoplug Smart Point 18",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-26T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-228-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-228*3",
+                      "locationName": "Ecoplug Smart Point 28",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-26T11:46:07.000Z",
+                      "status": "UNKNOWN",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-235-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-235*4",
+                      "locationName": "Ecoplug Fast Charge 35",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-26T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-245-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-245*3",
+                      "locationName": "Ecoplug Fast Charge 45",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-26T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-202-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-202*1",
+                      "locationName": "Ecoplug Highway Station 2",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-25T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-204-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-204*3",
+                      "locationName": "Ecoplug Charging Plaza 4",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-25T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-205-EVSE-06",
+                      "chargerId": "*IN*EPL*LOC-205*6",
+                      "locationName": "Ecoplug Fast Charge 5",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-25T11:46:07.000Z",
+                      "status": "UNKNOWN",
+                      "emsp": "Adani TotalEnergies",
+                      "hardwareModel": "Tritium Veefil-PK 175"
+                    },
+                    {
+                      "id": "LOC-209-EVSE-05",
+                      "chargerId": "*IN*EPL*LOC-209*5",
+                      "locationName": "Ecoplug Charging Plaza 9",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-25T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-214-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-214*2",
+                      "locationName": "Ecoplug Charging Plaza 14",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-25T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-215-EVSE-06",
+                      "chargerId": "*IN*EPL*LOC-215*6",
+                      "locationName": "Ecoplug Fast Charge 15",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-25T11:46:07.000Z",
+                      "status": "UNKNOWN",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-216-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-216*2",
+                      "locationName": "Ecoplug City Hub 16",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-25T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-219-EVSE-05",
+                      "chargerId": "*IN*EPL*LOC-219*5",
+                      "locationName": "Ecoplug Charging Plaza 19",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-25T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Adani TotalEnergies",
+                      "hardwareModel": "Tritium Veefil-PK 175"
+                    },
+                    {
+                      "id": "LOC-223-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-223*2",
+                      "locationName": "Ecoplug Smart Point 23",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-25T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-229-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-229*2",
+                      "locationName": "Ecoplug Charging Plaza 29",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-25T11:46:07.000Z",
+                      "status": "UNKNOWN",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-239-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-239*1",
+                      "locationName": "Ecoplug Charging Plaza 39",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-25T11:46:07.000Z",
+                      "status": "INOPERATIVE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-240-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-240*2",
+                      "locationName": "Ecoplug Fast Charge 40",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-25T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-243-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-243*4",
+                      "locationName": "Ecoplug Smart Point 43",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-25T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Adani TotalEnergies",
+                      "hardwareModel": "Tritium Veefil-PK 175"
+                    },
+                    {
+                      "id": "LOC-246-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-246*1",
+                      "locationName": "Ecoplug City Hub 46",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-25T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-219-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-219*3",
+                      "locationName": "Ecoplug Charging Plaza 19",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-24T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-220-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-220*1",
+                      "locationName": "Ecoplug Fast Charge 20",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-24T11:46:07.000Z",
+                      "status": "UNKNOWN",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-220-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-220*3",
+                      "locationName": "Ecoplug Fast Charge 20",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-24T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-228-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-228*2",
+                      "locationName": "Ecoplug Smart Point 28",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-24T11:46:07.000Z",
+                      "status": "INOPERATIVE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-247-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-247*2",
+                      "locationName": "Ecoplug Highway Station 47",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-24T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-205-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-205*4",
+                      "locationName": "Ecoplug Fast Charge 5",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-23T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-214-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-214*1",
+                      "locationName": "Ecoplug Charging Plaza 14",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-23T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-220-EVSE-06",
+                      "chargerId": "*IN*EPL*LOC-220*6",
+                      "locationName": "Ecoplug Fast Charge 20",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-23T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-229-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-229*3",
+                      "locationName": "Ecoplug Charging Plaza 29",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-23T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-239-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-239*3",
+                      "locationName": "Ecoplug Charging Plaza 39",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-23T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-248-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-248*2",
+                      "locationName": "Ecoplug Smart Point 48",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-23T11:46:07.000Z",
+                      "status": "INOPERATIVE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-209-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-209*2",
+                      "locationName": "Ecoplug Charging Plaza 9",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-22T11:46:07.000Z",
+                      "status": "UNKNOWN",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-210-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-210*4",
+                      "locationName": "Ecoplug Fast Charge 10",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-22T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-211-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-211*1",
+                      "locationName": "Ecoplug City Hub 11",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-22T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-213-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-213*2",
+                      "locationName": "Ecoplug Smart Point 13",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-22T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-219-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-219*2",
+                      "locationName": "Ecoplug Charging Plaza 19",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-22T11:46:07.000Z",
+                      "status": "UNKNOWN",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-244-EVSE-05",
+                      "chargerId": "*IN*EPL*LOC-244*5",
+                      "locationName": "Ecoplug Charging Plaza 44",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-22T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-248-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-248*4",
+                      "locationName": "Ecoplug Smart Point 48",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-22T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-206-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-206*1",
+                      "locationName": "Ecoplug City Hub 6",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-21T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-210-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-210*1",
+                      "locationName": "Ecoplug Fast Charge 10",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-21T11:46:07.000Z",
+                      "status": "UNKNOWN",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-210-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-210*2",
+                      "locationName": "Ecoplug Fast Charge 10",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-21T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-214-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-214*3",
+                      "locationName": "Ecoplug Charging Plaza 14",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-21T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-215-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-215*4",
+                      "locationName": "Ecoplug Fast Charge 15",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-21T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Adani TotalEnergies",
+                      "hardwareModel": "Tritium Veefil-PK 175"
+                    },
+                    {
+                      "id": "LOC-218-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-218*3",
+                      "locationName": "Ecoplug Smart Point 18",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-21T11:46:07.000Z",
+                      "status": "UNKNOWN",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-237-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-237*2",
+                      "locationName": "Ecoplug Highway Station 37",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-21T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-240-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-240*3",
+                      "locationName": "Ecoplug Fast Charge 40",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-21T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-201-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-201*1",
+                      "locationName": "Ecoplug City Hub 1",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-20T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-214-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-214*4",
+                      "locationName": "Ecoplug Charging Plaza 14",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-20T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Adani TotalEnergies",
+                      "hardwareModel": "Tritium Veefil-PK 175"
+                    },
+                    {
+                      "id": "LOC-220-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-220*2",
+                      "locationName": "Ecoplug Fast Charge 20",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-20T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-236-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-236*1",
+                      "locationName": "Ecoplug City Hub 36",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-20T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-219-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-219*4",
+                      "locationName": "Ecoplug Charging Plaza 19",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-19T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-234-EVSE-05",
+                      "chargerId": "*IN*EPL*LOC-234*5",
+                      "locationName": "Ecoplug Charging Plaza 34",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-19T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-244-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-244*3",
+                      "locationName": "Ecoplug Charging Plaza 44",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-19T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Adani TotalEnergies",
+                      "hardwareModel": "Tritium Veefil-PK 175"
+                    },
+                    {
+                      "id": "LOC-250-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-250*3",
+                      "locationName": "Ecoplug Fast Charge 50",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-19T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-226-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-226*2",
+                      "locationName": "Ecoplug City Hub 26",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-18T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-234-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-234*3",
+                      "locationName": "Ecoplug Charging Plaza 34",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-18T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-235-EVSE-06",
+                      "chargerId": "*IN*EPL*LOC-235*6",
+                      "locationName": "Ecoplug Fast Charge 35",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-18T11:46:07.000Z",
+                      "status": "UNKNOWN",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-241-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-241*1",
+                      "locationName": "Ecoplug City Hub 41",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-18T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-204-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-204*1",
+                      "locationName": "Ecoplug Charging Plaza 4",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-17T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-205-EVSE-05",
+                      "chargerId": "*IN*EPL*LOC-205*5",
+                      "locationName": "Ecoplug Fast Charge 5",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-17T11:46:07.000Z",
+                      "status": "INOPERATIVE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-206-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-206*2",
+                      "locationName": "Ecoplug City Hub 6",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-17T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Adani TotalEnergies",
+                      "hardwareModel": "Tritium Veefil-PK 175"
+                    },
+                    {
+                      "id": "LOC-208-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-208*3",
+                      "locationName": "Ecoplug Smart Point 8",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-17T11:46:07.000Z",
+                      "status": "UNKNOWN",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-223-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-223*1",
+                      "locationName": "Ecoplug Smart Point 23",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-17T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-227-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-227*2",
+                      "locationName": "Ecoplug Highway Station 27",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-17T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-227-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-227*3",
+                      "locationName": "Ecoplug Highway Station 27",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-17T11:46:07.000Z",
+                      "status": "INOPERATIVE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-228-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-228*4",
+                      "locationName": "Ecoplug Smart Point 28",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-17T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-230-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-230*4",
+                      "locationName": "Ecoplug Fast Charge 30",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-17T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-239-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-239*2",
+                      "locationName": "Ecoplug Charging Plaza 39",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-17T11:46:07.000Z",
+                      "status": "UNKNOWN",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-244-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-244*2",
+                      "locationName": "Ecoplug Charging Plaza 44",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-17T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-245-EVSE-06",
+                      "chargerId": "*IN*EPL*LOC-245*6",
+                      "locationName": "Ecoplug Fast Charge 45",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-17T11:46:07.000Z",
+                      "status": "UNKNOWN",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-250-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-250*1",
+                      "locationName": "Ecoplug Fast Charge 50",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-17T11:46:07.000Z",
+                      "status": "UNKNOWN",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-203-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-203*2",
+                      "locationName": "Ecoplug Smart Point 3",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-16T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-207-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-207*2",
+                      "locationName": "Ecoplug Highway Station 7",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-16T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-222-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-222*1",
+                      "locationName": "Ecoplug Highway Station 22",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-16T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-224-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-224*3",
+                      "locationName": "Ecoplug Charging Plaza 24",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-16T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-229-EVSE-05",
+                      "chargerId": "*IN*EPL*LOC-229*5",
+                      "locationName": "Ecoplug Charging Plaza 29",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-16T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-234-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-234*2",
+                      "locationName": "Ecoplug Charging Plaza 34",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-16T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-236-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-236*2",
+                      "locationName": "Ecoplug City Hub 36",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-16T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-238-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-238*3",
+                      "locationName": "Ecoplug Smart Point 38",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-16T11:46:07.000Z",
+                      "status": "UNKNOWN",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-240-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-240*4",
+                      "locationName": "Ecoplug Fast Charge 40",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-16T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-241-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-241*2",
+                      "locationName": "Ecoplug City Hub 41",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-16T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-220-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-220*4",
+                      "locationName": "Ecoplug Fast Charge 20",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-15T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-230-EVSE-06",
+                      "chargerId": "*IN*EPL*LOC-230*6",
+                      "locationName": "Ecoplug Fast Charge 30",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-15T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-231-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-231*1",
+                      "locationName": "Ecoplug City Hub 31",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-15T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Adani TotalEnergies",
+                      "hardwareModel": "Tritium Veefil-PK 175"
+                    },
+                    {
+                      "id": "LOC-233-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-233*2",
+                      "locationName": "Ecoplug Smart Point 33",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-15T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Adani TotalEnergies",
+                      "hardwareModel": "Tritium Veefil-PK 175"
+                    },
+                    {
+                      "id": "LOC-235-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-235*2",
+                      "locationName": "Ecoplug Fast Charge 35",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-15T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-242-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-242*3",
+                      "locationName": "Ecoplug Highway Station 42",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-15T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-205-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-205*2",
+                      "locationName": "Ecoplug Fast Charge 5",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-14T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-210-EVSE-06",
+                      "chargerId": "*IN*EPL*LOC-210*6",
+                      "locationName": "Ecoplug Fast Charge 10",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-14T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-219-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-219*1",
+                      "locationName": "Ecoplug Charging Plaza 19",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-14T11:46:07.000Z",
+                      "status": "INOPERATIVE",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-222-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-222*2",
+                      "locationName": "Ecoplug Highway Station 22",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-14T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-226-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-226*1",
+                      "locationName": "Ecoplug City Hub 26",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-14T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-230-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-230*2",
+                      "locationName": "Ecoplug Fast Charge 30",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-14T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-230-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-230*3",
+                      "locationName": "Ecoplug Fast Charge 30",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-14T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-234-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-234*1",
+                      "locationName": "Ecoplug Charging Plaza 34",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-14T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Adani TotalEnergies",
+                      "hardwareModel": "Tritium Veefil-PK 175"
+                    },
+                    {
+                      "id": "LOC-243-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-243*2",
+                      "locationName": "Ecoplug Smart Point 43",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-14T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-245-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-245*1",
+                      "locationName": "Ecoplug Fast Charge 45",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 60,
+                      "lastActive": "2026-09-14T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Adani TotalEnergies",
+                      "hardwareModel": "Tritium Veefil-PK 175"
+                    },
+                    {
+                      "id": "LOC-218-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-218*1",
+                      "locationName": "Ecoplug Smart Point 18",
+                      "city": "Gurugram",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-13T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-225-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-225*1",
+                      "locationName": "Ecoplug Fast Charge 25",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-13T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-229-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-229*1",
+                      "locationName": "Ecoplug Charging Plaza 29",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-13T11:46:07.000Z",
+                      "status": "INOPERATIVE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-238-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-238*4",
+                      "locationName": "Ecoplug Smart Point 38",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-13T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-249-EVSE-05",
+                      "chargerId": "*IN*EPL*LOC-249*5",
+                      "locationName": "Ecoplug Charging Plaza 49",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 120,
+                      "lastActive": "2026-09-13T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-201-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-201*2",
+                      "locationName": "Ecoplug City Hub 1",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-12T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-213-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-213*1",
+                      "locationName": "Ecoplug Smart Point 13",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-12T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-214-EVSE-05",
+                      "chargerId": "*IN*EPL*LOC-214*5",
+                      "locationName": "Ecoplug Charging Plaza 14",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-12T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-215-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-215*3",
+                      "locationName": "Ecoplug Fast Charge 15",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-12T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    },
+                    {
+                      "id": "LOC-229-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-229*4",
+                      "locationName": "Ecoplug Charging Plaza 29",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-12T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-233-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-233*4",
+                      "locationName": "Ecoplug Smart Point 33",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-12T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Relux",
+                      "hardwareModel": "Alpitronic Hypercharger HYC300"
+                    },
+                    {
+                      "id": "LOC-235-EVSE-05",
+                      "chargerId": "*IN*EPL*LOC-235*5",
+                      "locationName": "Ecoplug Fast Charge 35",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-12T11:46:07.000Z",
+                      "status": "INOPERATIVE",
+                      "emsp": "Adani TotalEnergies",
+                      "hardwareModel": "Tritium Veefil-PK 175"
+                    },
+                    {
+                      "id": "LOC-243-EVSE-01",
+                      "chargerId": "*IN*EPL*LOC-243*1",
+                      "locationName": "Ecoplug Smart Point 43",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 180,
+                      "lastActive": "2026-09-12T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Statiq Platform",
+                      "hardwareModel": "ABB Terra 180 Fast Charger"
+                    },
+                    {
+                      "id": "LOC-202-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-202*3",
+                      "locationName": "Ecoplug Highway Station 2",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-11T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Tata Power",
+                      "hardwareModel": "Delta City Charger 120"
+                    },
+                    {
+                      "id": "LOC-221-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-221*2",
+                      "locationName": "Ecoplug City Hub 21",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 200,
+                      "lastActive": "2026-09-11T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-204-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-204*4",
+                      "locationName": "Ecoplug Charging Plaza 4",
+                      "city": "Jaipur",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-10T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-209-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-209*3",
+                      "locationName": "Ecoplug Charging Plaza 9",
+                      "city": "Faridabad",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-10T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-213-EVSE-03",
+                      "chargerId": "*IN*EPL*LOC-213*3",
+                      "locationName": "Ecoplug Smart Point 13",
+                      "city": "New Delhi",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-10T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Ather Grid",
+                      "hardwareModel": "Ather Grid FastPod"
+                    },
+                    {
+                      "id": "LOC-223-EVSE-04",
+                      "chargerId": "*IN*EPL*LOC-223*4",
+                      "locationName": "Ecoplug Smart Point 23",
+                      "city": "Chandigarh",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-10T11:46:07.000Z",
+                      "status": "AVAILABLE",
+                      "emsp": "Fortum Charge",
+                      "hardwareModel": "Kempower Satellite C-Series"
+                    },
+                    {
+                      "id": "LOC-238-EVSE-02",
+                      "chargerId": "*IN*EPL*LOC-238*2",
+                      "locationName": "Ecoplug Smart Point 38",
+                      "city": "Noida",
+                      "connectorType": "IEC_62196_T2_COMBO",
+                      "maxOutputKW": 300,
+                      "lastActive": "2026-09-10T11:46:07.000Z",
+                      "status": "INOPERATIVE",
+                      "emsp": "Zeon Charging",
+                      "hardwareModel": "Siemens Sicharge D"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/apisessions": {
+      "get": {
+        "summary": "Sessions Data",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "example": "application/json",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/sessions": {
+      "get": {
+        "summary": "Sessions Pagination Data",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "example": "1",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "",
+            "required": true,
+            "example": "10",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "example": "application/json",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/complaints/41": {
+      "get": {
+        "summary": "Complaints",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "priority",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "High",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "Open",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "emsp",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "Ather%20Grid",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "complaintType",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "Payment",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fromDate",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "2026-10-01",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "2026-10-17",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 41,
+                    "complaintId": "CMP-37-1441",
+                    "sessionId": 1441,
+                    "emsp": "Ather Grid",
+                    "chargerName": "0e5e657c-c3d3-11f1-a3b9-246a0e286e4d",
+                    "stationName": "Ecoplug Energy Hub 11",
+                    "complaintType": "Payment",
+                    "subType": "Payment Failed",
+                    "priority": "Medium",
+                    "status": "In Progress",
+                    "customerName": "Demo Customer 1441",
+                    "customerPhone": "+91 9000001441",
+                    "customerEmail": "demo1441@example.com",
+                    "vehicle": "Demo EV",
+                    "raisedAt": "2026-10-08T13:17:00.000Z",
+                    "resolvedAt": null,
+                    "tatMinutes": 12858,
+                    "tat": "8d 22h 18m",
+                    "notes": [
+                      {
+                        "id": 30,
+                        "complaintId": 41,
+                        "sender": "Support Team",
+                        "noteText": "Demo update: Support team is investigating the issue.",
+                        "createdAt": "2026-10-08T13:17:00.000Z"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/notification": {
+      "post": {
+        "summary": "Send Notification",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "example": "application/json",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {
+                "type": "NEW_COMPLAINT",
+                "title": "New Complaint Received",
+                "message": "A new complaint has been registered for testing.",
+                "entityId": "TEST-COMPLAINT-001"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "company_id": 37,
+                    "type": "NEW_COMPLAINT",
+                    "title": "New Complaint Received",
+                    "message": "A new complaint has been registered for testing.",
+                    "entity_id": "TEST-COMPLAINT-001",
+                    "is_read": false,
+                    "created_at": "2026-10-21T09:44:00.885Z"
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "Get Notification",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "example": "application/json",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "type": "NEW_COMPLAINT",
+                      "title": "New Complaint Received",
+                      "message": "A new complaint has been registered for testing.",
+                      "entity_id": "TEST-COMPLAINT-001",
+                      "is_read": 0,
+                      "created_at": "2026-10-21T09:44:00.000Z"
+                    }
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {},
+    "responses": {},
+    "securitySchemes": {
+      "bearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "servers": [],
+  "security": []
+}
