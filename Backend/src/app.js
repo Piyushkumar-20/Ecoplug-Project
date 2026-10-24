@@ -26,19 +26,17 @@ const openapiPath = path.resolve(__dirname, "../openapi.json");
 const openapi = JSON.parse(fs.readFileSync(openapiPath, "utf-8"));
 
 app.use(cookieParser());
-<<<<<<< HEAD
 app.use(
   cors({
-    origin: process.env.FRONTEND_ORIGIN || "http://localhost:5173",
+    origin: process.env.FRONTEND_ORIGIN || "http://localhost:4173",
     credentials: true,
   }),
 );
-=======
 app.use(cors({
   origin: process.env.FRONTEND_URL || "http://localhost:4173",
   credentials: true,
 }));
->>>>>>> d574b8ddf1aa4686a3a751e68bdadb2106076b4f
+
 app.use(express.json());
 
 app.get("/api/health", (req, res) => {
