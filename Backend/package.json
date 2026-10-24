@@ -19,6 +19,7 @@
   },
   "type": "module",
   "dependencies": {
+    "@scalar/express-api-reference": "^0.10.30",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
