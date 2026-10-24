@@ -5,28 +5,16 @@ import { Link } from "react-router-dom";
 import { apiRequest } from "../services/api";
 
 import {
-  Users,
   Building,
   Zap,
   TrendingUp,
   IndianRupee,
   Leaf,
-  Calendar,
-  ArrowUpRight,
   ChevronRight,
   Maximize2,
-  Bell,
-  CheckCircle2,
-  AlertTriangle,
-  Clock,
-  Sparkles,
-  Play,
-  Globe,
-  Battery,
-  ShieldAlert,
 } from "lucide-react";
 
-const DashboardView = ({ selectedCpo }) => {
+const DashboardView = ( ) => {
   const [activeTab, setActiveTab] = useState("Sessions");
 
   const [hoveredBar, setHoveredBar] = useState(null);
@@ -733,7 +721,7 @@ const DashboardView = ({ selectedCpo }) => {
                     <div
                       className={`w-8 h-8 rounded-xl ${session.logoBg} flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs`}
                     >
-                      {session.id.substring(0, 2)}
+                      {String(session.id ?? "—").substring(0, 2)}
                     </div>
 
                     <div>
