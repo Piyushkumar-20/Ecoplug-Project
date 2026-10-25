@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -6,7 +5,6 @@ import {
   LogOut,
   Sun,
   Moon,
-  Search,
   Bell,
   Grid,
   ChevronDown,
@@ -233,23 +231,6 @@ const Header = ({
             }`}
           />
         </button>
-
-        <div className="relative flex-1">
-          <Search
-            className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 ${
-              isDark ? 'text-slate-400' : 'text-slate-400'
-            }`}
-          />
-          <input
-            type="text"
-            placeholder="Search stations, chargers, transactions, tickets..."
-            className={`w-full pl-9 pr-4 py-1.5 border rounded-xl text-xs focus:outline-hidden focus:ring-2 focus:ring-amber-400/40 focus:border-amber-400 transition-all ${
-              isDark
-                ? 'bg-slate-800 border-slate-700 text-slate-100 placeholder-slate-400 focus:bg-slate-800'
-                : 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400 focus:bg-white'
-            }`}
-          />
-        </div>
       </div>
 
       {/* Right Side */}
