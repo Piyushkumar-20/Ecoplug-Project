@@ -6,7 +6,6 @@ import {
   Sun,
   Moon,
   Bell,
-  Grid,
   ChevronDown,
   PanelLeft,
 } from 'lucide-react';
@@ -356,18 +355,7 @@ const Header = ({
           )}
         </div>
 
-        {/* Grid Icon */}
-        <button
-          className={`p-2 rounded-xl transition-colors hidden sm:flex cursor-pointer ${
-            isDark
-              ? 'text-slate-300 hover:bg-slate-800'
-              : 'text-slate-500 hover:bg-slate-100'
-          }`}
-          aria-label="Applications"
-        >
-          <Grid className="w-4.5 h-4.5" />
-        </button>
-
+        
         <div
           className={`h-6 w-px hidden sm:block ${
             isDark ? 'bg-slate-700' : 'bg-slate-200'
