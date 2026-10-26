@@ -5,28 +5,16 @@ import { Link } from "react-router-dom";
 import { apiRequest } from "../services/api";
 
 import {
-  Users,
   Building,
   Zap,
   TrendingUp,
   IndianRupee,
   Leaf,
-  Calendar,
-  ArrowUpRight,
   ChevronRight,
   Maximize2,
-  Bell,
-  CheckCircle2,
-  AlertTriangle,
-  Clock,
-  Sparkles,
-  Play,
-  Globe,
-  Battery,
-  ShieldAlert,
 } from "lucide-react";
 
-const DashboardView = ({ selectedCpo }) => {
+const DashboardView = ( ) => {
   const [activeTab, setActiveTab] = useState("Sessions");
 
   const [hoveredBar, setHoveredBar] = useState(null);
@@ -40,47 +28,50 @@ const DashboardView = ({ selectedCpo }) => {
   const [selectedChargerStatus, setSelectedChargerStatus] = useState(null);
   const [hoveredChargerStatus, setHoveredChargerStatus] = useState(null);
 
-  useEffect(() => {
-    let isMounted = true;
+  
+useEffect(() => {
+  let isMounted = true;
 
-    const fetchDashboard = async () => {
-      try {
-        const response = await apiRequest("/api/dashboard");
+  const fetchDashboard = async () => {
+    try {
+      const response = await apiRequest("/api/dashboard");
 
-        if (!response?.success || !response?.data) {
-          throw new Error(
-            response?.message || "Unable to fetch dashboard data",
-          );
-        }
-
-        if (isMounted) {
-          setDashboardData(response.data);
-
-          setDashboardError("");
-        }
-      } catch (error) {
-        console.error("Dashboard API error:", error);
-
-        if (isMounted) {
-          setDashboardError(error.message || "Dashboard request failed");
-        }
-      } finally {
-        if (isMounted) {
-          setDashboardLoading(false);
-        }
+      if (!response?.success || !response?.data) {
+        throw new Error(
+          response?.message || "Unable to fetch dashboard data"
+        );
       }
-    };
 
-    fetchDashboard();
+      if (isMounted) {
+        setDashboardData(response.data);
+        setDashboardError("");
+      }
+    } catch (error) {
+      console.error("Dashboard API error:", error);
 
-    const intervalId = window.setInterval(fetchDashboard, 30000);
+      if (isMounted) {
+        setDashboardError(
+          error instanceof Error
+            ? error.message
+            : "Dashboard request failed"
+        );
+      }
+    } finally {
+      if (isMounted) {
+        setDashboardLoading(false);
+      }
+    }
+  };
 
-    return () => {
-      isMounted = false;
+  fetchDashboard();
 
-      window.clearInterval(intervalId);
-    };
-  }, []);
+  const intervalId = window.setInterval(fetchDashboard, 30000);
+
+  return () => {
+    isMounted = false;
+    window.clearInterval(intervalId);
+  };
+}, []);
 
   // Stats Data
 
@@ -733,7 +724,7 @@ const DashboardView = ({ selectedCpo }) => {
                     <div
                       className={`w-8 h-8 rounded-xl ${session.logoBg} flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs`}
                     >
-                      {session.id.substring(0, 2)}
+                      {String(session.id ?? "—").substring(0, 2)}
                     </div>
 
                     <div>

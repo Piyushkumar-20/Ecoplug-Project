@@ -34,7 +34,11 @@ const Login = () => {
       navigate("/");
     } catch (error) {
       clearAccessToken();
-      setError(error.message);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Login failed. Please try again."
+      );
     } finally {
       setLoading(false);
     }
