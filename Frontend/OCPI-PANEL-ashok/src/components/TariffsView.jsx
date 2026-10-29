@@ -3,7 +3,6 @@ import {
   ChevronDown,
   SlidersHorizontal,
   Upload,
-  LayoutGrid,
   RotateCcw,
   Calendar,
 } from "lucide-react";
@@ -250,13 +249,7 @@ const TariffsView = () => {
               <Upload className="w-3.5 h-3.5 rotate-180" />
               Export
             </button>
-            <button
-              type="button"
-              aria-label="Table view"
-              className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600"
-            >
-              <LayoutGrid className="w-4 h-4" />
-            </button>
+            
           </div>
         </div>
 
