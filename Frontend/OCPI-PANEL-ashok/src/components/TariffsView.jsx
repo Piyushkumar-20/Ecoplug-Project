@@ -362,17 +362,7 @@ const TariffsView = () => {
             </div>
 
             <div className="flex justify-end gap-2 mt-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setFilters({ ...INITIAL_FILTERS });
-                  setAppliedFilters({ ...INITIAL_FILTERS });
-                  setCurrentPage(1);
-                }}
-                className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                Reset additional filters
-              </button>
+              
               <button
                 type="button"
                 onClick={() => {

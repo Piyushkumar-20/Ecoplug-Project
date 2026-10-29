@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Upload, LayoutGrid } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import { apiRequest } from '../services/api';
 
 const LocationsView = () => {
@@ -139,12 +139,7 @@ const LocationsView = () => {
             <Upload className="w-3.5 h-3.5 text-slate-500 rotate-180" />
             <span>Export</span>
           </button>
-          <button
-            type="button"
-            className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-all cursor-pointer shadow-2xs"
-          >
-            <LayoutGrid className="w-4 h-4" />
-          </button>
+          
         </div>
       </div>
 

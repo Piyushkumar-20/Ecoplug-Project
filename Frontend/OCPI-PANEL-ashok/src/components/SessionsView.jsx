@@ -161,17 +161,7 @@ const SessionsView = () => {
           <p className="text-xs font-semibold text-slate-400 mt-0.5">
             {pagination.total.toLocaleString()} sessions
           </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={applyLast30Days}
-          className="flex items-center space-x-2 bg-white border border-slate-200 hover:border-slate-300 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 shadow-sm transition-all"
-        >
-          <Calendar className="w-4 h-4 text-slate-400" />
-          <span>Last 30 Days</span>
-          <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-        </button>
+        </div>  
       </div>
 
       {/* Search and filters */}
