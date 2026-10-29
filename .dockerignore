@@ -1,6 +1,5 @@
 # Git
 .git
-.gitignore
 
 # Environment files and secrets
 .env
@@ -19,7 +18,7 @@ dist
 build
 .next
 coverage
-
+A
 # Logs and temporary files
 *.log
 logs
