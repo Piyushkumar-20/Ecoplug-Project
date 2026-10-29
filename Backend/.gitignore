@@ -1,53 +1,37 @@
+# Secrets and environment files
+.env
+.env.*
+.env.docker
+!.env.example
+credentials.json
+.public-key.pem
+
+# Git
+.git
+.gitignore
+
 # Dependencies
 node_modules/
-jspm_packages/
-web_modules/
+.pnpm-store/
 
-# Environment variables and secrets (CRITICAL)
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-config.env
-credentials.json
-
-# Logs
-logs
+# Logs and temporary files
+logs/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pids
+tmp/
+temp/
 *.pid
-*.seed
-*.pid.lock
 
-# Build and Output directories
-dist/
-build/
-out/
-.next/
-
-# Testing and Coverage
+# Tests and coverage
 coverage/
 .nyc_output/
 
-# IDEs and Text Editors
+# Build output
+dist/
+build/
+.next/
+
+# IDE and OS files
 .vscode/
-!.vscode/extensions.json
 .idea/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# OS Generated Files
 .DS_Store
-.DS_Store?
 Thumbs.db
-ehthumbs.db
-
-# Optional: Server/Database specific
-.public-key.pem

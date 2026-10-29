@@ -1,0 +1,37 @@
+# Git
+.git
+.gitignore
+
+# Environment files and secrets
+.env
+.env
+.env.docker
+!.env.example
+!.env.docker.example
+
+# Dependencies
+node_modules
+**/node_modules
+.pnpm-store
+
+# Build output
+dist
+build
+.next
+coverage
+
+# Logs and temporary files
+*.log
+logs
+tmp
+temp
+
+# Editor and OS files
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# Documentation and local-only files
+README*
+*.md
