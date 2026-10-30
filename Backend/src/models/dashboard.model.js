@@ -98,6 +98,7 @@ const getDashboardByCompanyId = async (companyId) => {
     // 7. Five most recent sessions
     db.query(
       `SELECT
+         s.id AS id,
          s.session_id AS sessionId,
          l.name AS stationName,
          l.city,

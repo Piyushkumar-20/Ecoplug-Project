@@ -123,7 +123,7 @@ useEffect(() => {
                       flex items-center rounded-xl font-medium text-sm transition-all duration-150 group cursor-pointer
                       ${isOpen ? 'w-full justify-between px-3.5 py-2.5' : 'w-full justify-center p-3'}
                       ${isActive
-                        ? 'bg-[#FEF0A6] text-slate-900 font-semibold shadow-xs shadow-amber-200/50'
+                        ? 'bg-[#f0ffc7] text-slate-900 font-semibold shadow-xs shadow-amber-200/50'
                         : isDark
                           ? 'text-slate-300 hover:bg-slate-800 hover:text-white'
                           : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'

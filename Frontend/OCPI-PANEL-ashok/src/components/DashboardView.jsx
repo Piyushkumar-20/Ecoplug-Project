@@ -225,6 +225,30 @@ useEffect(() => {
         ? "kWh"
         : "₹";
 
+  // Smooth area chart coordinates (uses the existing selected metric data)
+  const chartPoints = chartData.map((item, index) => ({
+    ...item,
+    x:
+      chartData.length > 1
+        ? 12 + (index / (chartData.length - 1)) * 976
+        : 500,
+    y: 230 - (item.value / maxChartValue) * 200,
+  }));
+
+  const linePath = chartPoints.reduce((path, point, index) => {
+    if (index === 0) return `M ${point.x} ${point.y}`;
+
+    const previous = chartPoints[index - 1];
+    const midX = (previous.x + point.x) / 2;
+
+    return `${path} C ${midX} ${previous.y}, ${midX} ${point.y}, ${point.x} ${point.y}`;
+  }, "");
+
+  const areaPath =
+    chartPoints.length > 0
+      ? `${linePath} L ${chartPoints[chartPoints.length - 1].x} 240 L ${chartPoints[0].x} 240 Z`
+      : "";
+
   // Recent Sessions from the dashboard API
   const recentSessions = (dashboardData?.recentSessions ?? []).map((item) => {
     const status = String(item.status ?? "UNKNOWN").toUpperCase();
@@ -240,7 +264,9 @@ useEffect(() => {
     const validDate = startedAt && !Number.isNaN(startedAt.getTime());
 
     return {
-      id: item.chargerId || item.sessionId || "Session",
+      id: item.id != null
+        ? `SES-${item.id}`
+        : item.sessionId || "Session",
       sessionId: item.sessionId,
       cpo:
         [item.stationName, item.city].filter(Boolean).join(" · ") ||
@@ -324,7 +350,7 @@ useEffect(() => {
               key={i}
               className={`${
                 i === 0
-                  ? "lg:col-span-2 lg:row-span-2 bg-[#211F26] text-white p-5 rounded-2xl border border-slate-800 shadow-md hover:-translate-y-1 hover:shadow-xl flex flex-col"
+                  ? "lg:col-span-2 lg:row-span-2 bg-[#E3F6F2] text-slate-900 p-5 rounded-2xl border border-slate-200/80 shadow-md hover:-translate-y-1 hover:shadow-xl flex flex-col"
                   : "lg:col-span-1 bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs hover:-translate-y-1 hover:shadow-md"
               } transition-all duration-300`}
             >
@@ -334,7 +360,7 @@ useEffect(() => {
                 <div
                   className={`w-9 h-9 rounded-xl ${
                     i === 0
-                      ? "bg-white/10 text-purple-300"
+                      ? "bg-emerald-100 text-emerald-700"
                       : `${stat.bg} ${stat.textColor}`
                   } flex items-center justify-center shadow-2xs`}
                 >
@@ -348,7 +374,7 @@ useEffect(() => {
                 <span
                   className={`${
                     i === 0
-                      ? "text-3xl text-white"
+                      ? "text-3xl text-slate-900"
                       : "text-xl sm:text-2xl text-slate-900"
                   } font-black tracking-tight block`}
                 >
@@ -361,7 +387,7 @@ useEffect(() => {
 
                 <span
                   className={`text-[11px] font-semibold ${
-                    i === 0 ? "text-slate-300" : "text-slate-500"
+                    i === 0 ? "text-slate-600" : "text-slate-500"
                   } block truncate mt-0.5`}
                 >
                   {stat.title}
@@ -397,7 +423,7 @@ useEffect(() => {
 
                    S270 45, 300 29"
                       fill="none"
-                      stroke="#B56CFF"
+                      stroke="#009F8C"
                       strokeWidth="2.5"
                       strokeLinecap="round"
                     />
@@ -449,7 +475,7 @@ useEffect(() => {
                       onClick={() => setActiveTab(tab)}
                       className={`px-2.5 py-1 rounded-lg transition-all ${
                         activeTab === tab
-                          ? "bg-[#FEF0A6] text-slate-900 font-bold shadow-xs"
+                          ? "bg-[#a9f28a] text-slate-900 font-bold shadow-xs"
                           : "text-slate-500 hover:text-slate-800"
                       }`}
                     >
@@ -472,16 +498,15 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* Interactive Bar Chart Visualization */}
+            {/* Interactive Area Chart Visualization */}
 
             <div className="relative pt-8 pb-2">
-              {/* Highlighted Tooltip */}
-
+              {/* Tooltip for the currently hovered date */}
               {selectedChartItem && (
                 <div
-                  className="absolute -top-1 transform -translate-x-1/2 bg-slate-900 text-white px-2.5 py-1 rounded-xl text-[10px] font-semibold shadow-lg z-10 transition-all pointer-events-none flex flex-col items-center"
+                  className="absolute -top-1 transform -translate-x-1/2 bg-slate-900 text-white px-2.5 py-1.5 rounded-xl text-[10px] font-semibold shadow-lg z-20 pointer-events-none flex flex-col items-center"
                   style={{
-                    left: `${chartData.length > 1 ? (hoveredBar / (chartData.length - 1)) * 90 + 5 : 50}%`,
+                    left: `${chartData.length > 1 ? (hoveredBar / (chartData.length - 1)) * 96 + 2 : 50}%`,
                   }}
                 >
                   <span className="font-bold text-amber-300">
@@ -493,52 +518,105 @@ useEffect(() => {
                   <span className="text-[9px] text-slate-300">
                     {selectedChartItem.label}
                   </span>
-                  <div className="w-1.5 h-1.5 bg-slate-900 rotate-45 -mb-1"></div>
+                  <div className="w-1.5 h-1.5 bg-slate-900 rotate-45 -mb-1" />
                 </div>
               )}
 
-              {/* Chart Grid background lines */}
-
-              <div className="h-64 w-full flex items-end justify-between gap-1 sm:gap-1.5 pt-4 border-b border-slate-200/80 relative">
-                <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-30">
-                  <div className="border-b border-dashed border-slate-300 w-full" />
-
-                  <div className="border-b border-dashed border-slate-300 w-full" />
-
-                  <div className="border-b border-dashed border-slate-300 w-full" />
-
-                  <div className="border-b border-dashed border-slate-300 w-full" />
-                </div>
-
-                {chartData.map((item, idx) => {
-                  const heightPercent = (item.value / maxChartValue) * 100;
-                  const isSelected = idx === hoveredBar;
-                  return (
-                    <div
-                      key={item.date}
-                      onMouseEnter={() => setHoveredBar(idx)}
-                      onMouseLeave={() => setHoveredBar(null)}
-                      onClick={() => setHoveredBar(idx)}
-                      title={`${item.label}: ${item.value.toLocaleString("en-IN")}`}
-                      className="flex-1 flex flex-col items-center group cursor-pointer h-full justify-end z-10"
+              {/* Smooth gradient area chart */}
+              <div className="h-64 w-full relative border-b border-slate-200/80">
+                <svg
+                  viewBox="0 0 1000 250"
+                  preserveAspectRatio="none"
+                  className="w-full h-full overflow-visible"
+                  role="img"
+                  aria-label={`Charging activity: ${activeTab}`}
+                >
+                  <defs>
+                    <linearGradient
+                      id="chargingActivityGradient"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
                     >
-                      <div
-                        className={`w-full rounded-t-sm transition-all duration-200 ${
-                          isSelected
-                            ? "bg-amber-400 shadow-md ring-2 ring-amber-300"
-                            : "bg-amber-100 hover:bg-amber-300"
-                        }`}
-                        style={{
-                          height: `${item.value > 0 ? Math.max(heightPercent, 1.5) : 0}%`,
-                        }}
+                      <stop offset="0%" stopColor="#6fe013" stopOpacity="0.38" />
+                      <stop offset="100%" stopColor="#604a4a" stopOpacity="0.03" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Horizontal grid lines */}
+                  {[55, 110, 165, 220].map((y) => (
+                    <line
+                      key={y}
+                      x1="0"
+                      y1={y}
+                      x2="1000"
+                      y2={y}
+                      stroke="#a7faa7"
+                      strokeDasharray="3 4"
+                      strokeWidth="1"
+                      opacity="0.55"
+                    />
+                  ))}
+
+                  {chartPoints.length > 0 && (
+                    <>
+                      <path d={areaPath} fill="url(#chargingActivityGradient)" />
+                      <path
+                        d={linePath}
+                        fill="none"
+                        stroke="#4eb15c"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        vectorEffect="non-scaling-stroke"
                       />
-                    </div>
-                  );
-                })}
+                    </>
+                  )}
+
+                  {/* Hover zones keep the existing date/value tooltip interaction */}
+                  {chartPoints.map((point, index) => {
+                    const left =
+                      index === 0
+                        ? 0
+                        : (chartPoints[index - 1].x + point.x) / 2;
+                    const right =
+                      index === chartPoints.length - 1
+                        ? 1000
+                        : (point.x + chartPoints[index + 1].x) / 2;
+
+                    return (
+                      <rect
+                        key={point.date}
+                        x={left}
+                        y="0"
+                        width={right - left}
+                        height="240"
+                        fill="transparent"
+                        className="cursor-crosshair"
+                        onMouseEnter={() => setHoveredBar(index)}
+                        onMouseLeave={() => setHoveredBar(null)}
+                        onClick={() => setHoveredBar(index)}
+                      />
+                    );
+                  })}
+
+                  {/* Highlight the selected data point */}
+                  {selectedChartItem && chartPoints[hoveredBar] && (
+                    <circle
+                      cx={chartPoints[hoveredBar].x}
+                      cy={chartPoints[hoveredBar].y}
+                      r="5"
+                      fill="#3B82F6"
+                      stroke="#FFFFFF"
+                      strokeWidth="2"
+                      pointerEvents="none"
+                    />
+                  )}
+                </svg>
               </div>
 
               {/* X Axis Labels */}
-
               <div className="flex justify-between text-[10px] font-semibold text-slate-400 mt-2 px-1">
                 {chartData.length > 0 &&
                   Array.from(
