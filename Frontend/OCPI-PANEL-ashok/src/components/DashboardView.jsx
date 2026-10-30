@@ -374,10 +374,7 @@ useEffect(() => {
                 <div className="mt-3 h-20 relative">
                   {/* Tooltip */}
 
-                  <div className="absolute top-0 left-[40%] bg-white text-slate-900 px-2 py-1 rounded-md text-[9px] font-bold shadow-md z-10">
-                    ↑ 28%
-                  </div>
-
+                 
                   <svg
                     className="w-full h-full"
                     viewBox="0 0 300 80"
@@ -398,7 +395,7 @@ useEffect(() => {
 
                    S225 35, 240 52
 
-                   S270 45, 300 18"
+                   S270 45, 300 29"
                       fill="none"
                       stroke="#B56CFF"
                       strokeWidth="2.5"
