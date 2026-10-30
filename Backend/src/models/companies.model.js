@@ -1,13 +1,13 @@
 import db from "../config/db.js";
 
 const createCompany = async (
-  { name, adminName, adminEmail },
+  { name, adminName, adminEmail, billingType },
   connection = db,
 ) => {
   const [result] = await connection.query(
-    `INSERT INTO companies (name, admin_name, admin_email)
-     VALUES (?, ?, ?)`,
-    [name, adminName, adminEmail],
+    `INSERT INTO companies (name, admin_name, admin_email, billing_type)
+     VALUES (?, ?, ?, ?)`,
+    [name, adminName, adminEmail, billingType],
   );
 
   return result;
@@ -44,6 +44,7 @@ const getProfileByUserId = async (userId, companyId) => {
        c.gstin,
        c.cin,
        c.pan,
+       c.billing_type,
 
        c.admin_name,
        c.admin_mobile,

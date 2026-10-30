@@ -3,13 +3,20 @@ import ApiError from "../utils/api-error.js";
 
 const register = async (req, res) => {
   try {
-    const { name, adminName, adminEmail, adminPassword } = req.body;
+    const {
+      name,
+      adminName,
+      adminEmail,
+      adminPassword,
+      billingType,
+    } = req.body;
 
     const result = await companyService.registerCompany({
       name: name.trim(),
       adminName: adminName.trim(),
       adminEmail: adminEmail.trim().toLowerCase(),
       adminPassword,
+      billingType,
     });
 
     res.status(201).json({

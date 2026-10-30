@@ -12,6 +12,7 @@ const registerCompany = async ({
   adminName,
   adminEmail,
   adminPassword,
+  billingType,
 }) => {
   const connection = await db.getConnection();
 
@@ -19,7 +20,7 @@ const registerCompany = async ({
     await connection.beginTransaction();
 
     const companyResult = await createCompany(
-      { name, adminName, adminEmail },
+      { name, adminName, adminEmail, billingType },
       connection,
     );
 
@@ -76,6 +77,7 @@ const getProfile = async (userId, companyId) => {
       gstin: profile.gstin,
       cin: profile.cin,
       pan: profile.pan,
+      billingType: profile.billing_type,
     },
 
     admin: {

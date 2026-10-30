@@ -6,6 +6,7 @@ import {
   Phone,
   Building2,
   MapPin,
+  Wallet,
 } from 'lucide-react';
 import { apiRequest } from '../services/api';
 
@@ -54,6 +55,7 @@ const ProfileView = () => {
     ['Company ID', profile.company.id],
     ['Party ID', profile.company.partyId],
     ['Company Role', profile.company.role],
+    ['Billing Type', profile.company.billingType],
     ['Address', profile.company.address],
     ['City', profile.company.city],
     ['State', profile.company.state],
@@ -139,6 +141,23 @@ const ProfileView = () => {
             <p className="text-base sm:text-lg font-semibold text-slate-500">
               {profile.company.name}
             </p>
+
+            <div className="mt-3 flex justify-center md:justify-start">
+              <span
+                className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold tracking-wide ${
+                  profile.company.billingType === 'PREPAID'
+                    ? 'bg-emerald-100 text-emerald-800'
+                    : 'bg-blue-100 text-blue-800'
+                }`}
+              >
+                <Wallet className="h-4 w-4" />
+                {profile.company.billingType === 'PREPAID'
+                  ? 'Prepaid Account'
+                  : profile.company.billingType === 'POSTPAID'
+                    ? 'Postpaid Account'
+                    : 'Billing type not set'}
+              </span>
+            </div>
 
             {/* Contact Details */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mt-6 pt-6 border-t border-slate-100">

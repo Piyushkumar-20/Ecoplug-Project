@@ -1,8 +1,14 @@
 import ApiError from "../utils/api-error.js";
 
 const validateCompanyRegistration = (req, res, next) => {
-  const { name, adminName, adminEmail, adminPassword, confirmPassword } =
-    req.body;
+  const {
+    name,
+    adminName,
+    adminEmail,
+    adminPassword,
+    confirmPassword,
+    billingType,
+  } = req.body;
 
   if (
     !name ||
@@ -13,6 +19,12 @@ const validateCompanyRegistration = (req, res, next) => {
   ) {
     throw ApiError.badRequest(
       "company name, admin name, admin email, admin password and confirm password are required",
+    );
+  }
+
+  if (!["PREPAID", "POSTPAID"].includes(billingType)) {
+    throw ApiError.badRequest(
+      "billingType must be either PREPAID or POSTPAID",
     );
   }
 
