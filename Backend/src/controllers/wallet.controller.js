@@ -4,9 +4,27 @@ const creditWallet = async (req, res, next) => {
   try {
     const result = await walletService.creditPrepaidWallet(req.body);
 
-    return res.status(201).json({
+    return res.status(result.alreadyProcessed ? 200 : 201).json({
       success: true,
-      message: "Wallet credited successfully",
+      message: result.alreadyProcessed
+        ? "Wallet credit was already processed"
+        : "Wallet credited successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const debitWallet = async (req, res, next) => {
+  try {
+    const result = await walletService.debitPrepaidWallet(req.body);
+
+    return res.status(result.alreadyProcessed ? 200 : 201).json({
+      success: true,
+      message: result.alreadyProcessed
+        ? "Wallet debit was already processed"
+        : "Wallet debited successfully",
       data: result,
     });
   } catch (error) {
@@ -46,4 +64,4 @@ const getTransactions = async (req, res, next) => {
   }
 };
 
-export { creditWallet, getBalance, getTransactions };
+export { creditWallet, debitWallet, getBalance, getTransactions };

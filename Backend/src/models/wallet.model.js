@@ -1,4 +1,3 @@
-
 import db from "../config/db.js";
 
 const getCompanyBillingType = async (companyId, connection = db) => {
@@ -7,7 +6,7 @@ const getCompanyBillingType = async (companyId, connection = db) => {
      FROM companies
      WHERE id = ?
      LIMIT 1`,
-    [companyId]
+    [companyId],
   );
 
   return rows[0] ?? null;
@@ -16,7 +15,7 @@ const getCompanyBillingType = async (companyId, connection = db) => {
 const getAccountByCompanyId = async (
   companyId,
   connection = db,
-  lock = false
+  lock = false,
 ) => {
   const [rows] = await connection.query(
     `SELECT
@@ -30,7 +29,7 @@ const getAccountByCompanyId = async (
      FROM company_accounts
      WHERE company_id = ?
      LIMIT 1${lock ? " FOR UPDATE" : ""}`,
-    [companyId]
+    [companyId],
   );
 
   return rows[0] ?? null;
@@ -63,29 +62,46 @@ const insertWalletTransaction = async (transaction, connection) => {
       transaction.reference_id ?? null,
       transaction.description ?? null,
       transaction.created_by ?? null,
-    ]
+    ],
   );
 
   return result;
 };
 
-const updateAvailableBalance = async (
-  accountId,
-  balance,
-  connection
-) => {
+const updateAvailableBalance = async (accountId, balance, connection) => {
   await connection.query(
     `UPDATE company_accounts
      SET available_balance = ?
      WHERE id = ?`,
-    [balance, accountId]
+    [balance, accountId],
   );
 };
 
-const getWalletTransactions = async (
+const getWalletTransactionByReference = async (
   companyId,
-  { limit, offset }
+  referenceType,
+  referenceId,
+  connection = db,
 ) => {
+  const [rows] = await connection.query(
+    `SELECT
+       id,
+       transaction_type,
+       amount,
+       balance_before,
+       balance_after
+     FROM wallet_transactions
+     WHERE company_id = ?
+       AND reference_type = ?
+       AND reference_id = ?
+     LIMIT 1`,
+    [companyId, referenceType, referenceId],
+  );
+
+  return rows[0] ?? null;
+};
+
+const getWalletTransactions = async (companyId, { limit, offset }) => {
   const [rows] = await db.query(
     `SELECT
        id,
@@ -102,7 +118,7 @@ const getWalletTransactions = async (
      WHERE company_id = ?
      ORDER BY id DESC
      LIMIT ? OFFSET ?`,
-    [companyId, limit, offset]
+    [companyId, limit, offset],
   );
 
   return rows;
@@ -112,6 +128,7 @@ export {
   getCompanyBillingType,
   getAccountByCompanyId,
   insertWalletTransaction,
+  getWalletTransactionByReference,
   updateAvailableBalance,
   getWalletTransactions,
 };
