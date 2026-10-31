@@ -121,7 +121,7 @@ const Header = ({
       const response = await apiRequest('/api/wallet/balance');
       const wallet = response?.data ?? response;
 
-      if (wallet?.billingType?.toUpperCase() === 'PREPAID') {
+      if (['PREPAID', 'POSTPAID'].includes(String(wallet?.billingType || '').toUpperCase())) {
         setWalletData(wallet);
       } else {
         setWalletData(null);
@@ -269,8 +269,8 @@ const Header = ({
       {/* Right Side */}
       <div className="flex items-center space-x-2 sm:space-x-4">
 
-        {/* Prepaid Wallet Balance */}
-          {walletData?.billingType?.toUpperCase() === 'PREPAID' && (
+        {/* Billing summary: wallet balance for PREPAID, outstanding for POSTPAID */}
+          {walletData && (
             <button
               type="button"
               onClick={() => navigate('/wallet')}
@@ -285,7 +285,7 @@ const Header = ({
 
               <div className="flex flex-col text-left">
                 <span className="text-[9px] font-medium opacity-70 leading-tight">
-                  Wallet Balance
+                  {walletData.billingType?.toUpperCase() === 'POSTPAID' ? 'Outstanding' : 'Wallet Balance'}
                 </span>
 
                 <span className="text-xs font-bold leading-tight">
@@ -293,7 +293,7 @@ const Header = ({
                     style: 'currency',
                     currency: walletData.currency || 'INR',
                     maximumFractionDigits: 2,
-                  }).format(Number(walletData.availableBalance ?? 0))}
+                  }).format(Number(walletData.billingType?.toUpperCase() === 'POSTPAID' ? walletData.outstandingBalance ?? 0 : walletData.availableBalance ?? 0))}
                 </span>
               </div>
             </button>

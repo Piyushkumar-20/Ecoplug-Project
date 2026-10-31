@@ -105,7 +105,6 @@ function App() {
               />
 
               <Route path="/profile" element={<ProfileView />} />
-              <Route path="/wallet" element={<div className="min-h-full" />} />
               <Route path="/wallet" element={<WalletView />} />
               <Route path="/locations" element={<LocationsView />} />
               <Route path="/chargers" element={<ChargersView />} />
