@@ -273,31 +273,34 @@ const Header = ({
       <div className="flex items-center space-x-2 sm:space-x-4">
 
         {/* Prepaid Wallet Balance */}
-        {walletData?.billingType?.toUpperCase() === 'PREPAID' && (
-          <div
-            className={`flex items-center gap-2 px-2.5 py-2 rounded-xl ${
-              isDark
-                ? 'bg-slate-800 text-slate-200'
-                : 'bg-emerald-50 text-emerald-800'
-            }`}
-            title="Available Wallet Balance"
-          >
-            <Wallet className="w-4 h-4 shrink-0" />
-            <div className="flex flex-col">
-              <span className="text-[9px] font-medium opacity-70 leading-tight">
-                Wallet Balance
-              </span>
-              <span className="text-xs font-bold leading-tight">
-                {new Intl.NumberFormat('en-IN', {
-                  style: 'currency',
-                  currency: walletData.currency || 'INR',
-                  maximumFractionDigits: 2,
-                }).format(Number(walletData.availableBalance ?? 0))}
-              </span>
-            </div>
-          </div>
-        )}
+          {walletData?.billingType?.toUpperCase() === 'PREPAID' && (
+            <button
+              type="button"
+              onClick={() => navigate('/wallet')}
+              className={`flex items-center gap-2 px-2.5 py-2 rounded-xl transition-colors cursor-pointer ${
+                isDark
+                  ? 'bg-slate-800 text-slate-200 hover:bg-slate-700'
+                  : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+              }`}
+              title="Open Wallet"
+            >
+              <Wallet className="w-4 h-4 shrink-0" />
 
+              <div className="flex flex-col text-left">
+                <span className="text-[9px] font-medium opacity-70 leading-tight">
+                  Wallet Balance
+                </span>
+
+                <span className="text-xs font-bold leading-tight">
+                  {new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: walletData.currency || 'INR',
+                    maximumFractionDigits: 2,
+                  }).format(Number(walletData.availableBalance ?? 0))}
+                </span>
+              </div>
+            </button>
+          )}
         {/* Notifications */}
         <div className="relative" ref={notificationRef}>
           <button

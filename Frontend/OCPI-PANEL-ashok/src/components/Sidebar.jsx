@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   User,
+  Wallet,
   MapPin,
   Zap,
   Receipt,
@@ -38,6 +39,7 @@ useEffect(() => {
   const menuItems = [
     { id: 'dashboard', path: '/', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'profile', path: '/profile', label: 'Profile', icon: User },
+    { id: 'wallet', path: '/wallet', label: 'Wallet', icon: Wallet },
     { id: 'locations', path: '/locations', label: 'Locations', icon: MapPin },
     { id: 'chargers', path: '/chargers', label: 'Chargers', icon: Zap },
     { id: 'tariffs', path: '/tariffs', label: "Tariff's", icon: Receipt },
