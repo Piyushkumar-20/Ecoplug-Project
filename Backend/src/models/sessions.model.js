@@ -259,4 +259,26 @@ const getSessionById = async (sessionId, companyId) => {
   return rows[0] ?? null;
 };
 
-export { getSessionsByCompanyId, getSessionById };
+
+const getSessionForBillingById = async (sessionDbId) => {
+  if (!sessionDbId) return null;
+
+  const [rows] = await db.query(
+    `SELECT
+       id,
+       company_id AS companyId,
+       status,
+       end_date_time AS endedAt,
+       total_cost AS totalCost,
+       currency,
+       session_id AS externalSessionId
+     FROM ocpi_sessions
+     WHERE id = ?
+     LIMIT 1`,
+    [sessionDbId],
+  );
+
+  return rows[0] ?? null;
+};
+
+export { getSessionsByCompanyId, getSessionById, getSessionForBillingById };

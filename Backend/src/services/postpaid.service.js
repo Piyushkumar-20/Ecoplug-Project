@@ -3,7 +3,6 @@ import ApiError from "../utils/api-error.js";
 import { getCompanyBillingType, getAccountByCompanyId } from "../models/wallet.model.js";
 import {
   getSessionForPostpaidUsage,
-  getCompletedSessionsForPeriod,
   getPostpaidUsageBySession,
   insertPostpaidUsage,
   increaseOutstandingBalance,
@@ -13,6 +12,11 @@ import {
   insertInvoiceItems,
   listCompanyInvoices,
   getCompanyInvoiceById,
+  getInvoiceForUpdate,
+  getPaymentByReference,
+  insertPaymentRecord,
+  updateInvoicePayment,
+  decreaseOutstandingBalance,
 } from "../models/postpaid.model.js";
 
 const toPaise = (value) => Math.round(Number(value) * 100);
@@ -113,35 +117,6 @@ const recordPostpaidSessionUsage = async ({ companyId, sessionId }) => {
   } finally {
     connection.release();
   }
-};
-
-const accrueCompletedSessionsForPeriod = async ({ companyId, startDate, endDate }) => {
-  if (!validId(companyId)) throw ApiError.badRequest("A valid companyId is required");
-  const datePattern = /^\d{4}-\d{2}-\d{2}$/;
-  if (!datePattern.test(startDate || "") || !datePattern.test(endDate || "") || startDate > endDate) {
-    throw ApiError.badRequest("Valid startDate and endDate are required in YYYY-MM-DD format");
-  }
-
-  const company = await getCompanyBillingType(companyId);
-  if (!company) throw ApiError.notFound("Company not found");
-  if (company.billing_type !== "POSTPAID") {
-    throw ApiError.badRequest("Session accrual is only allowed for POSTPAID companies");
-  }
-
-  const sessions = await getCompletedSessionsForPeriod(companyId, startDate, endDate);
-  const results = [];
-  for (const session of sessions) {
-    results.push(await recordPostpaidSessionUsage({ companyId, sessionId: session.id }));
-  }
-  return {
-    companyId: Number(companyId),
-    periodStart: startDate,
-    periodEnd: endDate,
-    scannedSessions: sessions.length,
-    newlyAccrued: results.filter((item) => !item.alreadyProcessed).length,
-    alreadyAccrued: results.filter((item) => item.alreadyProcessed).length,
-    results,
-  };
 };
 
 const generateMonthlyInvoices = async ({ year, month, companyId = null }) => {
@@ -262,6 +237,12 @@ const generateMonthlyInvoices = async ({ year, month, companyId = null }) => {
 };
 
 const listInvoices = async (companyId, page = 1, limit = 20) => {
+  const company = await getCompanyBillingType(companyId);
+  if (!company) throw ApiError.notFound("Company not found");
+  if (company.billing_type !== "POSTPAID") {
+    throw ApiError.badRequest("Invoices are only available for POSTPAID companies");
+  }
+
   const safePage = parsePage(page, 1);
   const safeLimit = parsePage(limit, 20);
   const [countRows] = await db.query(
@@ -280,16 +261,173 @@ const listInvoices = async (companyId, page = 1, limit = 20) => {
 };
 
 const getInvoiceDetails = async (companyId, invoiceId) => {
+  const company = await getCompanyBillingType(companyId);
+  if (!company) throw ApiError.notFound("Company not found");
+  if (company.billing_type !== "POSTPAID") {
+    throw ApiError.badRequest("Invoices are only available for POSTPAID companies");
+  }
+
   if (!validId(invoiceId)) throw ApiError.badRequest("A valid invoiceId is required");
   const invoice = await getCompanyInvoiceById(companyId, invoiceId);
   if (!invoice) throw ApiError.notFound("Invoice not found");
   return invoice;
 };
 
+
+const recordInvoicePayment = async ({
+  companyId,
+  invoiceId,
+  amount,
+  paymentMethod,
+  transactionReference,
+  paymentDate,
+  notes,
+  recordedBy,
+}) => {
+  if (!validId(companyId) || !validId(invoiceId)) {
+    throw ApiError.badRequest("Valid companyId and invoiceId are required");
+  }
+
+  const amountNumber = Number(amount);
+  if (!Number.isFinite(amountNumber) || amountNumber <= 0 ||
+      Math.abs(amountNumber * 100 - Math.round(amountNumber * 100)) > 0.000001) {
+    throw ApiError.badRequest("Payment amount must be positive with at most two decimal places");
+  }
+
+  const allowedMethods = ["UPI", "BANK_TRANSFER", "NEFT", "RTGS", "IMPS", "CHEQUE", "CASH", "OTHER"];
+  const normalizedMethod = String(paymentMethod || "").trim().toUpperCase();
+  if (!allowedMethods.includes(normalizedMethod)) {
+    throw ApiError.badRequest(`paymentMethod must be one of: ${allowedMethods.join(", ")}`);
+  }
+
+  if (notes !== undefined && notes !== null && typeof notes !== "string") {
+    throw ApiError.badRequest("notes must be a string");
+  }
+
+  const reference = typeof transactionReference === "string"
+    ? transactionReference.trim()
+    : "";
+  if (!reference || reference.length > 150) {
+    throw ApiError.badRequest("A transactionReference between 1 and 150 characters is required");
+  }
+
+  const normalizedDate = paymentDate || new Date();
+  if (Number.isNaN(new Date(normalizedDate).getTime())) {
+    throw ApiError.badRequest("A valid paymentDate is required");
+  }
+
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const company = await getCompanyBillingType(companyId, connection);
+    if (!company) throw ApiError.notFound("Company not found");
+    if (company.billing_type !== "POSTPAID") {
+      throw ApiError.badRequest("Invoice payments are only allowed for POSTPAID companies");
+    }
+
+    const account = await getAccountByCompanyId(companyId, connection, true);
+    if (!account) throw ApiError.notFound("Company account not found");
+    if (account.status !== "ACTIVE") {
+      throw ApiError.forbidden("Company account is not active");
+    }
+
+    const existingPayment = await getPaymentByReference(companyId, reference, connection);
+    if (existingPayment) {
+      if (Number(existingPayment.invoice_id) !== Number(invoiceId) ||
+          toPaise(existingPayment.amount) !== toPaise(amountNumber) ||
+          existingPayment.payment_method !== normalizedMethod) {
+        throw ApiError.conflict("This transaction reference has already been used with different payment details");
+      }
+      await connection.commit();
+      return {
+        paymentId: existingPayment.id,
+        invoiceId: Number(invoiceId),
+        companyId: Number(companyId),
+        amount: fromPaise(toPaise(existingPayment.amount)),
+        alreadyProcessed: true,
+      };
+    }
+
+    const invoice = await getInvoiceForUpdate(companyId, invoiceId, connection);
+    if (!invoice) throw ApiError.notFound("Invoice not found");
+    if (invoice.status === "CANCELLED") {
+      throw ApiError.conflict("Payments cannot be recorded against a cancelled invoice");
+    }
+
+    const amountPaise = toPaise(amountNumber);
+    const totalPaise = toPaise(invoice.total_amount);
+    const paidPaise = toPaise(invoice.paid_amount);
+    const duePaise = totalPaise - paidPaise;
+
+    if (amountPaise > duePaise) {
+      throw ApiError.conflict("Payment amount exceeds the remaining invoice balance");
+    }
+
+    const outstandingPaise = toPaise(account.outstanding_balance);
+    if (outstandingPaise < amountPaise) {
+      throw ApiError.conflict("Company outstanding balance is lower than the invoice payment; billing records require reconciliation");
+    }
+
+    const newPaidPaise = paidPaise + amountPaise;
+    const newOutstandingPaise = outstandingPaise - amountPaise;
+    const paymentAmount = fromPaise(amountPaise);
+
+    const paymentResult = await insertPaymentRecord({
+      companyId: Number(companyId),
+      invoiceId: Number(invoiceId),
+      amount: paymentAmount,
+      paymentMethod: normalizedMethod,
+      transactionReference: reference,
+      paymentDate: normalizedDate,
+      notes: notes?.trim() || null,
+      recordedBy: recordedBy ? String(recordedBy) : null,
+    }, connection);
+
+    await updateInvoicePayment(
+      invoiceId,
+      fromPaise(newPaidPaise),
+      connection,
+    );
+
+    const balanceUpdate = await decreaseOutstandingBalance(
+      account.id,
+      paymentAmount,
+      connection,
+    );
+    if (balanceUpdate.affectedRows !== 1) {
+      throw ApiError.conflict("Unable to update company outstanding balance");
+    }
+
+    const updatedInvoice = await getInvoiceForUpdate(companyId, invoiceId, connection);
+    await connection.commit();
+
+    return {
+      paymentId: paymentResult.insertId,
+      companyId: Number(companyId),
+      invoiceId: Number(invoiceId),
+      amount: paymentAmount,
+      paidAmount: fromPaise(newPaidPaise),
+      remainingInvoiceAmount: fromPaise(totalPaise - newPaidPaise),
+      outstandingBalance: fromPaise(newOutstandingPaise),
+      invoiceStatus: updatedInvoice.status,
+      alreadyProcessed: false,
+    };
+  } catch (error) {
+    await connection.rollback();
+    if (error?.code === "ER_DUP_ENTRY") {
+      throw ApiError.conflict("This payment transaction reference has already been processed");
+    }
+    throw error;
+  } finally {
+    connection.release();
+  }
+};
+
 export {
   recordPostpaidSessionUsage,
-  accrueCompletedSessionsForPeriod,
   generateMonthlyInvoices,
   listInvoices,
   getInvoiceDetails,
+  recordInvoicePayment,
 };

@@ -3,6 +3,7 @@ import {
   getSessionDetails,
 } from "../services/sessions.service.js";
 import ApiError from "../utils/api-error.js";
+import { processCompletedSessionBilling } from "../services/billing.service.js";
 
 const isValidDate = (value) => {
   if (typeof value !== "string") {
@@ -102,4 +103,20 @@ const getSessionDetailsController = async (req, res, next) => {
   }
 };
 
-export { getSessionsController, getSessionDetailsController };
+
+const processCompletedSessionBillingController = async (req, res, next) => {
+  try {
+    const result = await processCompletedSessionBilling(req.body.sessionId);
+    return res.status(200).json({
+      success: true,
+      message: result.alreadyProcessed
+        ? "Session billing was already processed"
+        : "Session billing processed successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { getSessionsController, getSessionDetailsController, processCompletedSessionBillingController };

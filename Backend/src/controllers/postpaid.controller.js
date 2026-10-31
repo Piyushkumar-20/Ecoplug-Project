@@ -17,6 +17,31 @@ const getInvoices = async (req, res, next) => {
   }
 };
 
+const recordInvoicePayment = async (req, res, next) => {
+  try {
+    const result = await postpaidService.recordInvoicePayment({
+      companyId: req.user.companyId,
+      invoiceId: req.params.invoiceId,
+      amount: req.body.amount,
+      paymentMethod: req.body.paymentMethod,
+      transactionReference: req.body.transactionReference,
+      paymentDate: req.body.paymentDate,
+      notes: req.body.notes,
+      recordedBy: req.user.userId,
+    });
+
+    return res.status(result.alreadyProcessed ? 200 : 201).json({
+      success: true,
+      message: result.alreadyProcessed
+        ? "Invoice payment was already recorded"
+        : "Invoice payment recorded successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getInvoiceDetails = async (req, res, next) => {
   try {
     const invoice = await postpaidService.getInvoiceDetails(
@@ -33,4 +58,4 @@ const getInvoiceDetails = async (req, res, next) => {
   }
 };
 
-export { getInvoices, getInvoiceDetails };
+export { getInvoices, getInvoiceDetails, recordInvoicePayment };

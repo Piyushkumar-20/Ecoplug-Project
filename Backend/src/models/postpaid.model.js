@@ -12,22 +12,6 @@ const getSessionForPostpaidUsage = async (sessionId, companyId, connection = db)
   return rows[0] ?? null;
 };
 
-const getCompletedSessionsForPeriod = async (companyId, startDate, endDate) => {
-  const [rows] = await db.query(
-    `SELECT id
-     FROM ocpi_sessions
-     WHERE company_id = ?
-       AND UPPER(status) = 'COMPLETED'
-       AND end_date_time IS NOT NULL
-       AND total_cost IS NOT NULL
-       AND DATE(start_date_time) >= ?
-       AND DATE(start_date_time) <= ?
-     ORDER BY start_date_time ASC, id ASC`,
-    [companyId, startDate, endDate],
-  );
-  return rows;
-};
-
 const getPostpaidUsageBySession = async (companyId, sessionId, connection) => {
   const [rows] = await connection.query(
     `SELECT id, amount FROM postpaid_usage
@@ -150,12 +134,94 @@ const getCompanyInvoiceById = async (companyId, invoiceId) => {
     [invoiceId],
   );
 
-  return { ...rows[0], items };
+  const payments = await getInvoicePayments(invoiceId);
+  return { ...rows[0], items, payments };
+};
+
+
+const getInvoiceForUpdate = async (companyId, invoiceId, connection) => {
+  const [rows] = await connection.query(
+    `SELECT id, company_id, total_amount, paid_amount, due_date, status
+     FROM invoices
+     WHERE company_id = ? AND id = ?
+     LIMIT 1
+     FOR UPDATE`,
+    [companyId, invoiceId],
+  );
+  return rows[0] ?? null;
+};
+
+const getPaymentByReference = async (companyId, transactionReference, connection) => {
+  const [rows] = await connection.query(
+    `SELECT id, invoice_id, amount, payment_method
+     FROM payment_records
+     WHERE company_id = ? AND transaction_reference = ?
+     LIMIT 1`,
+    [companyId, transactionReference],
+  );
+  return rows[0] ?? null;
+};
+
+const insertPaymentRecord = async (payment, connection) => {
+  const [result] = await connection.query(
+    `INSERT INTO payment_records
+      (company_id, invoice_id, amount, payment_method, transaction_reference,
+       payment_date, notes, recorded_by)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      payment.companyId,
+      payment.invoiceId,
+      payment.amount,
+      payment.paymentMethod,
+      payment.transactionReference,
+      payment.paymentDate,
+      payment.notes ?? null,
+      payment.recordedBy ?? null,
+    ],
+  );
+  return result;
+};
+
+const updateInvoicePayment = async (invoiceId, paidAmount, connection) => {
+  await connection.query(
+    `UPDATE invoices
+     SET paid_amount = ?,
+         status = CASE
+           WHEN ? >= total_amount THEN 'PAID'
+           WHEN due_date < CURDATE() THEN 'OVERDUE'
+           ELSE 'PARTIALLY_PAID'
+         END
+     WHERE id = ?`,
+    [paidAmount, paidAmount, invoiceId],
+  );
+};
+
+const decreaseOutstandingBalance = async (accountId, amount, connection) => {
+  const [result] = await connection.query(
+    `UPDATE company_accounts
+     SET outstanding_balance = outstanding_balance - ?
+     WHERE id = ? AND outstanding_balance >= ?`,
+    [amount, accountId, amount],
+  );
+  return result;
+};
+
+const getInvoicePayments = async (invoiceId) => {
+  const [rows] = await db.query(
+    `SELECT id, amount, payment_method AS paymentMethod,
+            transaction_reference AS transactionReference,
+            payment_date AS paymentDate, notes, recorded_by AS recordedBy,
+            created_at AS createdAt
+     FROM payment_records
+     WHERE invoice_id = ?
+     ORDER BY payment_date DESC, id DESC`,
+    [invoiceId],
+  );
+  return rows;
 };
 
 export {
   getSessionForPostpaidUsage,
-  getCompletedSessionsForPeriod,
   getPostpaidUsageBySession,
   insertPostpaidUsage,
   increaseOutstandingBalance,
@@ -165,4 +231,10 @@ export {
   insertInvoiceItems,
   listCompanyInvoices,
   getCompanyInvoiceById,
+  getInvoiceForUpdate,
+  getPaymentByReference,
+  insertPaymentRecord,
+  updateInvoicePayment,
+  decreaseOutstandingBalance,
+  getInvoicePayments,
 };

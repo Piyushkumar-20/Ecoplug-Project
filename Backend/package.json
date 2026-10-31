@@ -5,8 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
-    "postpaid-billing": "node scripts/postpaid-billing.js"
+    "dev": "nodemon src/server.js"
   },
   "keywords": [],
   "author": "",
