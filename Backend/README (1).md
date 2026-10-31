@@ -100,16 +100,20 @@ All backend source code and documentation are confidential and proprietary. No p
 
 ## PREPAID / POSTPAID session billing integration
 
-The CMS must save the session as COMPLETED in `ocpi_sessions` first, commit that database change, and then call:
+After the CMS saves a charging session as `COMPLETED` and commits its database transaction, it calls:
 
 `POST /api/sessions/billing-completed`
 
-Headers: `x-cms-billing-key: <CMS_BILLING_API_KEY>` and `Content-Type: application/json`
+Header: `x-cms-billing-key: <CMS_BILLING_API_KEY>`
 
-Body: `{ "sessionId": 1449 }` where `sessionId` is the numeric `ocpi_sessions.id` value.
+Body: `{"sessionId": 1449}` where `sessionId` is the numeric internal `ocpi_sessions.id`.
 
-The backend reads `company_id`, `billing_type`, final amount and currency from MySQL. PREPAID sessions debit the wallet; POSTPAID sessions increase outstanding balance. Repeated callbacks are safe and do not process the same session twice. The CMS must call this endpoint after its database transaction commits.
+- PREPAID: the final session amount is deducted from the company's wallet.
+- POSTPAID: the session is saved in `postpaid_usage` and added to `company_accounts.outstanding_balance`.
+- Repeated callbacks are idempotent; a session is not charged or recorded twice.
 
-Monthly POSTPAID invoices are generated on the 1st at 00:05 Asia/Kolkata. If the backend was offline at that time, it generates the previous month's invoices on startup.
+POSTPAID companies can view their own records and current outstanding balance through:
 
-Migration `001_postpaid_billing.sql` was applied during Phase 1. Apply `002_postpaid_payment_idempotency.sql` once to enable unique payment-reference protection.
+`GET /api/wallet/postpaid/usage?page=1&limit=20`
+
+The endpoint returns the usage records, pagination, and `outstandingBalance`.

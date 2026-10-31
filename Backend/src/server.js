@@ -4,10 +4,6 @@ import { Server } from "socket.io";
 import app from "./app.js";
 import db from "./config/db.js";
 import { socketAuthMiddleware } from "./middleware/socket-auth.middleware.js";
-import {
-  startPostpaidInvoiceScheduler,
-  stopPostpaidInvoiceScheduler,
-} from "./services/postpaid-invoice-scheduler.service.js";
 
 import {
   startComplaintNotificationPolling,
@@ -52,7 +48,6 @@ async function startServer() {
 
       // Start automatic detection of new complaints.
       startComplaintNotificationPolling(io);
-      startPostpaidInvoiceScheduler();
     });
   } catch (error) {
     console.error("Server startup failed:", error.message);
@@ -68,7 +63,6 @@ async function shutdown(signal) {
 
   try {
     await stopComplaintNotificationPolling();
-    stopPostpaidInvoiceScheduler();
 
     // Stop accepting new HTTP connections.
     await new Promise((resolve, reject) => {
