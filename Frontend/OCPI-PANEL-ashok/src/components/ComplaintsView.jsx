@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Calendar,
-  ChevronDown,
   Plus,
-  SlidersHorizontal,
   Upload,
   LayoutGrid,
   Search,
@@ -13,16 +10,12 @@ import {
   AlertCircle,
   Clock,
   CheckCircle2,
-  TrendingUp,
   User,
   Phone,
   Mail,
   MapPin,
   Send,
-  Trash2,
-  Check,
-  Tag,
-  AlertTriangle,
+  Tag
 } from 'lucide-react';
 import { apiRequest } from '../services/api';
 

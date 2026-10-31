@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
@@ -94,7 +93,6 @@ function App() {
         >
           <Routes>
             <Route path="/login" element={<Login />} />
-
             <Route element={<ProtectedRoute />}>
               <Route
                 path="/"

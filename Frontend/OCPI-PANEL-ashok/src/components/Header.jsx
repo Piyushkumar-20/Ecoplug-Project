@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -22,8 +21,6 @@ const Header = ({
   onOpenSidebar,
   onToggleSidebar,
   isSidebarOpen,
-  selectedCpo,
-  setSelectedCpo,
 }) => {
   const [isCpoOpen, setIsCpoOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
