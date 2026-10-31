@@ -97,7 +97,7 @@ const ProfileView = () => {
     ));
 
   return (
-    <div className="relative -mt-6 -mx-6 min-h-screen pb-12 bg-[#F3F6FC]">
+    <div className="relative -mt-6 -mx-6 min-h-screen pb-12 bg-[#F3F6FC] dark:bg-slate-950 transition-colors duration-300">
 
       {/* Header */}
       <header className="relative isolate overflow-hidden bg-gradient-to-r from-[#0D1B35] via-[#153966] to-[#24528B] px-6 sm:px-10 pt-6 pb-20 sm:pb-24">
@@ -114,7 +114,7 @@ const ProfileView = () => {
       </header>
 
       {/* Main Profile Card */}
-      <section className="relative z-10 -mt-16 mx-4 sm:mx-8 lg:mx-12 bg-white p-6 sm:p-5 rounded-3xl border border-slate-200/70 shadow-lg">
+      <section className="relative z-10 -mt-16 mx-4 sm:mx-8 lg:mx-12 bg-white dark:bg-slate-900 p-6 sm:p-5 rounded-3xl border border-slate-200/70 dark:border-slate-700 shadow-lg transition-colors duration-300">
 
         <div className="flex flex-col items-center gap-5 md:flex-row md:items-start md:gap-7">
 
@@ -216,7 +216,7 @@ const ProfileView = () => {
      <section className="grid grid-cols-1 items-start gap-5 mt-5 px-4 sm:px-8 lg:px-12">
 
         {/* Company Details */}
-        <div className="bg-white p-5 sm:p-7 rounded-2xl border border-slate-200/80 shadow-sm">
+       <div className="bg-white dark:bg-slate-900 p-5 sm:p-7 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-sm transition-colors duration-300">
           <h3 className="text-base font-bold text-slate-900 flex items-center gap-3 mb-5">
             <Building2 className="w-5 h-5 text-orange-500" />
             <span>Company Details</span>
@@ -227,7 +227,7 @@ const ProfileView = () => {
             {companyDetails.map(([label, value]) => (
               <div
                 key={label}
-                className={`rounded-xl border border-slate-100 bg-slate-50/70 p-4 min-w-0 ${
+                className={`rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800 p-4 min-w-0 ${
                   label === "Address" ? "sm:col-span-2" : ""
                 }`}
               >
