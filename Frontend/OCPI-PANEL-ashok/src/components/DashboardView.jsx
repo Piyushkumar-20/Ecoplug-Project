@@ -350,7 +350,7 @@ useEffect(() => {
               key={i}
               className={`${
                 i === 0
-                  ? "lg:col-span-2 lg:row-span-2 bg-[#E3F6F2] text-slate-900 p-5 rounded-2xl border border-slate-200/80 shadow-md hover:-translate-y-1 hover:shadow-xl flex flex-col"
+                  ? "lg:col-span-2 lg:row-span-2 bg-[#E3F6F2] dark:bg-slate-900 text-slate-900 dark:text-slate-100 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-md hover:-translate-y-1 hover:shadow-xl flex flex-col"
                   : "lg:col-span-1 bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs hover:-translate-y-1 hover:shadow-md"
               } transition-all duration-300`}
             >
@@ -374,7 +374,7 @@ useEffect(() => {
                 <span
                   className={`${
                     i === 0
-                      ? "text-3xl text-slate-900"
+                     ? "text-3xl text-slate-900 dark:!text-slate-100"
                       : "text-xl sm:text-2xl text-slate-900"
                   } font-black tracking-tight block`}
                 >
@@ -387,9 +387,11 @@ useEffect(() => {
 
                 <span
                   className={`text-[11px] font-semibold ${
-                    i === 0 ? "text-slate-600" : "text-slate-500"
-                  } block truncate mt-0.5`}
-                >
+                    i === 0
+                      ? "text-slate-600 dark:!text-slate-400"
+                      : "text-slate-500"
+                     } block truncate mt-0.5`}
+                  >
                   {stat.title}
                 </span>
               </div>
@@ -436,7 +438,7 @@ useEffect(() => {
               <div
                 className={`${
                   i === 0
-                    ? "mt-2 pt-2 border-t border-white/10 text-purple-300"
+                    ? "mt-2 pt-2 border-t border-emerald-100 dark:border-slate-700 text-emerald-700"
                     : "mt-2.5 pt-2 border-t border-slate-100 text-emerald-600"
                 } flex items-center space-x-1 text-[11px] font-bold`}
               >
@@ -649,7 +651,7 @@ useEffect(() => {
 
           <div className="py-3 flex flex-col items-center">
             {/* Clickable and hoverable charger status donut */}
-           <div className="relative w-48 h-48 flex items-center justify-center outline-none border-0 ring-0 focus:outline-none focus:ring-0">
+           <div className="relative w-40 h-40 flex items-center justify-center outline-none border-0 ring-0 focus:outline-none focus:ring-0">
               <svg
                 className="w-full h-full transform -rotate-90 overflow-visible outline-none focus:outline-none"
                 viewBox="0 0 36 36"
@@ -736,37 +738,53 @@ useEffect(() => {
             })()}
           </div>
 
+          
           {/* Live charger status legend */}
-          <div className="grid grid-cols-2 gap-2 text-xs pt-3 border-t border-slate-100">
-            {chargerStatusData.map((item) => (
-              <button
-                type="button"
-                key={item.key}
-                onClick={() =>
-                  setSelectedChargerStatus(
-                    selectedChargerStatus === item.key ? null : item.key,
-                  )
-                }
-                onMouseEnter={() => setHoveredChargerStatus(item.key)}
-                onMouseLeave={() => setHoveredChargerStatus(null)}
-                className={`flex items-center space-x-1.5 text-left rounded-md px-1.5 py-1 transition-colors cursor-pointer ${
-                  selectedChargerStatus === item.key
-                    ? "bg-slate-100 ring-1 ring-slate-200"
-                    : "hover:bg-slate-50"
-                }`}
-                aria-pressed={selectedChargerStatus === item.key}
-              >
-                <span
-                  className={`w-2.5 h-2.5 rounded-full ${item.dot} shrink-0`}
-                />
-                <span className="text-slate-600 text-[11px] font-medium">
-                  {item.label}
-                </span>
-                <span className="font-bold text-slate-900 ml-auto text-[11px]">
-                  {item.count.toLocaleString("en-IN")}
-                </span>
-              </button>
-            ))}
+          <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
+            {chargerStatusData.map((item) => {
+              const isSelected = selectedChargerStatus === item.key;
+
+              const rowBg =
+                item.key === "AVAILABLE"
+                  ? "bg-emerald-50"
+                  : item.key === "INOPERATIVE"
+                    ? "bg-rose-50"
+                    : "bg-amber-50";
+
+              const dotColor =
+                item.key === "UNKNOWN"
+                  ? "bg-amber-500"
+                  : item.dot;
+
+              return (
+                <button
+                  type="button"
+                  key={item.key}
+                  onClick={() =>
+                    setSelectedChargerStatus(
+                      selectedChargerStatus === item.key ? null : item.key,
+                    )
+                  }
+                  onMouseEnter={() => setHoveredChargerStatus(item.key)}
+                  onMouseLeave={() => setHoveredChargerStatus(null)}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all ${rowBg} ${
+                    isSelected ? "ring-2 ring-slate-300" : "hover:brightness-95"
+                  }`}
+                  aria-pressed={isSelected}
+                >
+                  <span className="flex items-center gap-3">
+                    <span className={`w-3 h-3 rounded-full shrink-0 ${dotColor}`} />
+                    <span className="text-sm font-medium text-slate-900">
+                      {item.label}
+                    </span>
+                  </span>
+
+                  <span className="text-sm font-bold text-slate-900">
+                    {item.count.toLocaleString("en-IN")}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
