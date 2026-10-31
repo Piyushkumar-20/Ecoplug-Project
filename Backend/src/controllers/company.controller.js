@@ -26,6 +26,7 @@ const register = async (req, res) => {
         companyId: result.companyId,
         adminUserId: result.adminUserId,
         adminEmail: adminEmail.trim().toLowerCase(),
+
       },
     });
   } catch (error) {

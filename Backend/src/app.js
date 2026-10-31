@@ -11,6 +11,7 @@ import sessionRoutes from "./routes/session.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import complaintRoutes from "./routes/complaints.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
+import walletRoutes from "./routes/wallet.routes.js";
 import cookieParser from "cookie-parser";
 import { apiReference } from "@scalar/express-api-reference";
 import fs from "node:fs";
@@ -65,5 +66,6 @@ app.use("/api/complaints", complaintRoutes);
 app.use("/api/notifications", notificationRoutes);
 // Backwards-compatible alias for existing clients.
 app.use("/api/notification", notificationRoutes);
+app.use("/api/wallet", walletRoutes);
 
 export default app;
