@@ -6,6 +6,7 @@ const getPostpaidUsage = async (req, res, next) => {
       req.user.companyId,
       req.query.page,
       req.query.limit,
+      { search: req.query.search, startDate: req.query.startDate, endDate: req.query.endDate },
     );
     return res.status(200).json({
       success: true,

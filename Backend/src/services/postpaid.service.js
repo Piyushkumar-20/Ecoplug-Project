@@ -110,7 +110,7 @@ const recordPostpaidSessionUsage = async ({ companyId, sessionId }) => {
   }
 };
 
-const listPostpaidUsage = async (companyId, page = 1, limit = 20) => {
+const listPostpaidUsage = async (companyId, page = 1, limit = 20, filters = {}) => {
   if (!validId(companyId)) throw ApiError.badRequest("A valid company is required");
 
   const company = await getCompanyBillingType(companyId);
@@ -123,13 +123,14 @@ const listPostpaidUsage = async (companyId, page = 1, limit = 20) => {
   const safeLimit = parsePage(limit, 20);
   const [account, total] = await Promise.all([
     getAccountByCompanyId(companyId),
-    countCompanyPostpaidUsage(companyId),
+    countCompanyPostpaidUsage(companyId, filters),
   ]);
   if (!account) throw ApiError.notFound("Company account not found");
 
   const records = await listCompanyPostpaidUsage(companyId, {
     limit: safeLimit,
     offset: (safePage - 1) * safeLimit,
+    ...filters,
   });
 
   return {

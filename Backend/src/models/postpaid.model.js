@@ -41,25 +41,50 @@ const increaseOutstandingBalance = async (accountId, amount, connection) => {
   );
 };
 
-const listCompanyPostpaidUsage = async (companyId, { limit, offset }) => {
+const listCompanyPostpaidUsage = async (companyId, { limit, offset, search, startDate, endDate }) => {
+  const conditions = ["pu.company_id = ?"];
+  const params = [companyId];
+  if (startDate) { conditions.push("pu.usage_date >= ?"); params.push(startDate); }
+  if (endDate) { conditions.push("pu.usage_date <= ?"); params.push(endDate); }
+  if (search) {
+    conditions.push("(CAST(s.id AS CHAR) LIKE ? OR s.session_id LIKE ? OR l.name LIKE ? OR e.evse_id LIKE ?)");
+    const term = `%${String(search).trim()}%`;
+    params.push(term, term, term, term);
+  }
   const [rows] = await db.query(
-    `SELECT id, session_id AS sessionId, usage_date AS usageDate,
-            amount, currency, description, created_at AS recordedAt
-     FROM postpaid_usage
-     WHERE company_id = ?
-     ORDER BY usage_date DESC, id DESC
+    `SELECT pu.id, pu.session_id AS sessionId, pu.usage_date AS usageDate,
+            pu.amount, pu.currency, pu.description, pu.created_at AS recordedAt,
+            l.name AS location, e.evse_id AS chargerId, s.status
+     FROM postpaid_usage pu
+     LEFT JOIN ocpi_sessions s ON s.id = pu.session_id AND s.company_id = pu.company_id
+     LEFT JOIN ocpi_roaming_locations l ON l.id = s.location_id AND l.company_id = s.company_id
+     LEFT JOIN ocpi_roaming_evses e ON e.uid = s.evse_uid AND e.location_id = l.id
+     WHERE ${conditions.join(" AND ")}
+     ORDER BY pu.usage_date DESC, pu.id DESC
      LIMIT ? OFFSET ?`,
-    [companyId, limit, offset],
+    [...params, limit, offset],
   );
   return rows;
 };
 
-const countCompanyPostpaidUsage = async (companyId) => {
+const countCompanyPostpaidUsage = async (companyId, { search, startDate, endDate } = {}) => {
+  const conditions = ["pu.company_id = ?"];
+  const params = [companyId];
+  if (startDate) { conditions.push("pu.usage_date >= ?"); params.push(startDate); }
+  if (endDate) { conditions.push("pu.usage_date <= ?"); params.push(endDate); }
+  if (search) {
+    conditions.push("(CAST(s.id AS CHAR) LIKE ? OR s.session_id LIKE ? OR l.name LIKE ? OR e.evse_id LIKE ?)");
+    const term = `%${String(search).trim()}%`;
+    params.push(term, term, term, term);
+  }
   const [rows] = await db.query(
     `SELECT COUNT(*) AS total
-     FROM postpaid_usage
-     WHERE company_id = ?`,
-    [companyId],
+     FROM postpaid_usage pu
+     LEFT JOIN ocpi_sessions s ON s.id = pu.session_id AND s.company_id = pu.company_id
+     LEFT JOIN ocpi_roaming_locations l ON l.id = s.location_id AND l.company_id = s.company_id
+     LEFT JOIN ocpi_roaming_evses e ON e.uid = s.evse_uid AND e.location_id = l.id
+     WHERE ${conditions.join(" AND ")}`,
+    params,
   );
   return Number(rows[0]?.total ?? 0);
 };

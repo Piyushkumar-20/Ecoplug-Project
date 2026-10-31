@@ -8,6 +8,7 @@ import {
   getWalletTransactionByReference,
   updateAvailableBalance,
   getWalletTransactions,
+  getWalletTransactionSummary,
 } from "../models/wallet.model.js";
 
 // Convert rupees to integer paise for accurate arithmetic
@@ -358,30 +359,30 @@ const getWalletBalance = async (companyId) => {
   };
 };
 
-const listWalletTransactions = async (companyId, page = 1, limit = 20) => {
+const listWalletTransactions = async (companyId, page = 1, limit = 20, filters = {}) => {
   const safePage = Math.max(1, Number.parseInt(page, 10) || 1);
-
-  const safeLimit = Math.min(
-    100,
-    Math.max(1, Number.parseInt(limit, 10) || 20),
-  );
-
+  const safeLimit = Math.min(100, Math.max(1, Number.parseInt(limit, 10) || 20));
   const company = await getCompanyBillingType(companyId);
-
-  if (!company) {
-    throw ApiError.notFound("Company not found");
+  if (!company) throw ApiError.notFound("Company not found");
+  if (company.billing_type !== "PREPAID") {
+    throw ApiError.badRequest("Transaction history is only available for PREPAID companies");
   }
-
-  const transactions = await getWalletTransactions(companyId, {
+  const [result, summary] = await Promise.all([getWalletTransactions(companyId, {
     limit: safeLimit,
     offset: (safePage - 1) * safeLimit,
-  });
-
+    search: filters.search,
+    startDate: filters.startDate,
+    endDate: filters.endDate,
+    transactionType: filters.transactionType,
+  }), getWalletTransactionSummary(companyId)]);
   return {
-    transactions,
+    transactions: result.rows,
+    summary: { totalUsage: String(summary.totalUsage), totalCredits: String(summary.totalCredits) },
     pagination: {
       page: safePage,
       limit: safeLimit,
+      total: result.total,
+      totalPages: Math.ceil(result.total / safeLimit),
     },
   };
 };

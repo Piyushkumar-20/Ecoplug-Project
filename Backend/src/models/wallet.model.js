@@ -101,28 +101,45 @@ const getWalletTransactionByReference = async (
   return rows[0] ?? null;
 };
 
-const getWalletTransactions = async (companyId, { limit, offset }) => {
+const getWalletTransactions = async (companyId, { limit, offset, search, startDate, endDate, transactionType }) => {
+  const conditions = ["company_id = ?"];
+  const params = [companyId];
+  if (transactionType) { conditions.push("transaction_type = ?"); params.push(transactionType); }
+  if (startDate) { conditions.push("DATE(created_at) >= ?"); params.push(startDate); }
+  if (endDate) { conditions.push("DATE(created_at) <= ?"); params.push(endDate); }
+  if (search) {
+    conditions.push("(description LIKE ? OR reference_id LIKE ? OR CAST(id AS CHAR) LIKE ?)");
+    const term = `%${String(search).trim()}%`;
+    params.push(term, term, term);
+  }
+  const where = conditions.join(" AND ");
+  const [rows] = await db.query(
+    `SELECT id, transaction_type AS transactionType, amount,
+            balance_before AS balanceBefore, balance_after AS balanceAfter,
+            reference_type AS referenceType, reference_id AS referenceId,
+            description, created_by AS createdBy, created_at AS createdAt
+     FROM wallet_transactions WHERE ${where}
+     ORDER BY id DESC LIMIT ? OFFSET ?`,
+    [...params, limit, offset],
+  );
+  const [countRows] = await db.query(
+    `SELECT COUNT(*) AS total FROM wallet_transactions WHERE ${where}`,
+    params,
+  );
+  return { rows, total: Number(countRows[0]?.total ?? 0) };
+};
+const getWalletTransactionSummary = async (companyId) => {
   const [rows] = await db.query(
     `SELECT
-       id,
-       transaction_type AS transactionType,
-       amount,
-       balance_before AS balanceBefore,
-       balance_after AS balanceAfter,
-       reference_type AS referenceType,
-       reference_id AS referenceId,
-       description,
-       created_by AS createdBy,
-       created_at AS createdAt
+       COALESCE(SUM(CASE WHEN transaction_type = 'DEBIT' THEN amount ELSE 0 END), 0) AS totalUsage,
+       COALESCE(SUM(CASE WHEN transaction_type = 'CREDIT' THEN amount ELSE 0 END), 0) AS totalCredits
      FROM wallet_transactions
-     WHERE company_id = ?
-     ORDER BY id DESC
-     LIMIT ? OFFSET ?`,
-    [companyId, limit, offset],
+     WHERE company_id = ?`,
+    [companyId],
   );
-
-  return rows;
+  return rows[0] ?? { totalUsage: 0, totalCredits: 0 };
 };
+
 
 export {
   getCompanyBillingType,
@@ -131,4 +148,5 @@ export {
   getWalletTransactionByReference,
   updateAvailableBalance,
   getWalletTransactions,
+  getWalletTransactionSummary,
 };

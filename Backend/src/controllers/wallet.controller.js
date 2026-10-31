@@ -52,6 +52,7 @@ const getTransactions = async (req, res, next) => {
       req.user.companyId,
       req.query.page,
       req.query.limit,
+      { search: req.query.search, startDate: req.query.startDate, endDate: req.query.endDate, transactionType: req.query.transactionType },
     );
 
     return res.status(200).json({
