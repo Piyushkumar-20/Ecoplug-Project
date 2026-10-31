@@ -6,6 +6,7 @@ import {
 } from "../models/companies.model.js";
 import { createUser } from "../models/user.model.js";
 import ApiError from "../utils/api-error.js"
+import { createCompanyAccount } from "../models/company-accounts.model.js";
 
 const registerCompany = async ({
   name,
@@ -36,6 +37,7 @@ const registerCompany = async ({
       connection,
     );
 
+    await createCompanyAccount(companyId, connection)
     await connection.commit();
 
     return {
