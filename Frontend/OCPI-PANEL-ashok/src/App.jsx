@@ -6,6 +6,7 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import DashboardView from './components/DashboardView';
 import ProfileView from './components/ProfileView';
+import WalletView from './components/WalletView';
 import LocationsView from './components/LocationsView';
 import ChargersView from './components/ChargersView';
 import TariffsView from './components/TariffsView';
@@ -106,10 +107,8 @@ function App() {
               />
 
               <Route path="/profile" element={<ProfileView />} />
-              <Route
-                path="/wallet"
-                element={<div className="min-h-full" />}
-              />
+              <Route path="/wallet" element={<div className="min-h-full" />} />
+              <Route path="/wallet" element={<WalletView />} />
               <Route path="/locations" element={<LocationsView />} />
               <Route path="/chargers" element={<ChargersView />} />
               <Route path="/tariffs" element={<TariffsView />} />
