@@ -768,18 +768,18 @@ useEffect(() => {
                   onMouseEnter={() => setHoveredChargerStatus(item.key)}
                   onMouseLeave={() => setHoveredChargerStatus(null)}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all ${rowBg} ${
-                    isSelected ? "ring-2 ring-slate-300" : "hover:brightness-95"
-                  }`}
+                  isSelected ? "ring-2 ring-slate-300" : "hover:brightness-95"
+                }`}
                   aria-pressed={isSelected}
                 >
                   <span className="flex items-center gap-3">
                     <span className={`w-3 h-3 rounded-full shrink-0 ${dotColor}`} />
-                    <span className="text-sm font-medium text-slate-900">
+                    <span className="text-sm font-medium !text-slate-900">
                       {item.label}
                     </span>
                   </span>
 
-                  <span className="text-sm font-bold text-slate-900">
+                  <span className="text-sm font-bold !text-slate-900">
                     {item.count.toLocaleString("en-IN")}
                   </span>
                 </button>
