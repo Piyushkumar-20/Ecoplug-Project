@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -8,8 +9,13 @@ import {
   Bell,
   ChevronDown,
   PanelLeft,
+  Wallet,
 } from 'lucide-react';
-import { apiRequest, clearAccessToken } from '../services/api';
+import {
+  apiRequest,
+  clearAccessToken,
+  restoreSession
+} from '../services/api';
 import { socket } from '../services/socket';
 
 const Header = ({
@@ -25,6 +31,9 @@ const Header = ({
   const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [notificationsError, setNotificationsError] = useState("");
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  // Wallet state
+  const [walletData, setWalletData] = useState(null);
 
   const [theme, setTheme] = useState(() =>
     localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'
@@ -100,6 +109,34 @@ const Header = ({
     .join('')
     .slice(0, 2)
     .toUpperCase();
+
+  // Fetch wallet balance
+  useEffect(() => {
+  const loadWalletBalance = async () => {
+    try {
+      const isSessionValid = await restoreSession();
+
+      if (!isSessionValid) {
+        setWalletData(null);
+        return;
+      }
+
+      const response = await apiRequest('/api/wallet/balance');
+      const wallet = response?.data ?? response;
+
+      if (wallet?.billingType?.toUpperCase() === 'PREPAID') {
+        setWalletData(wallet);
+      } else {
+        setWalletData(null);
+      }
+    } catch (error) {
+      console.error('Unable to load wallet balance:', error);
+      setWalletData(null);
+    }
+  };
+
+  loadWalletBalance();
+}, []);
 
   const loadNotifications = async () => {
     setNotificationsLoading(true);
@@ -234,6 +271,33 @@ const Header = ({
 
       {/* Right Side */}
       <div className="flex items-center space-x-2 sm:space-x-4">
+
+        {/* Prepaid Wallet Balance */}
+        {walletData?.billingType?.toUpperCase() === 'PREPAID' && (
+          <div
+            className={`flex items-center gap-2 px-2.5 py-2 rounded-xl ${
+              isDark
+                ? 'bg-slate-800 text-slate-200'
+                : 'bg-emerald-50 text-emerald-800'
+            }`}
+            title="Available Wallet Balance"
+          >
+            <Wallet className="w-4 h-4 shrink-0" />
+            <div className="flex flex-col">
+              <span className="text-[9px] font-medium opacity-70 leading-tight">
+                Wallet Balance
+              </span>
+              <span className="text-xs font-bold leading-tight">
+                {new Intl.NumberFormat('en-IN', {
+                  style: 'currency',
+                  currency: walletData.currency || 'INR',
+                  maximumFractionDigits: 2,
+                }).format(Number(walletData.availableBalance ?? 0))}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Notifications */}
         <div className="relative" ref={notificationRef}>
           <button
@@ -355,7 +419,6 @@ const Header = ({
           )}
         </div>
 
-        
         <div
           className={`h-6 w-px hidden sm:block ${
             isDark ? 'bg-slate-700' : 'bg-slate-200'
