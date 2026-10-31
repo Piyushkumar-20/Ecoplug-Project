@@ -10,6 +10,7 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile --prod
 
 COPY src ./src
+COPY database ./database
 COPY openapi.json ./openapi.json
 
 EXPOSE 5000
