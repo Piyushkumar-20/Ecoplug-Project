@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import db from "../config/db.js";
 import ApiError from "../utils/api-error.js";
 
@@ -50,12 +51,12 @@ const creditPrepaidWallet = async ({
 
   // 3. Validate transaction reference
   const normalizedReference =
-    typeof reference === "string" ? reference.trim() : "";
+    typeof reference === "string" && reference.trim()
+      ? reference.trim()
+      : `WLT-CR-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${randomUUID().slice(0, 8).toUpperCase()}`;
 
-  if (!normalizedReference || normalizedReference.length > 100) {
-    throw ApiError.badRequest(
-      "A valid reference between 1 and 100 characters is required",
-    );
+  if (normalizedReference.length > 100) {
+    throw ApiError.badRequest("Reference must not exceed 100 characters");
   }
 
   const connection = await db.getConnection();
@@ -75,9 +76,6 @@ const creditPrepaidWallet = async ({
         "Wallet credits are only allowed for PREPAID companies",
       );
     }
-
-    // 5. Fetch and lock company account
-    // This serializes credit operations for the same company.
     const account = await getAccountByCompanyId(companyId, connection, true);
 
     if (!account) {
@@ -107,14 +105,12 @@ const creditPrepaidWallet = async ({
           "This reference has already been used with a different amount",
         );
       }
-
-      // Same reference and same amount:
-      // Return original transaction without crediting again.
       await connection.commit();
 
       return {
         transactionId: existingTransaction.id,
         companyId: Number(companyId),
+        referenceId: normalizedReference,
         amount: fromCents(existingAmountCents),
         previousBalance: fromCents(toCents(existingTransaction.balance_before)),
         currentBalance: fromCents(toCents(existingTransaction.balance_after)),
@@ -162,6 +158,7 @@ const creditPrepaidWallet = async ({
     return {
       transactionId: transactionResult.insertId,
       companyId: Number(companyId),
+      referenceId: normalizedReference,
       amount: normalizedAmount,
       previousBalance: balanceBefore,
       currentBalance: balanceAfter,
@@ -283,10 +280,8 @@ const debitPrepaidWallet = async ({
     const beforeCents = toCents(account.available_balance);
     const debitCents = toCents(amount);
 
-    if (beforeCents < debitCents) {
-      throw ApiError.conflict("Insufficient wallet balance");
-    }
-
+    // Charging is not blocked for PREPAID accounts with insufficient funds.
+    // The balance may go negative; the dashboard shows a warning below ₹500.
     const afterCents = beforeCents - debitCents;
 
     const balanceBefore = fromCents(beforeCents);
@@ -324,6 +319,7 @@ const debitPrepaidWallet = async ({
       previousBalance: balanceBefore,
       currentBalance: balanceAfter,
       currency: "INR",
+      lowBalance: afterCents < 50000,
       alreadyProcessed: false,
     };
   } catch (error) {
@@ -355,6 +351,8 @@ const getWalletBalance = async (companyId) => {
     creditLimit: account.credit_limit,
     outstandingBalance: account.outstanding_balance,
     status: account.status,
+    lowBalance: company.billing_type === "PREPAID" && toCents(account.available_balance) < 50000,
+    lowBalanceThreshold: "500.00",
     currency: "INR",
   };
 };
