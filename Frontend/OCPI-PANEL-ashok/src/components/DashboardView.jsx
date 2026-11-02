@@ -119,6 +119,7 @@ useEffect(() => {
 
       value: formatCount(summary.totalChargers),
 
+      subtitle: "Total Chargers",
       change: "Live",
 
       bg: "bg-emerald-100/70",
@@ -133,6 +134,8 @@ useEffect(() => {
 
       value: formatCount(summary.totalSessions),
 
+      subtitle: "Total Sessions",
+
       change: "Live",
 
       bg: "bg-purple-100/70",
@@ -146,6 +149,8 @@ useEffect(() => {
       title: "Charging Stations",
 
       value: formatCount(summary.totalLocations),
+      
+      subtitle: "Total Stations",
 
       change: "Live",
 
@@ -160,7 +165,7 @@ useEffect(() => {
       title: "Failed Session",
 
       value: formatCount(failedSessions),
-
+      subtitle: "Total Failed Sessions",
       change: "Live",
 
       bg: "bg-teal-100/70",
@@ -442,12 +447,10 @@ useEffect(() => {
                     : "mt-2.5 pt-2 border-t border-slate-100 text-emerald-600"
                 } flex items-center space-x-1 text-[11px] font-bold`}
               >
-                <TrendingUp className="w-3 h-3" />
-
-                <span>{stat.change}</span>
+                
 
                 <span className="text-[10px] font-normal text-slate-400">
-                  vs last month
+                  {stat.subtitle}
                 </span>
               </div>
             </div>

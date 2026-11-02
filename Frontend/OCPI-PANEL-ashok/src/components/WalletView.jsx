@@ -8,6 +8,7 @@ import { apiRequest } from '../services/api';
 const money = (value) => new Intl.NumberFormat('en-IN', {
   style: 'currency', currency: 'INR', minimumFractionDigits: 2, maximumFractionDigits: 2,
 }).format(Number(value) || 0);
+
 const dateTime = (value) => {
   if (!value) return '—';
   const date = new Date(value);
@@ -21,6 +22,7 @@ const dateOnly = (value) => {
   if (Number.isNaN(d.getTime())) return String(value).slice(0, 10);
   return d.toISOString().slice(0, 10);
 };
+
 const unwrap = (response) => response?.data ?? response ?? {};
 
 const WalletView = () => {
@@ -119,6 +121,7 @@ const WalletView = () => {
           <div className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700"><Wallet className="h-9 w-9"/></div>
           <div className="min-w-0"><p className="text-sm font-semibold text-slate-500">{billingType === 'PREPAID' ? 'Available balance' : 'Outstanding Balance'}</p><p className="mt-1 text-3xl font-bold tracking-tight text-emerald-700">{money(billingType === 'PREPAID' ? summary?.availableBalance : summary?.outstandingBalance)}</p><p className="mt-1 text-sm text-slate-500">{billingType === 'PREPAID' ? 'Current wallet balance' : 'Total pending usage amount'}</p></div>
         </div>
+
         <div className="flex min-h-[145px] items-center gap-5 rounded-2xl border border-slate-100 bg-white p-7 shadow-sm">
           <div className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700"><Zap className="h-9 w-9"/></div>
           <div><p className="text-sm font-semibold text-slate-500">{billingType === 'PREPAID' ? 'Total usage' : 'Total Charging Sessions'}</p><p className="mt-1 text-3xl font-bold tracking-tight text-slate-900">{billingType === 'PREPAID' ? money(summary?.totalUsage ?? 0) : Number(pagination.total || 0).toLocaleString('en-IN')}</p><p className="mt-1 text-sm text-slate-500">{billingType === 'PREPAID' ? 'Total charging session deductions' : 'Recorded sessions'}</p></div>
@@ -149,6 +152,7 @@ const WalletView = () => {
                 <tr key={item.id ?? `${item.sessionId}-${index}`} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/70">
                   <td className="px-3 py-4 font-semibold text-slate-900">{item.sessionId ?? '—'}</td><td className="whitespace-nowrap px-3 py-4 text-slate-600">{dateTime(item.usageDate)}</td><td className="px-3 py-4 text-slate-700">{item.location || item.description || '—'}</td><td className="px-3 py-4 text-slate-700">{item.chargerId || '—'}</td><td className="whitespace-nowrap px-3 py-4 font-bold text-slate-900">{money(item.amount)}</td><td className="px-3 py-4"><span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">{item.status || 'Completed'}</span></td>
                 </tr>
+                
               ))}
             </tbody>
           </table>
