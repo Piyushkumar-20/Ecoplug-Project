@@ -10,7 +10,27 @@ const money = (value) => new Intl.NumberFormat('en-IN', {
 }).format(Number(value) || 0);
 const dateTime = (value) => {
   if (!value) return '—';
-  const date = new Date(value);
+
+  let date;
+  if (typeof value === 'string') {
+    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+    if (match) {
+      const [, year, month, day, hour = '0', minute = '0', second = '0'] = match;
+      date = new Date(
+        Number(year),
+        Number(month) - 1,
+        Number(day),
+        Number(hour),
+        Number(minute),
+        Number(second),
+      );
+    } else {
+      date = new Date(value);
+    }
+  } else {
+    date = new Date(value);
+  }
+
   return Number.isNaN(date.getTime()) ? '—' : new Intl.DateTimeFormat('en-IN', {
     day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
   }).format(date);
@@ -80,7 +100,7 @@ const WalletView = () => {
       : ['Session ID', 'Date', 'Location', 'Charger ID', 'Amount', 'Status'];
     const values = rows.map((item) => billingType === 'PREPAID'
       ? [dateTime(item.createdAt), item.description || 'Wallet transaction', item.transactionType, item.referenceId, item.amount, item.balanceAfter]
-      : [item.sessionId, dateTime(item.usageDate), item.location || item.description || '', item.chargerId || '', item.amount, item.status || 'COMPLETED']);
+      : [item.sessionId, dateTime(item.usageDate), item.location || item.description || '', item.chargerLabel || item.chargerId || '', item.amount, item.status || 'COMPLETED']);
     const csv = [headers, ...values].map((line) => line.map((cell) => `"${String(cell ?? '').replaceAll('"', '""')}"`).join(',')).join('\n');
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
     const link = document.createElement('a'); link.href = url; link.download = `${billingType.toLowerCase()}-${billingType === 'PREPAID' ? 'transactions' : 'usage'}.csv`; link.click(); URL.revokeObjectURL(url);
@@ -148,7 +168,7 @@ const WalletView = () => {
                 </tr>
               ) : (
                 <tr key={item.id ?? `${item.sessionId}-${index}`} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/70">
-                  <td className="px-3 py-4 font-semibold text-slate-900">{item.sessionId ?? '—'}</td><td className="whitespace-nowrap px-3 py-4 text-slate-600">{dateTime(item.usageDate)}</td><td className="px-3 py-4 text-slate-700">{item.location || item.description || '—'}</td><td className="px-3 py-4 text-slate-700">{item.chargerId || '—'}</td><td className="whitespace-nowrap px-3 py-4 font-bold text-slate-900">{money(item.amount)}</td><td className="px-3 py-4"><span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">{item.status || 'Completed'}</span></td>
+                  <td className="px-3 py-4 font-semibold text-slate-900">{item.sessionId ?? '—'}</td><td className="whitespace-nowrap px-3 py-4 text-slate-600">{dateTime(item.usageDate)}</td><td className="px-3 py-4 text-slate-700">{item.location || item.description || '—'}</td><td className="px-3 py-4 text-slate-700">{item.chargerLabel || item.chargerId || '—'}</td><td className="whitespace-nowrap px-3 py-4 font-bold text-slate-900">{money(item.amount)}</td><td className="px-3 py-4"><span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">{item.status || 'Completed'}</span></td>
                 </tr>
               ))}
             </tbody>
