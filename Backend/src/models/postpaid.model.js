@@ -52,9 +52,17 @@ const listCompanyPostpaidUsage = async (companyId, { limit, offset, search, star
     params.push(term, term, term, term);
   }
   const [rows] = await db.query(
-    `SELECT pu.id, pu.session_id AS sessionId, pu.usage_date AS usageDate,
+    `SELECT pu.id, pu.session_id AS sessionId,
+            DATE_FORMAT(s.start_date_time, '%Y-%m-%d %H:%i:%s') AS usageDate,
             pu.amount, pu.currency, pu.description, pu.created_at AS recordedAt,
-            l.name AS location, e.evse_id AS chargerId, s.status
+            l.name AS location,
+            e.evse_id AS chargerId,
+            CASE
+              WHEN e.evse_id IS NOT NULL AND e.evse_id LIKE '%*%'
+                THEN CONCAT(s.location_id, ' · Charger ', SUBSTRING_INDEX(e.evse_id, '*', -1))
+              ELSE e.evse_id
+            END AS chargerLabel,
+            s.status
      FROM postpaid_usage pu
      LEFT JOIN ocpi_sessions s ON s.id = pu.session_id AND s.company_id = pu.company_id
      LEFT JOIN ocpi_roaming_locations l ON l.id = s.location_id AND l.company_id = s.company_id
