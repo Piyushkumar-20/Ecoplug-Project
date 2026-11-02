@@ -8,7 +8,6 @@ import { apiRequest } from '../services/api';
 const money = (value) => new Intl.NumberFormat('en-IN', {
   style: 'currency', currency: 'INR', minimumFractionDigits: 2, maximumFractionDigits: 2,
 }).format(Number(value) || 0);
-
 const dateTime = (value) => {
   if (!value) return '—';
   const date = new Date(value);
@@ -16,13 +15,6 @@ const dateTime = (value) => {
     day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
   }).format(date);
 };
-const dateOnly = (value) => {
-  if (!value) return '';
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return String(value).slice(0, 10);
-  return d.toISOString().slice(0, 10);
-};
-
 const unwrap = (response) => response?.data ?? response ?? {};
 
 const WalletView = () => {
@@ -88,7 +80,7 @@ const WalletView = () => {
       : ['Session ID', 'Date', 'Location', 'Charger ID', 'Amount', 'Status'];
     const values = rows.map((item) => billingType === 'PREPAID'
       ? [dateTime(item.createdAt), item.description || 'Wallet transaction', item.transactionType, item.referenceId, item.amount, item.balanceAfter]
-      : [item.sessionId, dateOnly(item.usageDate), item.location || item.description || '', item.chargerId || '', item.amount, item.status || 'COMPLETED']);
+      : [item.sessionId, dateTime(item.usageDate), item.location || item.description || '', item.chargerId || '', item.amount, item.status || 'COMPLETED']);
     const csv = [headers, ...values].map((line) => line.map((cell) => `"${String(cell ?? '').replaceAll('"', '""')}"`).join(',')).join('\n');
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
     const link = document.createElement('a'); link.href = url; link.download = `${billingType.toLowerCase()}-${billingType === 'PREPAID' ? 'transactions' : 'usage'}.csv`; link.click(); URL.revokeObjectURL(url);
@@ -114,6 +106,13 @@ const WalletView = () => {
         </div>
       </div>
 
+      {billingType === 'PREPAID' && summary?.lowBalance && (
+        <div role="status" className="flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+          <Info className="mt-0.5 h-5 w-5 shrink-0" />
+          <div><p className="font-bold">Low wallet balance</p><p>Your available balance is below ₹500. Charging will continue; please arrange a wallet recharge to avoid a negative balance.</p></div>
+        </div>
+      )}
+
       {error && <div className="flex items-start justify-between gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"><span>{error}</span><button onClick={() => void loadWallet()} className="font-semibold underline">Retry</button></div>}
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
@@ -121,7 +120,6 @@ const WalletView = () => {
           <div className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700"><Wallet className="h-9 w-9"/></div>
           <div className="min-w-0"><p className="text-sm font-semibold text-slate-500">{billingType === 'PREPAID' ? 'Available balance' : 'Outstanding Balance'}</p><p className="mt-1 text-3xl font-bold tracking-tight text-emerald-700">{money(billingType === 'PREPAID' ? summary?.availableBalance : summary?.outstandingBalance)}</p><p className="mt-1 text-sm text-slate-500">{billingType === 'PREPAID' ? 'Current wallet balance' : 'Total pending usage amount'}</p></div>
         </div>
-
         <div className="flex min-h-[145px] items-center gap-5 rounded-2xl border border-slate-100 bg-white p-7 shadow-sm">
           <div className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700"><Zap className="h-9 w-9"/></div>
           <div><p className="text-sm font-semibold text-slate-500">{billingType === 'PREPAID' ? 'Total usage' : 'Total Charging Sessions'}</p><p className="mt-1 text-3xl font-bold tracking-tight text-slate-900">{billingType === 'PREPAID' ? money(summary?.totalUsage ?? 0) : Number(pagination.total || 0).toLocaleString('en-IN')}</p><p className="mt-1 text-sm text-slate-500">{billingType === 'PREPAID' ? 'Total charging session deductions' : 'Recorded sessions'}</p></div>
@@ -135,7 +133,7 @@ const WalletView = () => {
         </div>
 
         <div className="mb-5 grid grid-cols-1 gap-3 lg:grid-cols-[minmax(170px,0.8fr)_minmax(220px,1.2fr)]">
-          {billingType === 'PREPAID' && <select value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }} className="rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-700 outline-none focus:border-emerald-500"><option value="ALL">All Transactions</option><option value="CREDIT">Credits</option><option value="DEBIT">Debits</option></select>}
+          {billingType === 'PREPAID' && <select value={typeFilter} onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }} className="rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-700 outline-none focus:border-emerald-500"><option value="ALL">All Transactions</option><option value="CREDIT">Credits</option><option value="DEBIT">Debits</option><option value="REFUND">Refunds</option><option value="ADJUSTMENT">Adjustments</option></select>}
           <label className="flex items-center gap-2 rounded-xl border border-slate-200 px-3.5 py-2.5"><CalendarDays className="h-4 w-4 shrink-0 text-slate-500"/><input aria-label="Start date" type="date" value={startDate} onChange={(e) => { setStartDate(e.target.value); setPage(1); }} className="min-w-0 w-full text-sm text-slate-600 outline-none"/><span className="text-slate-300">—</span><input aria-label="End date" type="date" value={endDate} min={startDate || undefined} onChange={(e) => { setEndDate(e.target.value); setPage(1); }} className="min-w-0 w-full text-sm text-slate-600 outline-none"/></label>
           <label className="flex items-center gap-2 rounded-xl border border-slate-200 px-3.5 py-2.5 lg:col-span-2"><Search className="h-4 w-4 shrink-0 text-slate-500"/><input type="search" value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder={billingType === 'PREPAID' ? 'Search by description or reference ID...' : 'Search by session ID...'} className="w-full text-sm outline-none placeholder:text-slate-400"/></label>
         </div>
@@ -146,13 +144,12 @@ const WalletView = () => {
             <tbody>
               {loading ? <tr><td colSpan={6} className="px-3 py-12 text-center text-slate-500"><Loader2 className="mr-2 inline h-4 w-4 animate-spin"/>Loading records...</td></tr> : formattedRows.length === 0 ? <tr><td colSpan={6} className="px-3 py-12 text-center text-slate-500">No {billingType === 'PREPAID' ? 'transactions' : 'charging usage records'} found.</td></tr> : formattedRows.map((item, index) => billingType === 'PREPAID' ? (
                 <tr key={item.id ?? `${item.referenceId}-${index}`} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/70">
-                  <td className="whitespace-nowrap px-3 py-4 text-slate-600">{dateTime(item.createdAt)}</td><td className="max-w-[220px] px-3 py-4"><p className="truncate font-semibold text-slate-900">{item.description || (item.transactionType === 'CREDIT' ? 'Wallet recharge' : 'Charging session')}</p></td><td className="px-3 py-4"><span className={`rounded-full px-3 py-1 text-xs font-bold ${String(item.transactionType).toUpperCase() === 'CREDIT' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-50 text-red-600'}`}>{item.transactionType}</span></td><td className="whitespace-nowrap px-3 py-4 text-slate-600">{item.referenceId || '—'}</td><td className={`whitespace-nowrap px-3 py-4 font-bold ${String(item.transactionType).toUpperCase() === 'CREDIT' ? 'text-emerald-700' : 'text-red-600'}`}>{String(item.transactionType).toUpperCase() === 'CREDIT' ? '+' : '-'} {money(item.amount)}</td><td className="whitespace-nowrap px-3 py-4 font-bold text-slate-900">{money(item.balanceAfter)}</td>
+                  <td className="whitespace-nowrap px-3 py-4 text-slate-600">{dateTime(item.createdAt)}</td><td className="max-w-[220px] px-3 py-4"><p className="truncate font-semibold text-slate-900">{item.description || (item.transactionType === 'CREDIT' ? 'Wallet recharge' : 'Charging session')}</p></td><td className="px-3 py-4"><span className={`rounded-full px-3 py-1 text-xs font-bold ${['CREDIT', 'REFUND'].includes(String(item.transactionType).toUpperCase()) ? 'bg-emerald-100 text-emerald-700' : 'bg-red-50 text-red-600'}`}>{item.transactionType}</span></td><td className="whitespace-nowrap px-3 py-4 text-slate-600">{item.referenceId || '—'}</td><td className={`whitespace-nowrap px-3 py-4 font-bold ${['CREDIT', 'REFUND'].includes(String(item.transactionType).toUpperCase()) ? 'text-emerald-700' : 'text-red-600'}`}>{['CREDIT', 'REFUND'].includes(String(item.transactionType).toUpperCase()) ? '+' : '-'} {money(item.amount)}</td><td className="whitespace-nowrap px-3 py-4 font-bold text-slate-900">{money(item.balanceAfter)}</td>
                 </tr>
               ) : (
                 <tr key={item.id ?? `${item.sessionId}-${index}`} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/70">
                   <td className="px-3 py-4 font-semibold text-slate-900">{item.sessionId ?? '—'}</td><td className="whitespace-nowrap px-3 py-4 text-slate-600">{dateTime(item.usageDate)}</td><td className="px-3 py-4 text-slate-700">{item.location || item.description || '—'}</td><td className="px-3 py-4 text-slate-700">{item.chargerId || '—'}</td><td className="whitespace-nowrap px-3 py-4 font-bold text-slate-900">{money(item.amount)}</td><td className="px-3 py-4"><span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">{item.status || 'Completed'}</span></td>
                 </tr>
-                
               ))}
             </tbody>
           </table>
