@@ -31,7 +31,7 @@
         "security": []
       }
     },
-    "/companies/register": {
+    "/api/companies/register": {
       "post": {
         "summary": "Company Register",
         "deprecated": false,
@@ -80,14 +80,16 @@
                 ]
               },
               "example": {
-                "name": "CodeHouse Energy Limited",
-                "adminName": "Piyush",
-                "adminEmail": "piyush.test@company.com",
-                "adminPassword": "Piyush@123",
-                "confirmPassword": "Piyush@123"
+                "name": "Wallet Integration Test",
+                "adminName": "Test Admin",
+                "adminEmail": "wallet.test@example.com",
+                "adminPassword": "Test@123456",
+                "confirmPassword": "Test@123456",
+                "billingType": "PREPAID"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -104,6 +106,45 @@
           }
         },
         "security": []
+      }
+    },
+    "/api/companies/profile": {
+      "get": {
+        "summary": "Company Profile",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "example": "application/json",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
       }
     },
     "/api/auth/login": {
@@ -148,7 +189,8 @@
                   "properties": {}
                 }
               }
-            }
+            },
+            "headers": {}
           }
         },
         "security": []
@@ -171,15 +213,20 @@
                   "properties": {}
                 }
               }
-            }
+            },
+            "headers": {}
           }
         },
-        "security": []
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
       }
     },
     "/api/users": {
       "post": {
-        "summary": "Employee Created",
+        "summary": "Employee Creation",
         "deprecated": false,
         "description": "",
         "tags": [],
@@ -218,9 +265,9 @@
                 ]
               },
               "example": {
-                "name": "Piyush",
-                "email": "piyush.test@gmail.com",
-                "password": "Piyush@123"
+                "name": "Neeraj",
+                "email": "neeraj.test@gmail.com",
+                "password": "Neeraj@123"
               }
             }
           }
@@ -235,7 +282,8 @@
                   "properties": {}
                 }
               }
-            }
+            },
+            "headers": {}
           }
         },
         "security": [
@@ -260,45 +308,8 @@
                   "properties": {}
                 }
               }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      }
-    },
-    "/api/companies/profile": {
-      "get": {
-        "summary": "Company Profile",
-        "deprecated": false,
-        "description": "",
-        "tags": [],
-        "parameters": [
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "description": "",
-            "required": false,
-            "example": "application/json",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {}
-                }
-              }
-            }
+            },
+            "headers": {}
           }
         },
         "security": [
@@ -325,7 +336,8 @@
                   "properties": {}
                 }
               }
-            }
+            },
+            "headers": {}
           }
         },
         "security": [
@@ -335,7 +347,7 @@
         ]
       }
     },
-    "/apilocations": {
+    "/api/locations": {
       "get": {
         "summary": "Location Data",
         "deprecated": false,
@@ -363,7 +375,8 @@
                   "properties": {}
                 }
               }
-            }
+            },
+            "headers": {}
           }
         },
         "security": [
@@ -2853,45 +2866,8 @@
                   ]
                 }
               }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
-      }
-    },
-    "/apisessions": {
-      "get": {
-        "summary": "Sessions Data",
-        "deprecated": false,
-        "description": "",
-        "tags": [],
-        "parameters": [
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "description": "",
-            "required": true,
-            "example": "application/json",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {}
-                }
-              }
-            }
+            },
+            "headers": {}
           }
         },
         "security": [
@@ -2949,7 +2925,8 @@
                   "properties": {}
                 }
               }
-            }
+            },
+            "headers": {}
           }
         },
         "security": [
@@ -2959,7 +2936,7 @@
         ]
       }
     },
-    "/api/complaints/41": {
+    "/api/complaints": {
       "get": {
         "summary": "Complaints",
         "deprecated": false,
@@ -3069,7 +3046,8 @@
                   }
                 }
               }
-            }
+            },
+            "headers": {}
           }
         },
         "security": [
@@ -3105,10 +3083,10 @@
                 "properties": {}
               },
               "example": {
-                "type": "NEW_COMPLAINT",
+                "type": "New Issue Found",
                 "title": "New Complaint Received",
                 "message": "A new complaint has been registered for testing.",
-                "entityId": "TEST-COMPLAINT-001"
+                "entityId": "TEST-COMPLAINT-121"
               }
             }
           },
@@ -3190,6 +3168,462 @@
               }
             },
             "headers": {}
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/wallet/admin/credit": {
+      "post": {
+        "summary": "Add Balance",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {
+                "companyId": 36,
+                "amount": 7000,
+                "description": "Changed amount test",
+                "reference": "IDEMPOTENCY-20261031-001"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                },
+                "example": {
+                  "success": true,
+                  "message": "Wallet credited successfully",
+                  "data": {
+                    "transactionId": 1,
+                    "companyId": 36,
+                    "amount": "5000.00",
+                    "previousBalance": "0.00",
+                    "currentBalance": "5000.00",
+                    "currency": "INR"
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/wallet/balance": {
+      "get": {
+        "summary": "Check Balance",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                },
+                "example": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Error: Session expired. Please log in again.<br> &nbsp; &nbsp;at ApiError.unauthorized (file:///app/src/utils/api-error.js:10:12)<br> &nbsp; &nbsp;at authMiddleware (file:///app/src/middleware/auth.middleware.js:35:22)<br> &nbsp; &nbsp;at Layer.handleRequest (/app/node_modules/.pnpm/router@2.2.0_supports-color@5.5.0/node_modules/router/lib/layer.js:152:17)<br> &nbsp; &nbsp;at next (/app/node_modules/.pnpm/router@2.2.0_supports-color@5.5.0/node_modules/router/lib/route.js:157:13)<br> &nbsp; &nbsp;at Route.dispatch (/app/node_modules/.pnpm/router@2.2.0_supports-color@5.5.0/node_modules/router/lib/route.js:117:3)<br> &nbsp; &nbsp;at handle (/app/node_modules/.pnpm/router@2.2.0_supports-color@5.5.0/node_modules/router/index.js:435:11)<br> &nbsp; &nbsp;at Layer.handleRequest (/app/node_modules/.pnpm/router@2.2.0_supports-color@5.5.0/node_modules/router/lib/layer.js:152:17)<br> &nbsp; &nbsp;at /app/node_modules/.pnpm/router@2.2.0_supports-color@5.5.0/node_modules/router/index.js:295:15<br> &nbsp; &nbsp;at processParams (/app/node_modules/.pnpm/router@2.2.0_supports-color@5.5.0/node_modules/router/index.js:582:12)<br> &nbsp; &nbsp;at next (/app/node_modules/.pnpm/router@2.2.0_supports-color@5.5.0/node_modules/router/index.js:291:5)</pre>\n</body>\n</html>\n"
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/wallet/transactions": {
+      "get": {
+        "summary": "Transaction By ID",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "1",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": [
+              "2"
+            ],
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "transactions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "transactionType": {
+                                "type": "string"
+                              },
+                              "amount": {
+                                "type": "string"
+                              },
+                              "balanceBefore": {
+                                "type": "string"
+                              },
+                              "balanceAfter": {
+                                "type": "string"
+                              },
+                              "referenceType": {
+                                "type": "string"
+                              },
+                              "referenceId": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "createdBy": {
+                                "type": "string"
+                              },
+                              "createdAt": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "page": {
+                              "type": "integer"
+                            },
+                            "limit": {
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "page",
+                            "limit"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "transactions",
+                        "pagination"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/wallet/debit": {
+      "post": {
+        "summary": "Debit Balance",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {
+                "companyId": 37,
+                "amount": 500,
+                "description": "POSTPAID debit rejection test",
+                "reference": "POSTPAID-DEBIT-TEST-001"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/wallet/invoices/999999": {
+      "get": {
+        "summary": "Postpaid Invoices",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "invoices": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "page": {
+                              "type": "integer"
+                            },
+                            "limit": {
+                              "type": "integer"
+                            },
+                            "total": {
+                              "type": "integer"
+                            },
+                            "totalPages": {
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "page",
+                            "limit",
+                            "total",
+                            "totalPages"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "invoices",
+                        "pagination"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/api/sessions/billing-completed": {
+      "post": {
+        "summary": "Billing Complete",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "example": "application/json",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-cms-billing-key",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "example": "sdhsjssjvzskjvkjvzkjvkjvhvvvzkvnhaiy747539853948539ifj98tq3q3498",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {
+                "sessionId": "1516"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "billingType": {
+                          "type": "string"
+                        },
+                        "sessionId": {
+                          "type": "integer"
+                        },
+                        "companyId": {
+                          "type": "integer"
+                        },
+                        "amount": {
+                          "type": "string"
+                        },
+                        "availableBalance": {
+                          "type": "string"
+                        },
+                        "alreadyProcessed": {
+                          "type": "boolean"
+                        },
+                        "transactionId": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "billingType",
+                        "sessionId",
+                        "companyId",
+                        "amount",
+                        "availableBalance",
+                        "alreadyProcessed",
+                        "transactionId"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
           }
         },
         "security": [
