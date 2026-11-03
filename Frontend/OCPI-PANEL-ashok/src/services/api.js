@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = import.meta.env.VITE_API_URL || ""
 
 // Access tokens live only in memory. The refresh token is managed by the
 // backend through an HttpOnly cookie and is never read by frontend JavaScript.
