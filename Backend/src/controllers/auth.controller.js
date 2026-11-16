@@ -18,6 +18,7 @@ const cookieOptions = {
   path: "/api/auth",
 };
 
+// Set refresh token cookie
 const setRefreshCookie = (res, refreshToken) => {
   res.cookie(REFRESH_COOKIE_NAME, refreshToken, {
     ...cookieOptions,
@@ -25,46 +26,27 @@ const setRefreshCookie = (res, refreshToken) => {
   });
 };
 
+// Clear refresh token cookie
 const clearRefreshCookie = (res) => {
   res.clearCookie(REFRESH_COOKIE_NAME, cookieOptions);
 };
 
-const handleError = (res, error, fallbackMessage) => {
-  const status = error.statusCode || 500;
-
-  if (status >= 500) {
-    console.error(fallbackMessage, error);
-  }
-
-  return res.status(status).json({
-    success: false,
-    message: status >= 500 ? fallbackMessage : error.message,
-  });
-};
-
+// Login
 const login = async (req, res) => {
-  try {
-    const result = await loginUser(req.body);
-
-    setRefreshCookie(res, result.refreshToken);
-
-    const { refreshToken, ...responseData } = result;
-
-    return ApiResponse.ok(res, "Login successful", responseData);
-  } catch (error) {
-    return handleError(res, error, "Login failed");
-  }
+  const result = await loginUser(req.body);
+  setRefreshCookie(res, result.refreshToken);
+  const { refreshToken, ...responseData } = result;
+  return ApiResponse.ok(res, "Login successful", responseData);
 };
 
-const refresh = async (req, res) => {
+// Refresh access token
+const refresh = async (req, res, next) => {
   try {
     const refreshToken = req.cookies?.[REFRESH_COOKIE_NAME];
-
     if (!refreshToken) {
-      throw ApiError.unauthorized("Refresh token is Required");
+      throw ApiError.unauthorized("Refresh token is required");
     }
     const result = await refreshAccessToken(refreshToken);
-
     setRefreshCookie(res, result.refreshToken);
 
     return ApiResponse.ok(res, "Token refreshed successfully", {
@@ -72,34 +54,25 @@ const refresh = async (req, res) => {
     });
   } catch (error) {
     clearRefreshCookie(res);
-    return handleError(res, error, "Token refresh failed");
+    return next(error);
   }
 };
 
+// Get current user
 const me = async (req, res) => {
-  try {
-    const user = await getCurrentUser(req.user.userId);
-
-    return ApiResponse.ok(res, "User fetched successfully", user);
-  } catch (error) {
-    return handleError(res, error, "Failed to fetch user");
-  }
+  const user = await getCurrentUser(req.user.userId);
+  return ApiResponse.ok(res, "User fetched successfully", user);
 };
 
+// Logout
 const logout = async (req, res) => {
-  try {
-    const refreshToken = req.cookies?.[REFRESH_COOKIE_NAME];
+  const refreshToken = req.cookies?.[REFRESH_COOKIE_NAME];
 
-    if (refreshToken) {
-      await logoutUser(refreshToken);
-    }
-
-    clearRefreshCookie(res);
-
-    return ApiResponse.ok(res, "Logout successful");
-  } catch (error) {
-    return handleError(res, error, "Logout failed");
+  if (refreshToken) {
+    await logoutUser(refreshToken);
   }
+  clearRefreshCookie(res);
+  return ApiResponse.ok(res, "Logout successful");
 };
 
 export { login, refresh, me, logout };

@@ -5,21 +5,23 @@ const authMiddleware = (req, res, next) => {
   const authorization = req.headers.authorization;
 
   if (!authorization || !authorization.startsWith("Bearer ")) {
-    throw ApiError.unauthorized("Authentication required");
+    return next(ApiError.unauthorized("Authentication required"));
   }
 
   const token = authorization.slice(7).trim();
 
   if (!token) {
-    throw ApiError.unauthorized("Authentication required");
+    return next(ApiError.unauthorized("Authentication required"));
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     if (!decoded.userId || !decoded.companyId || !decoded.role) {
-      throw ApiError.unauthorized(
-        "Authentication required. Invalid Authentication Token!",
+      return next(
+        ApiError.unauthorized(
+          "Authentication required. Invalid Authentication Token!",
+        ),
       );
     }
 
@@ -29,11 +31,18 @@ const authMiddleware = (req, res, next) => {
       role: decoded.role,
     };
 
-    next();
+    return next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {
-      throw ApiError.unauthorized("Session expired. Please log in again.");
+      return next(
+        ApiError.unauthorized("Session expired. Please log in again."),
+      );
     }
+
+    if (error.name === "JsonWebTokenError") {
+      return next(ApiError.unauthorized("Authentication failed"));
+    }
+    return next(error);
   }
 };
 

@@ -1,5 +1,12 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
+import { apiReference } from "@scalar/express-api-reference";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+// Routes
 import healthRoutes from "./routes/health.router.js";
 import companyRoutes from "./routes/company.routes.js";
 import userRoutes from "./routes/user.routes.js";
@@ -13,28 +20,33 @@ import complaintRoutes from "./routes/complaints.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
 import walletRoutes from "./routes/wallet.routes.js";
 import postpaidRoutes from "./routes/postpaid.routes.js";
-import cookieParser from "cookie-parser";
-import { apiReference } from "@scalar/express-api-reference";
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+
+// Error handling
+import ApiError from "./utils/api-error.js";
+import { errorMiddleware } from "./middleware/error.middleware.js";
 
 const app = express();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Load OpenAPI documentation
 const openapiPath = path.resolve(__dirname, "../openapi.json");
 const openapi = JSON.parse(fs.readFileSync(openapiPath, "utf-8"));
 
+// Global Middleware
 app.use(cookieParser());
 
-app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    credentials: true,
+  }),
+);
+
 app.use(express.json());
 
+// Health Check
 app.get("/api/health", (req, res) => {
   res.json({
     success: true,
@@ -42,6 +54,7 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// API Documentation
 app.get("/openapi.json", (req, res) => {
   res.json(openapi);
 });
@@ -54,6 +67,7 @@ app.use(
   }),
 );
 
+// API Routes
 app.use("/api/health", healthRoutes);
 app.use("/api/companies", companyRoutes);
 app.use("/api/users", userRoutes);
@@ -65,9 +79,17 @@ app.use("/api/sessions", sessionRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/complaints", complaintRoutes);
 app.use("/api/notifications", notificationRoutes);
-// Backwards-compatible alias for existing clients.
 app.use("/api/notification", notificationRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/wallet", postpaidRoutes);
+
+// Handle Unknown Routes (404)
+app.use((req, res, next) => {
+  next(ApiError.notFound(`Route ${req.method} ${req.originalUrl} not found`));
+});
+
+// Centralized Error Handler
+
+app.use(errorMiddleware);
 
 export default app;
