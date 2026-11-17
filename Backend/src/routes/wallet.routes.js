@@ -8,13 +8,14 @@ import {
 } from "../controllers/wallet.controller.js";
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
+import { walletInternalApiKeyMiddleware } from "../middleware/wallet-internal-api-key.middleware.js";
 
 const router = express.Router();
 
-// Temporary: EcoPlug internal wallet credit through Apidog
-router.post("/admin/credit", authMiddleware, creditWallet);
+// Internal EcoPlug operation
+router.post("/admin/credit", walletInternalApiKeyMiddleware, creditWallet);
 
-// Company users can view their own company's wallet
+// Company-facing operations
 router.get("/balance", authMiddleware, getBalance);
 router.post("/debit", authMiddleware, debitWallet);
 router.get("/transactions", authMiddleware, getTransactions);
