@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import ApiError from "../utils/api-error.js";
+import { rateLimit } from "express-rate-limit"; 
 
 const authMiddleware = (req, res, next) => {
   const authorization = req.headers.authorization;
@@ -46,4 +47,17 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
-export { authMiddleware };
+const authRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  skipSuccessfulRequests: true,
+
+  message: {
+    success: false,
+    message: "Too many requests. Please try again after 15 minutes.",
+  },
+});
+
+export { authMiddleware, authRateLimiter };
