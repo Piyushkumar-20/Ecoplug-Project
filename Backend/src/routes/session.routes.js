@@ -10,7 +10,7 @@ import { cmsBillingMiddleware } from "../middleware/cms-billing.middleware.js";
 
 const router = express.Router();
 
-router.post("/billing-completed", cmsBillingMiddleware, processCompletedSessionBillingController);
+router.post("/billing-completed", authMiddleware, cmsBillingMiddleware, processCompletedSessionBillingController);
 
 router.get("/", authMiddleware, getSessionsController);
 

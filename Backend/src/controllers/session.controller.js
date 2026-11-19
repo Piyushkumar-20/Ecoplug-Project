@@ -106,7 +106,7 @@ const getSessionDetailsController = async (req, res, next) => {
 
 const processCompletedSessionBillingController = async (req, res, next) => {
   try {
-    const result = await processCompletedSessionBilling(req.body.sessionId);
+    const result = await processCompletedSessionBilling(req.body.sessionId, req.user.companyId);
     return res.status(200).json({
       success: true,
       message: result.alreadyProcessed

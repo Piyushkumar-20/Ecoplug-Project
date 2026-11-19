@@ -4,39 +4,77 @@ import { debitPrepaidWallet } from "./wallet.service.js";
 import { recordPostpaidSessionUsage } from "./postpaid.service.js";
 import ApiError from "../utils/api-error.js";
 
-const processCompletedSessionBilling = async (sessionDbId) => {
+const processCompletedSessionBilling = async (
+  sessionDbId,
+  authenticatedCompanyId,
+) => {
   const parsedSessionId = Number(sessionDbId);
+  const userCompanyId = Number(authenticatedCompanyId);
+
   if (!Number.isSafeInteger(parsedSessionId) || parsedSessionId <= 0) {
-    throw ApiError.badRequest("A valid numeric session database ID is required");
+    throw ApiError.badRequest(
+      "A valid numeric session database ID is required",
+    );
   }
 
-  // CMS must save the completed session before calling this endpoint.
-  const session = await getSessionForBillingById(parsedSessionId);
-  if (!session) throw ApiError.notFound("Charging session not found");
+  if (!Number.isSafeInteger(userCompanyId) || userCompanyId <= 0) {
+    throw ApiError.unauthorized(
+      "Authenticated company information is required",
+    );
+  }
 
-  if (String(session.status).toUpperCase() !== "COMPLETED" || !session.endedAt) {
+  // Retrieve the session from the database.
+  const session = await getSessionForBillingById(parsedSessionId);
+
+  if (!session) {
+    throw ApiError.notFound("Charging session not found");
+  }
+
+  // Verify that the session belongs to the authenticated user's company.
+  const companyId = Number(session.companyId);
+
+  if (companyId !== userCompanyId) {
+    throw ApiError.forbidden(
+      "You are not authorized to bill this company's session",
+    );
+  }
+
+  // Validate session completion.
+  if (
+    String(session.status).toUpperCase() !== "COMPLETED" ||
+    !session.endedAt
+  ) {
     throw ApiError.badRequest("Only completed charging sessions can be billed");
   }
 
   if (session.totalCost === null || session.totalCost === undefined) {
-    throw ApiError.badRequest("Completed session does not have a final total cost");
+    throw ApiError.badRequest(
+      "Completed session does not have a final total cost",
+    );
   }
 
   if (String(session.currency).toUpperCase() !== "INR") {
-    throw ApiError.badRequest("Only INR charging sessions are currently supported");
+    throw ApiError.badRequest(
+      "Only INR charging sessions are currently supported",
+    );
   }
 
-  const companyId = Number(session.companyId);
   const company = await getCompanyBillingType(companyId);
-  if (!company) throw ApiError.notFound("Session company not found");
+
+  if (!company) {
+    throw ApiError.notFound("Session company not found");
+  }
 
   const amount = Number(session.totalCost);
+
   if (!Number.isFinite(amount) || amount <= 0) {
     throw ApiError.badRequest("Session total cost must be greater than zero");
   }
 
   const reference = `OCPI-SESSION-${parsedSessionId}`;
-  const description = `EV charging session ${session.externalSessionId || parsedSessionId}`;
+  const description = `EV charging session ${
+    session.externalSessionId || parsedSessionId
+  }`;
 
   if (company.billing_type === "PREPAID") {
     const result = await debitPrepaidWallet({
