@@ -5,7 +5,7 @@ import {
   getProfileByUserId,
 } from "../models/companies.model.js";
 import { createUser } from "../models/user.model.js";
-import ApiError from "../utils/api-error.js"
+import ApiError from "../utils/api-error.js";
 import { createCompanyAccount } from "../models/company-accounts.model.js";
 
 const registerCompany = async ({
@@ -37,7 +37,7 @@ const registerCompany = async ({
       connection,
     );
 
-    await createCompanyAccount(companyId, connection)
+    await createCompanyAccount(companyId, connection);
     await connection.commit();
 
     return {
@@ -56,38 +56,46 @@ const getProfile = async (userId, companyId) => {
   const profile = await getProfileByUserId(userId, companyId);
 
   if (!profile) {
-    throw ApiError.notFound("Profile not found!")
+    throw ApiError.notFound("Profile not found!");
   }
 
-  return {
+  const role = profile.user_role;
+
+  if (!["ADMIN", "EMPLOYEE"].includes(role)) {
+    throw ApiError.forbidden("Access denied");
+  }
+
+  const company = {
+    id: profile.company_id,
+    name: profile.company_name,
+    partyId: profile.party_id,
+    role: profile.company_role,
+    address: profile.address,
+    city: profile.city,
+    state: profile.state,
+    pin: profile.pin,
+    billingType: profile.billing_type,
+  };
+
+  const response = {
     user: {
       id: profile.user_id,
       name: profile.user_name,
       email: profile.user_email,
-      role: profile.user_role,
+      role,
     },
+    company,
+  };
 
-    company: {
-      id: profile.company_id,
-      name: profile.company_name,
-      partyId: profile.party_id,
-      role: profile.company_role,
-      address: profile.address,
-      city: profile.city,
-      state: profile.state,
-      pin: profile.pin,
+  if (role === "ADMIN") {
+    Object.assign(company, {
       gstin: profile.gstin,
       cin: profile.cin,
       pan: profile.pan,
-      billingType: profile.billing_type,
-    },
+    });
+  }
 
-    admin: {
-      name: profile.admin_name,
-      mobile: profile.admin_mobile,
-      email: profile.admin_email,
-    },
-  };
+  return response;
 };
 
 export { registerCompany, getProfile };

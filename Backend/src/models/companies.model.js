@@ -41,14 +41,31 @@ const getProfileByUserId = async (userId, companyId) => {
        c.city,
        c.state,
        c.pin,
-       c.gstin,
-       c.cin,
-       c.pan,
        c.billing_type,
 
-       c.admin_name,
-       c.admin_mobile,
-       c.admin_email
+       CASE WHEN u.role = 'ADMIN'
+         THEN c.gstin ELSE NULL
+       END AS gstin,
+
+       CASE WHEN u.role = 'ADMIN'
+         THEN c.cin ELSE NULL
+       END AS cin,
+
+       CASE WHEN u.role = 'ADMIN'
+         THEN c.pan ELSE NULL
+       END AS pan,
+
+       CASE WHEN u.role = 'ADMIN'
+         THEN c.admin_name ELSE NULL
+       END AS admin_name,
+
+       CASE WHEN u.role = 'ADMIN'
+         THEN c.admin_mobile ELSE NULL
+       END AS admin_mobile,
+
+       CASE WHEN u.role = 'ADMIN'
+         THEN c.admin_email ELSE NULL
+       END AS admin_email
 
      FROM company_users u
      INNER JOIN companies c
@@ -62,5 +79,4 @@ const getProfileByUserId = async (userId, companyId) => {
 
   return rows[0] ?? null;
 };
-
-export { createCompany, findCompanyById, getProfileByUserId};
+export { createCompany, findCompanyById, getProfileByUserId };

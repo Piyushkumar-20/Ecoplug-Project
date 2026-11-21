@@ -103,7 +103,6 @@ const getSessionDetailsController = async (req, res, next) => {
   }
 };
 
-
 const processCompletedSessionBillingController = async (req, res, next) => {
   try {
     const result = await processCompletedSessionBilling(req.body.sessionId, req.user.companyId);
