@@ -88,7 +88,9 @@ const WalletView = () => {
     }
   }, [page, search, startDate, endDate, typeFilter]);
 
-  useEffect(() => { void loadWallet(); }, [loadWallet]);
+  useEffect(() => { 
+    void loadWallet(); 
+  }, [loadWallet]);
 
   const totalPages = Math.max(1, Number(pagination.totalPages) || 1);
   const firstItem = pagination.total ? (page - 1) * 10 + 1 : 0;
@@ -103,10 +105,14 @@ const WalletView = () => {
       : [item.sessionId, dateTime(item.usageDate), item.location || item.description || '', item.chargerLabel || item.chargerId || '', item.amount, item.status || 'COMPLETED']);
     const csv = [headers, ...values].map((line) => line.map((cell) => `"${String(cell ?? '').replaceAll('"', '""')}"`).join(',')).join('\n');
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-    const link = document.createElement('a'); link.href = url; link.download = `${billingType.toLowerCase()}-${billingType === 'PREPAID' ? 'transactions' : 'usage'}.csv`; link.click(); URL.revokeObjectURL(url);
+    const link = document.createElement('a'); link.href = url; link.download = `${billingType.toLowerCase()}-${billingType === 'PREPAID' ? 'transactions' : 'usage'}.csv`; 
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
-  const formattedRows = useMemo(() => rows, [rows]);
+  const formattedRows = rows;
 
   if (loading && !summary) return <div className="flex min-h-[50vh] items-center justify-center gap-2 text-slate-500"><Loader2 className="h-5 w-5 animate-spin"/> Loading wallet...</div>;
 
